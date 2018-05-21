@@ -1,0 +1,2 @@
+# scratch3_adapter_extensions
+scratch3_adapter extensions
