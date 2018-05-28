@@ -21,8 +21,7 @@ class DemoExtension(Extension):
     def run(self):
         # run 会被作为线程调用
         while True:
-            if settings.DEBUG:
-                self.publish(str(time.time()))
-                time.sleep(1)
+            message = self.read()
+            self.logger.debug("message:%s",str(message))
 
 export = DemoExtension
