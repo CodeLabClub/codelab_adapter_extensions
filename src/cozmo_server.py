@@ -54,13 +54,16 @@ class CozmoProxy:
 
     def move(self):
         # Drive forwards for 150 millimeters at 50 millimeters-per-second.
-        self.robot.drive_straight(distance_mm(150),speed_mmps(50)).wait_for_completed()
+        distance = self.data.get("distance",50)
+        speed = self.data.get("speed",25)
+        self.robot.drive_straight(distance_mm(distance),speed_mmps(speed)).wait_for_completed()
 
     def turn(self):
         # Turn 90 degrees to the left.
         # Note: To turn to the right, just use a negative number.
-        angle = int(self.data)
-        self.robot.turn_in_place(degrees(angle)).wait_for_completed()
+        angle = self.data.get("angle",90)
+        speed = self.data.get("speed",45)
+        self.robot.turn_in_place(degrees(angle),speed=degrees(speed)).wait_for_completed()
 
     def handle_sensor(self):
         result = {}
