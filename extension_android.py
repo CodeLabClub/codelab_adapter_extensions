@@ -4,6 +4,8 @@ import zmq
 from scratch3_adapter.core_extension import Extension
 from scratch3_adapter import settings
 
+# todo 这个插件可以做成通用的，连接有scratch3决定
+
 # connect req
 android_ip = "10.10.100.243"
 port = 38778
@@ -11,8 +13,7 @@ context = zmq.Context()
 socket = context.socket(zmq.REQ)
 socket.connect("tcp://{}:{}".format(android_ip,port))
 
-# todo 发送传感器数据 thread
-# ip最好都在一处配置，这次让REQ来bind
+# ip在一处配置，让REQ来bind
 port_sensor = 38779
 context_sonsor = zmq.Context()
 socket_sonsor = context_sonsor.socket(zmq.REP)
@@ -31,6 +32,8 @@ class AndroidExtension(Extension):
             # print(message)
             time.sleep(1)
             self.logger.info("sensor pipe recv: %s", message)
+            # pub 到scratch3
+            self.publish({"topic":"sensor/android","data":message})
             socket_sonsor.send_json({"result":"ok"})
         # 等待android的数据，推到scratch3
         # 写一个安卓的 scratch3插件
