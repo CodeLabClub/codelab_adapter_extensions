@@ -7,7 +7,7 @@ usage:
 ref:
     https://github.com/anki/cozmo-python-sdk/blob/master/examples/apps/remote_control_cozmo.py#L335
 '''
-
+import time
 import zmq
 # from zmq.asyncio import Context
 from zmq import Context
