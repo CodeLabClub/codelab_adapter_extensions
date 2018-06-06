@@ -81,6 +81,7 @@ class CozmoProxy:
 def cozmo_program(robot: cozmo.robot.Robot):
     # import IPython;IPython.embed()
     while True:
+        # 如果cozmo连接成功之后 终端，则这个while出不去，需要一个信号传递过来，或者进程被重启
         message = socket.recv_json()  # python dict
         print(f"cozmo server Received request: {message}")
         if message:
@@ -90,6 +91,13 @@ def cozmo_program(robot: cozmo.robot.Robot):
             socket.send_json(result)
 
 if __name__ == '__main__':
-    cozmo.run_program(cozmo_program)
+  while True:
+    try:
+        cozmo.run_program(cozmo_program)
+        # 如果cozmo没连上则会重试
+    except:
+        print("wait for mobile(usb)")
+        time.sleep(3)
+
 
 
