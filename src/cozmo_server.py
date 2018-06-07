@@ -111,7 +111,7 @@ def cozmo_program(robot: cozmo.robot.Robot):
     while True:
         # 如果cozmo连接成功之后 终端，则这个while出不去，需要一个信号传递过来，或者进程被重启
         message = socket.recv_json()  # python dict
-        print(f"cozmo server Received request: {message}")
+        print("cozmo server Received request: {message}".format(message=message))
         if message:
             topic, data = (message["topic"], message["data"])
             cozmo_proxy = CozmoProxy(topic, data, robot)
