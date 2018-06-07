@@ -36,6 +36,8 @@ class CozmoProxy:
             "cozmo/play": self.play_anim,
             "cozmo/move": self.move,
             "cozmo/turn": self.turn,
+            "cozmo/pick": self.pick,
+            "cozmo/move_north": self.move_north,
         }
         handle = robot_match.get(self.topic, None)
         if handle:
@@ -57,6 +59,31 @@ class CozmoProxy:
         distance = self.data.get("distance",50)
         speed = self.data.get("speed",25)
         self.robot.drive_straight(distance_mm(distance),speed_mmps(speed)).wait_for_completed()
+
+    def move_north(self):
+        # Drive forwards for 150 millimeters at 50 millimeters-per-second.
+        # distance = self.data.get("distance",50)
+        # speed = self.data.get("speed",25)
+        angle = -90
+        speed = 180
+        self.robot.turn_in_place(degrees(angle),speed=degrees(speed)).wait_for_completed()
+
+        distance = 130
+        speed = 200
+        self.robot.drive_straight(distance_mm(distance),speed_mmps(speed)).wait_for_completed()
+
+        angle = 90
+        speed = 180
+        self.robot.turn_in_place(degrees(angle),speed=degrees(speed)).wait_for_completed()
+
+    # 移动手 left  pick
+
+    def pick(self):
+        # 挥动手臂  采摘松果 种树
+        # import IPython;IPython.embed()
+        self.robot.move_lift(5)
+        time.sleep(0.5)
+        self.robot.move_lift(-5)
 
     def turn(self):
         # Turn 90 degrees to the left.
@@ -95,6 +122,7 @@ if __name__ == '__main__':
     try:
         cozmo.run_program(cozmo_program)
         # 如果cozmo没连上则会重试
+        time.sleep(60*5)
     except:
         print("wait for mobile(usb)")
         time.sleep(3)
