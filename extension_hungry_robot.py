@@ -35,7 +35,7 @@ class HungryRobotExtension(Extension):
                     data = read_message.get("data")
                     if data == "eat":
                         # 串口写eat
-                        message_bytes = b'8\n'
+                        message_bytes = b'8\n' # 8 -> eat
                         self.ser.write(message_bytes)
                 # subprocess.call("say {}".format(read_message["data"]),shell=True)
 
