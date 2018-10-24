@@ -20,8 +20,8 @@ class DemoExtension(Extension):
 
     def run(self):
         # run 会被作为线程调用
-        while True:
+        while self._running:
             message = self.read()
-            self.logger.debug("message:%s",str(message))
+            self.logger.info("message:%s",str(message))
 
 export = DemoExtension
