@@ -1,6 +1,5 @@
 import sys;sys.path.append("/usr/local/lib/python3.6/site-packages")
 from furl import furl
-from scratch3_adapter import settings
 from scratch3_adapter.core_extension import Extension
 
 class ThirdPartyLibraryExtension(Extension):
