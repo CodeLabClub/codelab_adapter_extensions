@@ -24,7 +24,7 @@ try:
 except pygame.error:
             print('joystick error')
 
-class EIMExtension(Extension):
+class JoystickExtension(Extension):
     def __init__(self):
         name = type(self).__name__  # class name
         super().__init__(name)
@@ -64,4 +64,4 @@ class EIMExtension(Extension):
             time.sleep(0.1)
 
 
-export = EIMExtension
+export = JoystickExtension
