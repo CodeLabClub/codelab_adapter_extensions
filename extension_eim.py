@@ -7,27 +7,38 @@ import threading
 from scratch3_adapter import settings
 from scratch3_adapter.core_extension import Extension
 
+
 class EIMExtension(Extension):
     def __init__(self):
-        name = type(self).__name__ # class name
+        name = type(self).__name__  # class name
         super().__init__(name)
 
     def run(self):
-        # run 会被作为线程调用
+        '''
+        run 会被作为线程调用
+        当前插件功能:
+            往scratch不断发送信息
+        '''
+
         def message_monitor():
-            message = self.read() # json
-            # self.logger.debug("message_monitor:%s",str(message))
-            if message["topic"] == "eim":
-                self.logger.debug("eim message:%s",message["data"])
-            time.sleep(1)
+            while True:
+                read_message = self.read()  # json
+                self.logger.debug("message:%s", str(read_message))
+                # self.logger.debug("message_monitor:%s",str(message))
+                if read_message.get("topic") == "eim":
+                    self.logger.debug("eim message:%s", read_message["data"])
+                # time.sleep(1)
+
         bg_task = threading.Thread(target=message_monitor)
         self.logger.info("thread start")
         bg_task.daemon = True
         bg_task.start()
-        while True:
+
+        while self._running:
             if settings.DEBUG:
-                message = {"topic":"eim","message":"message"}
+                message = {"topic": "eim", "message": "message"}
                 self.publish(message)
                 time.sleep(1)
+
 
 export = EIMExtension
