@@ -1,4 +1,5 @@
 import time
+import serial
 
 from scratch3_adapter import settings
 from scratch3_adapter.core_extension import Extension
