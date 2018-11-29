@@ -25,6 +25,6 @@ class Test2Extension(Extension):
                 B = int(data.get("B"))
                 self.logger.info("RGB: {} {} {}".format(R,G,B))
                 info("info","RGB: {} {} {}".format(R,G,B))
-                # doRGBLed(red=R, green=G, blue=B)
+                # doRGBLed(self.ser,red=R, green=G, blue=B)
 
 export = Test2Extension
