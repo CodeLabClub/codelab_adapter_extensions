@@ -38,6 +38,7 @@ class FlyExtension(Extension):
                     mambo.turn_degrees(90)
                 if data == "up":
                     # self.logger.info("up!!") # ok
+                    # https://jingtaozf.gitbooks.io/crazepony-gitbook/content/wiki/pitch-yaw-roll.html
                     mambo.fly_direct(
                         roll=0,
                         pitch=0,
