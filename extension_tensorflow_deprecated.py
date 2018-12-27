@@ -1,3 +1,4 @@
+# 弃用，会造成阻塞，使用进程间通信
 import sys, os
 sys.path.append('/home/pi/.local/lib/python3.5/site-packages')
 import cv2
