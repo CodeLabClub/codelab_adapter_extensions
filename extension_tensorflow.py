@@ -23,9 +23,9 @@ class TensorflowExtension(Extension):
         tf = subprocess.Popen(cmd , shell = True)
         while self._running:
             tf_class = socket.recv_json().get("class")
-            self.logger.info("Received request: {message}".format(message=tf_class))
-            self.publish({"topic": "eim", "message": tf_class})
             socket.send_json({"status":"200"})
+            # 发往scratch3.0中的eim积木
+            self.publish({"topic": "eim", "message": tf_class})
         # release socket
         tf.terminate()
         tf.wait()
