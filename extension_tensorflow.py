@@ -1,3 +1,4 @@
+# 文档： https://blog.just4fun.site/adapter-tensorflow.html
 import time
 import zmq
 from zmq import Context
