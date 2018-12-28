@@ -1,4 +1,5 @@
 # 文档: https://blog.just4fun.site/adapter-opencv.html
+# 树莓派和macOS已测试
 import time
 import zmq
 from zmq import Context
