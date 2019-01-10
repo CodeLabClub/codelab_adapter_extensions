@@ -4,7 +4,7 @@ import sys
 from scratch3_adapter import settings
 from scratch3_adapter.core_extension import Extension
 
-class ExecExtension(Extension):
+class KernelExtension(Extension):
     def __init__(self):
         name = type(self).__name__  # class name
         super().__init__(name)
@@ -36,4 +36,4 @@ class ExecExtension(Extension):
                 self.publish(message)
 
 
-export = ExecExtension
+export = KernelExtension
