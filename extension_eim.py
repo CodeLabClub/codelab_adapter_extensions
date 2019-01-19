@@ -12,6 +12,7 @@ class EIMExtension(Extension):
     def __init__(self):
         name = type(self).__name__  # class name
         super().__init__(name)
+        self.TOPIC = "eim"
 
     def run(self):
         '''
@@ -24,10 +25,12 @@ class EIMExtension(Extension):
             while True:
                 read_message = self.read()  # json
                 self.logger.debug("message:%s", str(read_message))
-                # self.logger.debug("message_monitor:%s",str(message))
-                if read_message.get("topic") == "eim":
-                    self.logger.debug("eim message:%s", read_message["data"])
-                # time.sleep(1)
+                topic = read_message.get("topic")
+                if topic == self.TOPIC:
+                    data = read_message.get("data")
+                    self.logger.info(
+                        "eim message:%s",
+                        data)  # for developer debug : tail info.log
 
         bg_task = threading.Thread(target=message_monitor)
         self.logger.info("thread start")
@@ -35,10 +38,9 @@ class EIMExtension(Extension):
         bg_task.start()
 
         while self._running:
-            if settings.DEBUG:
-                message = {"topic": "eim", "message": "message"}
-                self.publish(message)
-                time.sleep(1)
+            message = {"topic": self.TOPIC, "message": "message"}
+            self.publish(message)
+            time.sleep(1)
 
 
 export = EIMExtension
