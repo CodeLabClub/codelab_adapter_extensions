@@ -4,14 +4,11 @@ import time
 import json
 import threading
 import platform
-# scratch3_adapter cli模式下不要使用tkinter
-from guizero import error
+from scratch3_adapter.utils import ui_error
+
 from serial.tools.list_ports import comports as list_serial_ports
 
-# from scratch3_adapter.utils import find_microbit # find ubtrobot
 from scratch3_adapter.core_extension import Extension
-
-# https://scratch3-adapter-docs.just4fun.site/dev_guide/helloworld/
 
 
 def find_ubtrobot():
@@ -36,7 +33,7 @@ def find_ubtrobot():
             # 00010039_PID win7需要这个
             if ("00001101-0000-1000-8000-00805f9b34fb" in port[2].lower()
                 ) and ("00010039_pid" in port[2].lower()):
-                # 找到最大的(for 循环默认从小到大吗)，旧的port会被系统留着
+                # 旧的port会被系统留着
                 win_ports.append(str(port[0]))
         target_port = sorted(win_ports)[-1]  # 选择最大的
 
@@ -60,13 +57,6 @@ def check_env():
 
 
 class UbtrobotProxy(Extension):
-    '''
-        继承 Extension 之后你将获得:
-            self.actuator_sub
-            self.sensor_pub
-            self.logger
-    '''
-
     def __init__(self):
         name = type(self).__name__  # class name
         super().__init__(name)
@@ -77,12 +67,10 @@ class UbtrobotProxy(Extension):
             连接硬件 串口
             '''
             env_is_valid = check_env()
+            # 等待用户连接microbit
             if not env_is_valid:
-                try:
-                    # 使其在cli下能用
-                    error("错误信息", "请连接ubtrobot")
-                except RuntimeError:
-                    self.logger.info("错误信息: %s", "请插入ubtrobot")
+                self.logger.info("错误信息: %s", "请插入ubtrobot")
+                ui_error("错误信息", "请连接ubtrobot")
                 time.sleep(5)
             else:
                 try:
@@ -90,11 +78,8 @@ class UbtrobotProxy(Extension):
                     self.ser = serial.Serial(port, 115200, timeout=1)  # 9600
                     break
                 except OSError:
-                    try:
-                        # 使其在cli下能用
-                        error("错误信息", "请连接ubtrobot")
-                    except RuntimeError:
-                        self.logger.info("错误信息: %s", "请插入ubtrobot")
+                    self.logger.info("错误信息: %s", "请插入ubtrobot")
+                    ui_error("错误信息", "请连接ubtrobot")
                     time.sleep(5)
 
         while self._running:
@@ -104,21 +89,30 @@ class UbtrobotProxy(Extension):
             message = self.read()
             cmd_map = {
                 "forward":
-                [],
+                [0xFB, 0xBF, 0x09, 0x03, 0xc7, 0xb0, 0xbd, 0xf8, 0x38, 0xED],
                 "backward":
-                [],
+                [0xFB, 0xBF, 0x09, 0x03, 0xba, 0xf3, 0xcd, 0xcb, 0x51, 0xED],
                 "left":
-                [],
+                [0xFB, 0xBF, 0x09, 0x03, 0xd7, 0xf3, 0xd7, 0xaa, 0x57, 0xED],
                 "right": [
+                    0xFB, 0xBF, 0x09, 0x03, 0xd3, 0xd2, 0xd7, 0xaa, 0x32, 0xED
                 ],
                 "push ups": [
+                    0xFB, 0xBF, 0x0b, 0x03, 0xb8, 0xa9, 0xce, 0xd4, 0xb3, 0xc5,
+                    0x89, 0xED
                 ],
-                "stop": [],
+                "stop": [0xFB, 0xBF, 0x06, 0x05, 0x00, 0x0b, 0xED],
                 "init": [
+                    0xFB, 0xBF, 0x0b, 0x03, 0xb3, 0xf5, 0xca, 0xbc, 0xbb, 0xaf,
+                    0xa6, 0xED
                 ],
                 "happy birthday": [
+                    0xFB, 0xBF, 0x13, 0x03, 0x48, 0x61, 0x70, 0x70, 0x79, 0x20,
+                    0x42, 0x69, 0x72, 0x74, 0x68, 0x64, 0x61, 0x79, 0x6f, 0xED
                 ],
                 "left punch": [
+                    0xFB, 0xBF, 0x0b, 0x03, 0xd7, 0xf3, 0xb3, 0xf6, 0xc8, 0xad,
+                    0xf6, 0xED
                 ]
             }
             self.logger.debug("message {}".format(message))
@@ -131,10 +125,6 @@ class UbtrobotProxy(Extension):
                     port = find_linux_port()
                     self.ser = serial.Serial(port, 115200, timeout=1)
                 self.ser.write(cmd)
-            # response
-            # res = get_response() # 获取串口数据
-            # self.publish(res)
-            # time.sleep(0.05)
 
 
-export = UbtrobotProxy  # 最后声明
+export = UbtrobotProxy
