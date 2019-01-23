@@ -30,7 +30,7 @@ class ArduinoExtension(Extension):
             ui_error("error", "无法连接arduino")
 
         while self._running:
-            message = self.read()  # python code
+            message = self.read()  # todo 停止插件后，这里仍可能处于阻塞，以至于ser.close()无法释放（需要前端再多发一条消息才能跳出while）
             self.logger.debug(message)
             topic = message.get("topic")
             if topic == self.TOPIC:
