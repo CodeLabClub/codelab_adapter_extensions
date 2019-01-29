@@ -1,7 +1,7 @@
 import serial
 import platform
-from scratch3_adapter.core_extension import Extension
-from scratch3_adapter.utils import ui_error
+from codelab_adapter.core_extension import Extension
+from codelab_adapter.utils import ui_error
 
 
 class ArduinoExtension(Extension):
@@ -12,7 +12,7 @@ class ArduinoExtension(Extension):
 
     def connect_to_arduino(self):
         # 根据平台不同找到port(类似microbit的发现机制), 或者提供选择积木
-        # 参考 https://github.com/Scratch3Lab/scratch3_adapter_extensions/blob/master/extension_ubtrobot.py
+        # 参考 https://github.com/Scratch3Lab/codelab_adapter_extensions/blob/master/extension_ubtrobot.py
         ser = None
         if platform.system() == "Linux":
             try:

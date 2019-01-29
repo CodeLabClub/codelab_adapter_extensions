@@ -1,8 +1,8 @@
 import time, threading
 import zmq
 
-from scratch3_adapter.core_extension import Extension
-from scratch3_adapter import settings
+from codelab_adapter.core_extension import Extension
+from codelab_adapter import settings
 
 # todo 这个插件可以做成通用的，连接有scratch3决定
 

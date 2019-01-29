@@ -3,8 +3,8 @@ import time
 import json
 import threading
 
-from scratch3_adapter.utils import find_microbit, ui_error
-from scratch3_adapter.core_extension import Extension
+from codelab_adapter.utils import find_microbit, ui_error
+from codelab_adapter.core_extension import Extension
 
 
 def check_env():

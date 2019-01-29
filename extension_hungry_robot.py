@@ -7,9 +7,9 @@ import threading
 import subprocess
 import serial
 
-from scratch3_adapter import settings
-from scratch3_adapter.core_extension import Extension
-from scratch3_adapter.utils import find_microbit
+from codelab_adapter import settings
+from codelab_adapter.core_extension import Extension
+from codelab_adapter.utils import find_microbit
 
 
 class HungryRobotExtension(Extension):

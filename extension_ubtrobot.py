@@ -4,11 +4,11 @@ import time
 import json
 import threading
 import platform
-from scratch3_adapter.utils import ui_error
+from codelab_adapter.utils import ui_error
 
 from serial.tools.list_ports import comports as list_serial_ports
 
-from scratch3_adapter.core_extension import Extension
+from codelab_adapter.core_extension import Extension
 
 
 def find_ubtrobot():

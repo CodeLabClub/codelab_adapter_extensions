@@ -5,8 +5,8 @@ zmq作为管道 req/rep
 import time
 import zmq
 
-from scratch3_adapter.core_extension import Extension
-from scratch3_adapter import settings
+from codelab_adapter.core_extension import Extension
+from codelab_adapter import settings
 
 # connect req
 port = 38778

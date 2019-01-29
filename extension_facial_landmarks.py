@@ -1,8 +1,8 @@
 import sys
 sys.path.append("/usr/local/lib/python3.6/site-packages")
 
-from scratch3_adapter import settings
-from scratch3_adapter.core_extension import Extension
+from codelab_adapter import settings
+from codelab_adapter.core_extension import Extension
 # 调度程序，拿到脸部程序输出的数据，每次一行
 import subprocess
 import json

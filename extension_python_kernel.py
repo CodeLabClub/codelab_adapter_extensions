@@ -3,8 +3,8 @@ import contextlib
 import sys
 # import subprocess
 # import webbrowser
-from scratch3_adapter import settings
-from scratch3_adapter.core_extension import Extension
+from codelab_adapter import settings
+from codelab_adapter.core_extension import Extension
 
 # 安全性原则: 打开这个插件前，提醒社区用户确认积木中没有危险的Python代码， 允许社区成员举报危险代码
 # 在EIM中运行Python代码，通用

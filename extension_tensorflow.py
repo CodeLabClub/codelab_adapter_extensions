@@ -4,8 +4,8 @@ import zmq
 from zmq import Context
 import subprocess
 
-from scratch3_adapter.core_extension import Extension
-from scratch3_adapter import settings
+from codelab_adapter.core_extension import Extension
+from codelab_adapter import settings
 
 
 class TensorflowExtension(Extension):

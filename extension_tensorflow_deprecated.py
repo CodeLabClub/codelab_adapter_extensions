@@ -5,8 +5,8 @@ import cv2
 import numpy as np
 import tensorflow as tf
 
-from scratch3_adapter import settings
-from scratch3_adapter.core_extension import Extension
+from codelab_adapter import settings
+from codelab_adapter.core_extension import Extension
 
 IM_WIDTH = 640  # Use smaller resolution for
 IM_HEIGHT = 480  # slightly faster framerate
@@ -124,7 +124,7 @@ class TensorflowExtension(Extension):
                 break
 
         # 结束后
-        # https://github.com/Scratch3Lab/scratch3_adapter_extensions/blob/master/extension_home_assistant.py
+        # https://github.com/Scratch3Lab/codelab_adapter_extensions/blob/master/extension_home_assistant.py
         camera.release()
         cv2.destroyAllWindows()
 

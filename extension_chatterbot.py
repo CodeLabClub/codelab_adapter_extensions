@@ -7,8 +7,8 @@ from chatterbot.trainers import ListTrainer
 import time
 import threading
 
-from scratch3_adapter import settings
-from scratch3_adapter.core_extension import Extension
+from codelab_adapter import settings
+from codelab_adapter.core_extension import Extension
 
 
 class EIMExtension(Extension):

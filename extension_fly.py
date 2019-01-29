@@ -1,7 +1,7 @@
 import time
 
-from scratch3_adapter import settings
-from scratch3_adapter.core_extension import Extension
+from codelab_adapter import settings
+from codelab_adapter.core_extension import Extension
 
 import sys;sys.path.append("/usr/local/lib/python3.6/site-packages")
 from pyparrot.Minidrone import Mambo

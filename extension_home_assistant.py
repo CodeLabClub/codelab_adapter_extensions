@@ -2,8 +2,8 @@ import time
 import subprocess
 import platform
 
-from scratch3_adapter import settings
-from scratch3_adapter.core_extension import Extension
+from codelab_adapter import settings
+from codelab_adapter.core_extension import Extension
 
 '''
 预先按照好hass，全局的

@@ -7,8 +7,8 @@ import subprocess
 import pathlib
 import platform
 
-from scratch3_adapter.core_extension import Extension
-from scratch3_adapter import settings
+from codelab_adapter.core_extension import Extension
+from codelab_adapter import settings
 
 
 class OpencvExtension(Extension):
@@ -23,9 +23,9 @@ class OpencvExtension(Extension):
         socket = context.socket(zmq.REP)
         socket.bind("tcp://*:%s" % port)
         # Object_detection_for_adapter.py 依赖于shell中的变量，所以需要在命令行里启动
-        # ~/scratch3_adapter目录
-        scratch3_adapter_dir = pathlib.Path.home() / "scratch3_adapter"
-        script =  "{}/ExploreOpencvDnn/main_for_adapter.py".format(scratch3_adapter_dir)
+        # ~/codelab_adapter目录
+        codelab_adapter_dir = pathlib.Path.home() / "codelab_adapter"
+        script =  "{}/ExploreOpencvDnn/main_for_adapter.py".format(codelab_adapter_dir)
         if (platform.system() == "Darwin"):
             # which python3
             python = "/usr/local/bin/python3"

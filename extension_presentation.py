@@ -3,8 +3,8 @@ import contextlib
 import sys
 import subprocess
 import webbrowser
-from scratch3_adapter import settings
-from scratch3_adapter.core_extension import Extension
+from codelab_adapter import settings
+from codelab_adapter.core_extension import Extension
 
 class PresentationExtension(Extension):
     def __init__(self):

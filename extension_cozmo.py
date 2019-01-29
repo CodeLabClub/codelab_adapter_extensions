@@ -5,8 +5,8 @@
 import time
 import zmq
 import platform
-from scratch3_adapter.core_extension import Extension
-from scratch3_adapter import settings
+from codelab_adapter.core_extension import Extension
+from codelab_adapter import settings
 import pathlib
 import subprocess
 
@@ -42,9 +42,9 @@ class CozmoExtension(Extension):
         context = zmq.Context()
         socket = context.socket(zmq.REQ)
         socket.connect("tcp://localhost:%s" % port)
-        scratch3_adapter_server_dir = pathlib.Path.home(
-        ) / "scratch3_adapter" / "servers"
-        script = "{}/cozmo_server.py".format(scratch3_adapter_server_dir)
+        codelab_adapter_server_dir = pathlib.Path.home(
+        ) / "codelab_adapter" / "servers"
+        script = "{}/cozmo_server.py".format(codelab_adapter_server_dir)
         cmd = [python3_path, script]
         cozmo_server = subprocess.Popen(cmd)
         settings.running_child_procs.append(cozmo_server)

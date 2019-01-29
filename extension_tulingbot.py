@@ -2,8 +2,8 @@ import time
 import requests # 加到主要依赖里，可能已经被依赖
 import json
 
-from scratch3_adapter import settings
-from scratch3_adapter.core_extension import Extension
+from codelab_adapter import settings
+from codelab_adapter.core_extension import Extension
 
 class TulingExtension(Extension):
     def __init__(self):

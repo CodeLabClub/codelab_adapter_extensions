@@ -5,8 +5,8 @@ import threading
 import multiprocessing as mp
 from guizero import error
 
-from scratch3_adapter.utils import find_microbit
-from scratch3_adapter.core_extension import Extension
+from codelab_adapter.utils import find_microbit
+from codelab_adapter.core_extension import Extension
 from craft import MineCraft
 
 

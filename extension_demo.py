@@ -1,14 +1,14 @@
 import time
 
-from scratch3_adapter import settings
-from scratch3_adapter.core_extension import Extension
+from codelab_adapter import settings
+from codelab_adapter.core_extension import Extension
 
 class DemoExtension(Extension):
     def __init__(self):
         '''
         继承 Extension 之后你将获得:
 
-            self.logger  日志，日志目录在home目录下的 scratch3_adapter
+            self.logger  日志，日志目录在home目录下的 codelab_adapter
             self.read 读取来自scratch的json消息
             self.publish 把json发往scratch
         高级:

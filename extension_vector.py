@@ -3,8 +3,8 @@ import subprocess
 import pathlib
 import platform
 
-from scratch3_adapter.core_extension import Extension
-from scratch3_adapter import settings
+from codelab_adapter.core_extension import Extension
+from codelab_adapter import settings
 
 
 def get_python3_path():
@@ -34,9 +34,9 @@ class VectorExtension(Extension):
         context = zmq.Context.instance()
         socket = context.socket(zmq.REQ)
         socket.connect("tcp://localhost:%s" % port)
-        scratch3_adapter_server_dir = pathlib.Path.home(
-        ) / "scratch3_adapter" / "servers"
-        script = "{}/vector_server.py".format(scratch3_adapter_server_dir)
+        codelab_adapter_server_dir = pathlib.Path.home(
+        ) / "codelab_adapter" / "servers"
+        script = "{}/vector_server.py".format(codelab_adapter_server_dir)
 
         cmd = [python3_path, script]
         vector_server = subprocess.Popen(cmd)

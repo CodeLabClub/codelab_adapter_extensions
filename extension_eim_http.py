@@ -1,8 +1,8 @@
 import time
 import requests
-from scratch3_adapter import settings
-from scratch3_adapter.core_extension import Extension
-from scratch3_adapter.utils import  ui_error
+from codelab_adapter import settings
+from codelab_adapter.core_extension import Extension
+from codelab_adapter.utils import  ui_error
 
 class EimHttpExtension(Extension):
     def __init__(self):

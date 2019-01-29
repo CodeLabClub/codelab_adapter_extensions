@@ -10,8 +10,8 @@ from pygame.locals import *
 import os
 import time
 
-from scratch3_adapter import settings
-from scratch3_adapter.core_extension import Extension
+from codelab_adapter import settings
+from codelab_adapter.core_extension import Extension
 
 try:
     os.environ["SDL_VIDEODRIVER"] = "dummy"
