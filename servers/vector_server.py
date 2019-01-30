@@ -1,5 +1,5 @@
 '''
-pip3 install anki_vector --user
+pip3 install anki_vector pyzmq --user
 python3 vector.py # should be ok
 '''
 import anki_vector
