@@ -1,5 +1,5 @@
 '''
-pip3 install gpiozero pigpio --user
+pip3 install gpiozero pigpio pyzmq --user
 # docs: https://gpiozero.readthedocs.io/en/stable/remote_gpio.html
 '''
 import zmq
