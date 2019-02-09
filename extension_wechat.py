@@ -12,6 +12,7 @@ from codelab_adapter.utils import get_python3_path, LocalServer
 '''
 
 python3_path = get_python3_path()
+quit_code = "quit!"
 
 
 class WechatExtension(Extension):
@@ -25,16 +26,18 @@ class WechatExtension(Extension):
         # 接收微信消息 wechat_server
         port = 38783
         self.wechat_server = LocalServer(
-            "wechat", python3_path, port, socket_mode=zmq.REP)  # 为何不是新的
-        self.wechat_server.run()  # subprocess Popen 不应该每个实例不同吗
+            "wechat", python3_path, port, socket_mode=zmq.REP)
+        self.wechat_server.run()  # subprocess Popen
         while self._running:
-            try:
-                result = self.wechat_server.socket.recv_json()
-                self.wechat_server.socket.send_json({"result": "get it!"})
-                # 接收微信消息, 发往Scratch
-                self.publish({"topic": self.TOPIC, "content": result})
-            except zmq.error.ContextTerminated:
-                pass
+            # try:
+            result = self.wechat_server.socket.recv_json()  # todo 使其顺利退出
+            if result.get("text") == "quit!":
+                break
+            self.wechat_server.socket.send_json({"result": "get it!"})
+            # 接收微信消息, 发往Scratch
+            self.publish({"topic": self.TOPIC, "content": result})
+            #except zmq.error.ContextTerminated:
+            pass
 
     def run(self):
 
@@ -59,9 +62,16 @@ class WechatExtension(Extension):
                 socket.send_json({"username": username, "text": text})
                 _ = socket.recv_json()
 
+        # 发布退出消息
+        socket.send_json({"text": quit_code, "username": ""})
+        _ = socket.recv_json()
+        time.sleep(0.5)
+        print("wwj 1")
         self.wechat_server.terminate()
+        print("wwj 2")
         socket.close()
-        context.term()
+        # context.term()
+        print("wwj end")
 
 
 export = WechatExtension
