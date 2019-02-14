@@ -6,6 +6,7 @@ import threading
 
 from codelab_adapter import settings
 from codelab_adapter.core_extension import Extension
+import typing
 
 
 class EIMExtension(Extension):
@@ -21,13 +22,14 @@ class EIMExtension(Extension):
             往scratch不断发送信息
         '''
 
+        self.logger.info(dir(typing))
         def message_monitor():
             while True:
                 read_message = self.read()  # json
-                self.logger.debug("message:%s", str(read_message))
+                self.logger.info("eim message:%s", str(read_message))
                 topic = read_message.get("topic")
                 if topic == self.TOPIC:
-                    data = read_message.get("data")
+                    data = read_message.get("payload")
                     self.logger.info(
                         "eim message:%s",
                         data)  # for developer debug : tail info.log
@@ -38,7 +40,7 @@ class EIMExtension(Extension):
         bg_task.start()
 
         while self._running:
-            message = {"topic": self.TOPIC, "message": "message"}
+            message = {"topic": self.TOPIC, "payload": "payload"}
             self.publish(message)
             time.sleep(1)
 

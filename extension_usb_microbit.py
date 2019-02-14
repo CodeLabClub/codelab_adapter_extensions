@@ -68,7 +68,7 @@ class UsbMicrobitProxy(Extension):
             self.logger.debug("scratch3_message {}".format(scratch3_message))
             self.scratch3_message = {}
             if scratch3_message == {}:
-                scratch3_message = {"topic": self.TOPIC, "data": ""}
+                scratch3_message = {"topic": self.TOPIC, "payload": ""}
             scratch3_message = json.dumps(scratch3_message) + "\r\n"
             scratch3_message_bytes = scratch3_message.encode('utf-8')
             self.logger.debug(scratch3_message_bytes)
@@ -76,7 +76,7 @@ class UsbMicrobitProxy(Extension):
             # response
             response_from_microbit = get_response_from_microbit()
             if response_from_microbit:
-                # message = {"topic":self.TOPIC, "data":} # todo 不要在microbit中构建消息
+                # message = {"topic":self.TOPIC, "payload":} # todo 不要在microbit中构建消息
                 self.publish(response_from_microbit) 
                 time.sleep(0.05)
 

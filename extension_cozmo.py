@@ -53,13 +53,13 @@ class CozmoExtension(Extension):
             message = self.read()
             self.logger.debug(message)
             topic = message.get('topic')
-            python_code = message.get('data')
+            python_code = message.get("payload")
             if topic == self.TOPIC:
                 socket.send_json({"python_code": python_code})
                 # socket.send_json(message) # 设置超时
                 result = socket.recv_json().get("result")
                 # 发往scratch3.0
-                self.publish({"topic": self.TOPIC, "message": result})
+                self.publish({"topic": self.TOPIC, "payload": result})
 
         # release socket
         socket.send_json({"python_code": "quit!"})

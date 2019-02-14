@@ -43,15 +43,15 @@ class VectorExtension(Extension):
         settings.running_child_procs.append(vector_server)
 
         while self._running:
-            message = self.read()  # 有可能有阻塞在这里，关掉插件后，还需要scratch3发一条消息。
+            message = self.read()
             self.logger.debug(message)
             topic = message.get('topic')
-            python_code = message.get('data')
+            python_code = message.get("payload")
             if topic == self.TOPIC:
                 socket.send_json({"python_code": python_code})
                 result = socket.recv_json().get("result")
                 # 发往scratch3.0
-                self.publish({"topic": self.TOPIC, "message": result})
+                self.publish({"topic": self.TOPIC, "payload": result})
 
         # release socket
         socket.send_json({"python_code": "quit!"})

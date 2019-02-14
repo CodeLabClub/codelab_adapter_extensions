@@ -1,6 +1,8 @@
 
 '''
 Raspberry Pi
+requirement:
+    pip3 install gpiozero pigpio --user
 '''
 import zmq
 import subprocess
@@ -14,6 +16,8 @@ def get_python3_path():
     # If it is not working,  Please replace python3_path with your local python3 path. shell: which python3
     if (platform.system() == "Darwin"):
         # which python3
+        # 不如用PATH python
+        # 不确定
         path = "/usr/local/bin/python3"
     if platform.system() == "Windows":
         path = "python"
@@ -31,8 +35,8 @@ class RpiExtension(Extension):
         self.TOPIC = "eim/rpi"
 
     def run(self):
-
-        port = 38782
+        # 抽象掉这部分 Class
+        port = 38782 # todo 随机分配
         context = zmq.Context.instance()
         socket = context.socket(zmq.REQ)
         socket.connect("tcp://localhost:%s" % port)
@@ -48,12 +52,12 @@ class RpiExtension(Extension):
             message = self.read()
             self.logger.debug(message)
             topic = message.get('topic')
-            python_code = message.get('data')
+            python_code = message.get("payload")
             if topic == self.TOPIC:
                 socket.send_json({"python_code": python_code})
                 result = socket.recv_json().get("result")
                 # 发往scratch3.0
-                self.publish({"topic": self.TOPIC, "message": result})
+                self.publish({"topic": self.TOPIC, "payload": result})
 
         # release socket
         socket.send_json({"python_code": "quit!"})

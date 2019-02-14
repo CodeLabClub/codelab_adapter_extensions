@@ -27,7 +27,7 @@ class EimMonitorExtension(Extension):
             try:
                 response = monitor()
                 if response:
-                    message = {"topic": "eim", "message": response}
+                    message = {"topic": "eim", "payload": response}
                     self.publish(message)
             except:
                 ui_error('eim_script error',str(e))

@@ -35,7 +35,7 @@ class WechatExtension(Extension):
                 break
             self.wechat_server.socket.send_json({"result": "get it!"})
             # 接收微信消息, 发往Scratch
-            self.publish({"topic": self.TOPIC, "content": result})
+            self.publish({"topic": self.TOPIC, "payload": result})
             #except zmq.error.ContextTerminated:
             pass
 
@@ -56,7 +56,7 @@ class WechatExtension(Extension):
             topic = scratch_message.get("topic")
             if topic == self.TOPIC:
                 self.logger.info("wechat message:%s", str(scratch_message))
-                data = scratch_message.get("content")
+                data = scratch_message.get("payload")
                 username = data["username"]
                 text = data["text"]
                 socket.send_json({"username": username, "text": text})

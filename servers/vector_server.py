@@ -1,6 +1,7 @@
 '''
-pip3 install anki_vector pyzmq --user
-python3 vector.py # should be ok
+pip3 install anki_vector --user
+# https://github.com/anki/vector-python-sdk/blob/master/examples/tutorials/01_hello_world.py
+python3 01_hello_world.py  # should be ok
 '''
 import anki_vector
 import zmq

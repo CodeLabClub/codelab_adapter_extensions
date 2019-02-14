@@ -29,8 +29,8 @@ class KernelExtension(Extension):
                 self.logger.debug(message)
                 topic = message.get("topic")
                 if topic == self.TOPIC:
-                    python_code = message.get('data')
-                    self.logger.info("run python code:{}".format(message))
+                    python_code = message.get("payload")
+                    self.logger.info("run python code:{}".format(python_code))
                     try:
                         with self.stdoutIO() as s:
                             # 'hello world'[::-1]
@@ -39,7 +39,7 @@ class KernelExtension(Extension):
                         output = s.getvalue()
                     except Exception as e:
                         output = str(e)
-                    message = {"topic": self.TOPIC, "message": str(output.rstrip())}
+                    message = {"topic": self.TOPIC, "payload": str(output).rstrip()}
                     self.publish(message)
 
 

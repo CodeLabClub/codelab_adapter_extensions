@@ -1,8 +1,10 @@
 '''
-pip3 install pyautogui  --user
+pip3 install gpiozero pigpio --user
+# docs: https://gpiozero.readthedocs.io/en/stable/remote_gpio.html
 '''
 import zmq
-import os
+import os  # env
+# GPIOZERO_PIN_FACTORY=pigpio PIGPIO_ADDR= "raspberrypi.local"# 192.168.1.3
 
 from time import sleep
 import pyautogui

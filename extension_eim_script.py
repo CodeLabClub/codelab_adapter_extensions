@@ -22,11 +22,11 @@ class EimScriptExtension(Extension):
         importlib.reload(module)
         while self._running:
             message = self.read()
-            data = message.get('data')
+            data = message.get("payload")
             if data:
                 # self.logger.debug("message:%s",str(message))
                 response = handle(data, self.logger)
-                message = {"topic": "eim", "message": response}
+                message = {"topic": "eim", "payload": response}
                 self.publish(message)
 
 
