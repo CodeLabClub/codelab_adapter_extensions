@@ -21,7 +21,7 @@ class TulingExtension(Extension):
         # run 会被作为线程调用
         while self._running:
             message = self.read()
-            data = message.get("data")
+            data = message.get("payload")
             if data:
                 content =  {
                                 "perception": {
@@ -37,7 +37,7 @@ class TulingExtension(Extension):
                 res = requests.post(url=self.apiUrl, data=json.dumps(content))
                 r = res.json()
                 message = {"topic": "eim"}
-                message["message"] = r['results'][0]['values'][r['results'][0]['resultType']]
+                message["payload"] = r['results'][0]['values'][r['results'][0]['resultType']]
                 self.publish(message)
                 # from IPython import embed;embed()
                 # self.logger.debug("message:%s",str(message))

@@ -32,7 +32,7 @@ class FlyExtension(Extension):
         while self._running:
             message = self.read()
             self.logger.info("message:%s", str(message))
-            data = message.get("data")
+            data = message.get("payload")
             if data:
                 if data == "turn around":
                     mambo.turn_degrees(90)

@@ -86,7 +86,7 @@ class MicrobitProxy(Extension):
             self.logger.debug("message {}".format(message))
             self.message = {}
             if message == {}:
-                message = {"topic": "sensor", "data": ""}
+                message = {"topic": "sensor", "payload": ""}
             message = json.dumps(message) + "\r\n"
             message_bytes = message.encode('utf-8')
             self.logger.debug(message_bytes)

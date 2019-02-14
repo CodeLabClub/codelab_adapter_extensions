@@ -33,7 +33,7 @@ class AndroidExtension(Extension):
             time.sleep(1)
             self.logger.info("sensor pipe recv: %s", message)
             # pub 到scratch3
-            self.publish({"topic":"sensor/android","data":message})
+            self.publish({"topic":"sensor/android","payload":message})
             socket_sonsor.send_json({"result":"ok"})
         # 等待android的数据，推到scratch3
         # 写一个安卓的 scratch3插件

@@ -39,7 +39,7 @@ class OpencvExtension(Extension):
             tf_class = socket.recv_json().get("class")
             socket.send_json({"status":"200"})
             # 发往scratch3.0中的eim积木
-            self.publish({"topic": "eim", "message": tf_class})
+            self.publish({"topic": "eim", "payload": tf_class})
         # release socket
         tf.terminate()
         tf.wait()

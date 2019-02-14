@@ -15,7 +15,7 @@ class EimHttpExtension(Extension):
     def run(self):
         while self._running:
             message = self.read()
-            data = message.get('data')
+            data = message.get("payload")
             topic = message.get("topic")
             if (topic == "eim") and data:
                 # 返回json还是text
@@ -26,7 +26,7 @@ class EimHttpExtension(Extension):
                     response = r.text
                 except:
                     response = "something error"
-                message = {"topic": "eim", "message": response}
+                message = {"topic": "eim", "payload": response}
                 self.publish(message)
                     
                     

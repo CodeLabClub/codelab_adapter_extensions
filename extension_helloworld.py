@@ -11,7 +11,7 @@ class HelloworldExtension(Extension):
         while True:
             message = self.read()
             if message["topic"] == "eim":
-                subprocess.call("say {}".format(message["data"]),shell=True)
+                subprocess.call("say {}".format(message["payload"]),shell=True)
 
 export = HelloworldExtension
 

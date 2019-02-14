@@ -117,7 +117,7 @@ class UbtrobotProxy(Extension):
             }
             self.logger.debug("message {}".format(message))
             if message.get("topic") == "eim":
-                cmd = cmd_map.get(message.get("data"))
+                cmd = cmd_map.get(message.get("payload"))
             if cmd:
                 self.logger.debug("cmd:{}".format(cmd))
                 # 如果是linux每次都要重连

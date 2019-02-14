@@ -32,7 +32,7 @@ CWD_PATH = "/home/pi/tensorflow1/models/research/object_detection"
 PATH_TO_CKPT = os.path.join(CWD_PATH, MODEL_NAME, 'frozen_inference_graph.pb')
 
 # Path to label map file
-PATH_TO_LABELS = os.path.join(CWD_PATH, 'data', 'mscoco_label_map.pbtxt')
+PATH_TO_LABELS = os.path.join(CWD_PATH, "payload", 'mscoco_label_map.pbtxt')
 
 # Number of classes the object detector can identify
 NUM_CLASSES = 90
@@ -112,7 +112,7 @@ class TensorflowExtension(Extension):
             # https://lijiancheng0614.github.io/2017/08/22/2017_08_22_TensorFlow-Object-Detection-API/
             category_name = category_index[np.squeeze(classes).astype(np.int32)[0]]['name']
             print("classes", category_name)
-            message = {"topic": "eim", "message": category_name}
+            message = {"topic": "eim", "payload": category_name}
             self.publish(message)
             # publish
             t2 = cv2.getTickCount()

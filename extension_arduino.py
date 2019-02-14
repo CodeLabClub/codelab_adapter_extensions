@@ -34,7 +34,7 @@ class ArduinoExtension(Extension):
             self.logger.debug(message)
             topic = message.get("topic")
             if topic == self.TOPIC:
-                python_code = message.get('data')
+                python_code = message.get("payload")
                 self.logger.debug("run python code:{}".format(message))
                 try:
                     # 单一入口，传递源码
@@ -44,7 +44,7 @@ class ArduinoExtension(Extension):
                     output = e
                 message = {
                     "topic": self.TOPIC,
-                    "message": str(output).rstrip()
+                    "payload": str(output).rstrip()
                 }
                 self.publish(message)
         ser.close()

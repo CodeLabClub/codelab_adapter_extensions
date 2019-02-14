@@ -113,12 +113,12 @@ while True:
         message = socket.recv_json()  # python dict
         print(f"android server Received request: {message}")
         if message:
-            topic, data = (message["topic"], message["data"])
+            topic, data = (message["topic"], message["payload"])
             if "android" not in topic:
                 continue
             # todo 在此凑出cmd
             if topic == "android/sms_send":
-                cmd = cmd_map[topic].format(data.get("number",10010),data.get("message",'hello'))
+                cmd = cmd_map[topic].format(data.get("number",10010),data.get("payload",'hello'))
             else:
                 cmd = cmd_map[topic].format(data)
             output, rc, error = execute(cmd)

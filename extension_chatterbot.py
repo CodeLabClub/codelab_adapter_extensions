@@ -36,12 +36,12 @@ class EIMExtension(Extension):
                 # scratch user say
                 # 同步模式 基于异步实现
                 # self.logger.debug("message:%s", str(read_message))
-                content = read_message["data"]
+                content = read_message["payload"]
                 if read_message.get("topic") == "eim":
                     # 由前端发起 action
                     self.logger.info("eim message:%s", content)
                     response = self.deepThought.get_response(content).text
-                    message = {"topic": "eim", "message": response}
+                    message = {"topic": "eim", "payload": response}
                     self.publish(message)
                 # time.sleep(1)
 

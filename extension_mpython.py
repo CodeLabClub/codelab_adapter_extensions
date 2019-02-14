@@ -29,14 +29,14 @@ class MpythonExtension(Extension):
         while self._running:
             message = self.read()
             self.logger.debug("message:%s",str(message))
-            data = message.get("data")
+            data = message.get("payload")
             if data:
                 shell = data
                 conn.send(shell.encode('utf-8'))
                 print('New connection from %s:%d' % (addr[0], addr[1]))
                 data = conn.recv(socksize)
                 # stdout,stderr = cmd.communicate()
-                message = {"topic": "eim", "message": data.decode('utf-8')}
+                message = {"topic": "eim", "payload": data.decode('utf-8')}
                 self.publish(message)
                 # 同步控制多个掌控板
             s.close()

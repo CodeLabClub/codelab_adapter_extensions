@@ -32,11 +32,11 @@ class HungryRobotExtension(Extension):
                 self.logger.info("message:", read_message)
                 # zeromq
                 if read_message.get("topic") == "eim":
-                    data = read_message.get("data")
+                    data = read_message.get("payload")
                     if data == "eat":
                         # 串口写eat
                         message_bytes = b'8\n' # 8 -> eat
                         self.ser.write(message_bytes)
-                # subprocess.call("say {}".format(read_message["data"]),shell=True)
+                # subprocess.call("say {}".format(read_message["payload"]),shell=True)
 
 export = HungryRobotExtension

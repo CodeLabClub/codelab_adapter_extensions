@@ -40,7 +40,7 @@ class JoystickExtension(Extension):
         '''
 
         while self._running:
-            # message = {"topic": "eim", "message": "message"}
+            # message = {"topic": "eim", "payload": "payload"}
             # self.publish(message)
             # time.sleep(1)
             eventlist = pygame.event.get()
@@ -60,7 +60,7 @@ class JoystickExtension(Extension):
                     print("button: {}".format(str(e.dict)))
                     # 只将button信息发往scratch
                     # todo: eim应该有处理json的能力，对于调试，直接say出来，看是什么即可
-                    message = {"topic": "eim", "message": str(str(e.button))}
+                    message = {"topic": "eim", "payload": str(str(e.button))}
                     self.publish(message)
 
             time.sleep(0.1)

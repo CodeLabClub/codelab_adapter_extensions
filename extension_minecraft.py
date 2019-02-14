@@ -27,7 +27,7 @@ class MineCraftProxy(Extension):
         while True:
             message = self.read()
             topic = message.get('topic')
-            data = message.get('data')
+            data = message.get("payload")
             if topic == 'init':
                 self.mc = MineCraft(data)
                 self.publish({"id": 'minecraft', "topic": "sensor", "is_connected": True})

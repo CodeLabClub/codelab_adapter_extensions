@@ -35,7 +35,7 @@ class FaceExtension(Extension):
                 print(out_json)
             except:
                 continue
-            message = {"topic": "eim", "message": out_json.get("shape_data")} # 就是原始数据本身
+            message = {"topic": "eim", "payload": out_json.get("shape_data")} # 就是原始数据本身
             self.publish(message)
             # time.sleep(1)
             '''
