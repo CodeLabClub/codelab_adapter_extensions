@@ -6,7 +6,6 @@ import threading
 
 from codelab_adapter import settings
 from codelab_adapter.core_extension import Extension
-import typing
 
 
 class EIMExtension(Extension):
@@ -22,7 +21,6 @@ class EIMExtension(Extension):
             往scratch不断发送信息
         '''
 
-        self.logger.info(dir(typing))
         def message_monitor():
             while True:
                 read_message = self.read()  # json
