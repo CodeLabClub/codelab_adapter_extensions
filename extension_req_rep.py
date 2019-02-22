@@ -18,8 +18,8 @@ class ReqRepExtension(Extension):
             if topic == self.TOPIC:
                 self.logger.info(str(read_message))
                 time.sleep(1)
-                content = read_message.get('content')
-                read_message['content'] = content[::-1]
+                payload = read_message.get('payload')
+                read_message['payload'] = payload[::-1]
                 self.publish(read_message)
                 # time.sleep(1)
 
