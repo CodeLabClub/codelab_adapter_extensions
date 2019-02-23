@@ -59,8 +59,14 @@ class CozmoExtension(Extension):
                 # socket.send_json(message) # 设置超时
                 result = socket.recv_json().get("result")
                 # 发往scratch3.0
+                messageID = message.get("messageID")
                 self.publish({"topic": self.TOPIC, "payload": result})
-
+                self.publish({
+                    "topic": self.TOPIC,
+                    "payload": result,
+                    "messageID": messageID
+                })
+                
         # release socket
         socket.send_json({"python_code": "quit!"})
         result = socket.recv_json().get("result")

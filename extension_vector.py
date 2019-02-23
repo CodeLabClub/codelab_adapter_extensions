@@ -51,7 +51,12 @@ class VectorExtension(Extension):
                 socket.send_json({"python_code": python_code})
                 result = socket.recv_json().get("result")
                 # 发往scratch3.0
-                self.publish({"topic": self.TOPIC, "payload": result})
+                messageID = message.get("messageID")
+                self.publish({
+                    "topic": self.TOPIC,
+                    "payload": result,
+                    "messageID": messageID
+                })
 
         # release socket
         socket.send_json({"python_code": "quit!"})
