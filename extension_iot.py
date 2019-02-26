@@ -2,7 +2,9 @@
 IoT: Internet of Things
 server : iot.codelab.club
 
-# tool:
+# 保持透明
+
+# test tool:
     pip3 install hbmqtt # 0.9.5
     hbmqtt_pub --url mqtt://guest:test@iot.codelab.club -t "/scratch3_sub" -m "hello from hbmqtt_pub"
     hbmqtt_sub --url mqtt://guest:test@iot.codelab.club -t "/scratch3_pub"
@@ -25,8 +27,6 @@ class IoTExtension(Extension):
     def __init__(self):
         name = type(self).__name__  # class name
         super().__init__(name)
-        # self.TOPIC = "iot"
-        self.mqtt_exit_flag = False
         self.queue = Queue()
         username = "guest"
         password = "test"
@@ -37,8 +37,7 @@ class IoTExtension(Extension):
         '''
         接收scratch3发出的消息,消息频道为 scratch3_pub
         '''
-        # 保持透明
-        C = MQTTClient()  # clientid?
+        C = MQTTClient(client_id="adapter_client_sub")
         await C.connect(self.mqtt_url)
         scratch3_pub = '/scratch3_pub'  # 消息体内做更细的分割
         await C.subscribe([
@@ -60,7 +59,8 @@ class IoTExtension(Extension):
         '''
         发送消息给scratch3正在订阅的频道scratch3_sub
         '''
-        C = MQTTClient()
+        # C = await self.connect_to_mqtt_server()
+        C = MQTTClient(client_id="adapter_client_pub")
         await C.connect(self.mqtt_url)
         scratch3_sub = '/scratch3_sub'
         try:
@@ -79,7 +79,7 @@ class IoTExtension(Extension):
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         loop.run_until_complete(self.message_from_scratch3())
-        # Q: 两个一起就会有问题
+        # Q: 两个一起会有问题
         '''
         loop.run_until_complete(asyncio.gather(
             self.run_mqtt_sub(),
@@ -97,16 +97,15 @@ class IoTExtension(Extension):
         self.task1()
         self.task2()
 
-        # as demo
-        #'''
+        #  for test
+        '''
         for i in range(3):
             self.queue.put("message:{}".format(i))
             time.sleep(1)
-        #'''
+        '''
         while self._running:
             # to publish mqtt message
             time.sleep(1)
-        time.sleep(0.2)
 
 
 export = IoTExtension
