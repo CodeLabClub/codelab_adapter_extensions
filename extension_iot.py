@@ -12,15 +12,15 @@ server : iot.codelab.club
 import time
 import logging
 import asyncio
-import threading
 from queue import Queue
-
-from codelab_adapter import settings
-from codelab_adapter.core_extension import Extension
-from codelab_adapter.utils import threaded
+from threading import Event
 
 from hbmqtt.client import MQTTClient, ClientException
 from hbmqtt.mqtt.constants import QOS_0
+
+from codelab_adapter import settings
+from codelab_adapter.core_extension import Extension
+from codelab_adapter.utils import get_client_id, AsyncTaskManager
 
 
 class IoTExtension(Extension):
@@ -37,7 +37,8 @@ class IoTExtension(Extension):
         '''
         接收scratch3发出的消息,消息频道为 scratch3_pub
         '''
-        C = MQTTClient(client_id="adapter_client_sub")
+        client_id = "adapter_iot_sub_" + get_client_id()
+        C = MQTTClient(client_id=client_id)
         await C.connect(self.mqtt_url)
         scratch3_pub = '/scratch3_pub'  # 消息体内做更细的分割
         await C.subscribe([
@@ -60,52 +61,59 @@ class IoTExtension(Extension):
         发送消息给scratch3正在订阅的频道scratch3_sub
         '''
         # C = await self.connect_to_mqtt_server()
-        C = MQTTClient(client_id="adapter_client_pub")
+        client_id = "adapter_iot_pub" + get_client_id()
+        C = MQTTClient(client_id=client_id)
         await C.connect(self.mqtt_url)
         scratch3_sub = '/scratch3_sub'
+
         try:
             while self._running:
-                message = self.queue.get()
-                self.logger.info("mqtt_pub:{}".format(message))
-                #  todo: 在此将消息发往Scratch3
-                await C.publish('/scratch3_sub', message.encode(), qos=0x00)
+                    # if not self.queue.empty():
+                    message = self.queue.get()
+                    self.logger.info("mqtt_pub:{}".format(message))
+                    #  todo: 在此将消息发往Scratch3
+                    await C.publish(
+                        '/scratch3_sub', message.encode(), qos=0x00)  # qos 0
             await C.disconnect()
         except ClientException as ce:
             self.logger.error("Client exception: %s" % ce)
 
-    @threaded
-    def task1(self):
-        # https://stackoverflow.com/questions/46727787/runtimeerror-there-is-no-current-event-loop-in-thread-in-async-apscheduler
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.message_from_scratch3())
-        # Q: 两个一起会有问题
-        '''
-        loop.run_until_complete(asyncio.gather(
-            self.run_mqtt_sub(),
-            # self.run_mqtt_pub()
-        ))
-        '''
-
-    @threaded
-    def task2(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(self.message_to_scratch3())
-
     def run(self):
-        self.task1()
-        self.task2()
+        event1 = Event()
+        b1 = AsyncTaskManager(event1)
+        b1.setDaemon(True) 
+        b1.start()
+        event1.wait()
 
-        #  for test
+        event2 = Event()
+        b2 = AsyncTaskManager(event2)
+        b2.setDaemon(True) 
+        b2.start()
+        event2.wait()
+
+        t1 = b1.add_task(self.message_from_scratch3())
+        t2 = b2.add_task(self.message_to_scratch3())
+
         '''
+        # for test
         for i in range(3):
             self.queue.put("message:{}".format(i))
             time.sleep(1)
         '''
+
         while self._running:
             # to publish mqtt message
             time.sleep(1)
 
+        b1.cancel_task(t1)
+        b2.cancel_task(t2)
+        b1.stop()
+        b2.stop()
+        time.sleep(0.5)
+        b1.close()
+        b2.close()
+        
+        self.logger.info("extension iot stop thread!")
+        # Q: 第二次启停 退出会报错 hbmqtt: Event loop is closed
 
 export = IoTExtension

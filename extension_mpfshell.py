@@ -34,38 +34,8 @@ class MpfshellExtension(Extension):
     def __init__(self):
         name = type(self).__name__  # class name
         super().__init__(name)
-        self.TOPIC = "eim/mpfshell"
-        
-        try:
-            from mp.mpfshell import MpFileShell
-
-            self.mpfs = MpFileShell(True, True, True, True)
-
-            self.logger.error(self.mpfs._MpFileShell__is_open()) # check state dont delete
-
-        except Exception as e:
-            self.logger.error(get_traceback())
-            
-        return 
-
-        try:
-            self.mpfs = MpFileShell(True, True, True, True)
-
-            result = find_devices()
-            if len(result) is 0:
-                self.logger.error("serial not found!")
-            else:
-                self.logger.error(result[-1])
-            
-            self.logger.error(self.mpfs._MpFileShell__is_open())
-            with self.stdoutIO() as s:
-                self.logger.error(self.mpfs.do_o('ser:' + result[-1]))
-            self.logger.error(s.getvalue())
-            self.logger.error(self.mpfs._MpFileShell__is_open())
-            
-        except Exception as e:
-            self.logger.error(get_traceback())
-            
+        self.topic = "eim/mpfshell/"
+        self.cache = { } # mpfshell class cache
 
     @contextlib.contextmanager
     def stdoutIO(self, stdout=None):
@@ -76,7 +46,7 @@ class MpfshellExtension(Extension):
         yield stdout
         sys.stdout = old
 
-    def open_device(self, dev_name):
+    def open_device(self, mpfs_name, dev_name):
         self.logger.info("open_device : {}".format(dev_name))
         try:
             # data = json.loads(message.get('data'))
@@ -89,11 +59,14 @@ class MpfshellExtension(Extension):
                     self.logger.info(result[-1])
                 dev_name = result[-1]
             
+            if mpfs_name not in self.cache:
+                self.cache[mpfs_name] = MpFileShell(True, True, True, True)
+
             # self.logger.error(self.mpfs._MpFileShell__is_open())
-            if self.mpfs._MpFileShell__is_open() is False:
+            if self.cache[mpfs_name]._MpFileShell__is_open() is False:
 
                 with self.stdoutIO() as s:
-                    self.mpfs.do_o(str(dev_name))
+                    self.cache[mpfs_name].do_o(str(dev_name))
                     
                 output = s.getvalue()
             else:
@@ -104,15 +77,15 @@ class MpfshellExtension(Extension):
             self.logger.error(get_traceback())
         return output
 
-    def exec_pycode(self, mpy_code):
+    def exec_pycode(self, mpfs_name, mpy_code):
         self.logger.info("exec_pycode : {}".format(mpy_code))
         try:
             
-            # self.logger.error(self.mpfs._MpFileShell__is_open())
-            if self.mpfs._MpFileShell__is_open() is True:
+            # self.logger.error(self.cache[mpfs_name]._MpFileShell__is_open())
+            if mpfs_name in self.cache and self.cache[mpfs_name]._MpFileShell__is_open() is True:
 
                 with self.stdoutIO() as s:
-                    self.mpfs.do_e(str(mpy_code))
+                    self.cache[mpfs_name].do_e(str(mpy_code))
                     
                 output = s.getvalue()
             else:
@@ -124,43 +97,49 @@ class MpfshellExtension(Extension):
         return output
 
     def run(self):
-        while self._running:
-            try:
-                message  = self.read() # python code
-                # self.logger.debug(message)
-                topic = message.get("topic")
-                if self.TOPIC in topic:
-                    data = message.get('payload')
-                    if 'open' in topic:
-                        message = {
-                            "topic": topic, 
-                            "payload": str(self.open_device(data)).rstrip()
-                        }
-                        self.publish(message)
-                    if 'exec' in topic:
-                        message = {
-                            "topic": topic, 
-                            "payload": str(self.exec_pycode(data)).rstrip()
-                        }
-                        self.publish(message)
-                    if 'isconnected' in topic:
-                        message = {
-                            "topic": topic,
-                            "payload": str(self.mpfs._MpFileShell__is_open())
-                        }
-                        self.publish(message)
-                    if 'close' in topic:
-                        
-                        self.mpfs.do_q(None)
-                        self.mpfs = MpFileShell(True, True, True, True)
-
-                        message = {
-                            "topic": topic,
-                            "payload": str(self.mpfs._MpFileShell__is_open())
-                        }
-                        self.publish(message)
-            except Exception as e:
-                self.logger.error(get_traceback())
-        self.mpfs.do_q(None)
+        try:
+            while self._running:
+                try:
+                    message  = self.read() # python code
+                    # self.logger.debug(message)
+                    topic = message.get("topic")
+                    if self.TOPIC in topic:
+                        data = message.get('payload')
+                        obj = topic.split('/')
+                        mpfs_name = 'default' if len(obj) < 4 else obj[3]
+                        self.logger.debug(mpfs_name)
+                        if 'open' in topic:
+                            message = {
+                                "topic": topic, 
+                                "payload": str(self.open_device(mpfs_name, data)).rstrip()
+                            }
+                            self.publish(message)
+                        if 'exec' in topic:
+                            message = {
+                                "topic": topic, 
+                                "payload": str(self.exec_pycode(mpfs_name, data)).rstrip()
+                            }
+                            self.publish(message)
+                        if 'isconnected' in topic:
+                            message = {
+                                "topic": topic,
+                                "payload": str(self.cache[mpfs_name]._MpFileShell__is_open())
+                            }
+                            self.publish(message)
+                        if 'close' in topic:
+                            self.cache[mpfs_name].do_close(None)
+                            message = {
+                                "topic": topic,
+                                "payload": str(self.cache[mpfs_name]._MpFileShell__is_open())
+                            }
+                            self.publish(message)
+                except Exception as e:
+                    self.logger.error(get_traceback())
+        except Exception as e:
+            self.logger.error(get_traceback())
+        finally:
+            # delete
+            for mpfs in self.cache:
+                mpfs.do_q(None)
 
 export = MpfshellExtension
