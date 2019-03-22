@@ -488,9 +488,10 @@ class TelloExtension(Extension):
         name = type(self).__name__  # class name
         super().__init__(name)
         self.TOPIC = "eim/tello"
-        self.tello = Tello('', 8889)
-    def run(self):
 
+    def run(self):
+        
+        self.tello = Tello('', 8889)
         while self._running:
             message = self.read()
             self.logger.debug(message)
