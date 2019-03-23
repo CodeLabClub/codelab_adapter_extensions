@@ -468,21 +468,6 @@ class Tello:
         return self.move('up', distance)
 
 
-
-def get_python3_path():
-    # If it is not working,  Please replace python3_path with your local python3 path. shell: which python3
-    if (platform.system() == "Darwin"):
-        # which python3
-        path = "/usr/local/bin/python3"
-    if platform.system() == "Windows":
-        path = "python"
-    if platform.system() == "Linux":
-        path = "/usr/bin/python3"
-    return path
-
-
-python3_path = get_python3_path()
-
 class TelloExtension(Extension):
     def __init__(self):
         name = type(self).__name__  # class name
