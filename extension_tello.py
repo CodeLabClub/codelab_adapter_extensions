@@ -500,10 +500,9 @@ class TelloExtension(Extension):
             if topic == self.TOPIC:
                 #socket.send_json({"python_code": python_code})
                 self.tello.send_command(python_code)#阻塞型，timeout=15s 确保接受到命令后执行接下来的命令，否则重发
+                result =self.tello.send_command(python_code)#阻塞型，timeout=15s 确保接受到命令后执行接下来的命令，否则重发
                 # socket.send_json(message) # 设置超时
-                
-               # result = socket.recv_json().get("result")
-                result = self.tello.response#上一条已经确保接受命令
+                # result = socket.recv_json().get("result")
                 # 发往scratch3.0
                 self.publish({"topic": self.TOPIC, "message": result})
 
