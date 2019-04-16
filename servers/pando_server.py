@@ -1,3 +1,4 @@
+import sys
 import zmq
 from zmq import Context
 import time
@@ -25,11 +26,11 @@ TX_CHAR_UUID = uuid.UUID('6E400002-B5A3-F393-E0A9-E50E24DCCA9E')
 RX_CHAR_UUID = uuid.UUID('6E400003-B5A3-F393-E0A9-E50E24DCCA9E')
 
 move_map = {
-    "forward": [0xd1],
-    "backward": [0xd2],
-    "left": [0xd3],
-    "right": [0xd4],
-    "stop": [0xda]
+    "pando_forward": [0xd1],
+    "pando_backward": [0xd2],
+    "pando_left": [0xd3],
+    "pando_right": [0xd4],
+    "pando_stop": [0xda]
 }
 
 
@@ -68,6 +69,7 @@ def ble_thread():
             time.sleep(0.1)
             if not ble_cmd_queue.empty():
                 cmd = ble_cmd_queue.get()
+                print('send ', cmd)
                 tx.write_value(bytes(cmd))
     except Exception as err:
         print(err)
@@ -80,9 +82,6 @@ def ble_send(cmd_list):
 
 
 def ble_run():
-    while True:
-        time.sleep(1)
-
     ble.initialize()
     ble.run_mainloop_with(ble_thread)
 
@@ -92,23 +91,24 @@ def run_in_backend(func):
     task.start()
 
 
+def terminate():
+    sys.exit(1)
+
+
 def server_loop():
     while True:
         action = socket.recv_json().get("action")
         socket.send_json({"result": "nothing"})
         print('rcv action = {}'.format(action))
-        if not action:
-            continue
         if action == "pando_quit":
             socket.send_json({"result": "quit!"})
+            terminate()
             break
         cmd = move_map.get(action)
         if cmd:
-            print(cmd)
             ble_send(cmd)
 
 
 if __name__ == '__main__':
-    # run_in_backend(server_loop)
-    server_loop()
-    # ble_run()
+    run_in_backend(server_loop)
+    ble_run()
