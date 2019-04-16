@@ -1,4 +1,5 @@
 import os
+import sys
 import zmq
 import subprocess
 import pathlib
@@ -6,6 +7,7 @@ import platform
 
 from codelab_adapter import settings
 from codelab_adapter.core_extension import Extension
+from codelab_adapter.utils import ui_info
 
 
 def which(program):
@@ -27,8 +29,20 @@ def which(program):
                 return exe_file
 
 
+def get_python_path():
+    # If it is not working,  Please replace python3_path with your local python3 path. shell: which python3
+    path = 'python'
+    if platform.system() == "Darwin":
+        path = "/usr/local/bin/python3"
+    if platform.system() == "Windows":
+        path = "python"
+    if platform.system() == "Linux":
+        path = "/usr/bin/python3"
+    return path
+
+
 def run_pando_server():
-    python_path = which('python3')
+    python_path = get_python_path()
     codelab_adapter_server_dir = pathlib.Path.home(
     ) / "codelab_adapter" / "servers"
     script = "{}/pando_server.py".format(codelab_adapter_server_dir)
@@ -44,6 +58,9 @@ class PandoExtension(Extension):
         self.prefix = 'pando'
 
     def run(self):
+
+        run_pando_server()
+
         # zmq socket
         port = 38789
         context = zmq.Context.instance()
