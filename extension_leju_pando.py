@@ -55,6 +55,7 @@ class PandoExtension(Extension):
             if self.prefix in payload:
                 self.logger.debug("payload: {}".format(payload))
                 client.send_json({"action": payload})
+                result = client.recv_json().get("result")
 
 
 export = PandoExtension

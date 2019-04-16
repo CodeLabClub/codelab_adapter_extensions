@@ -94,11 +94,8 @@ def run_in_backend(func):
 
 def server_loop():
     while True:
-        action = socket.recv_string()
-        print('action = {}', action)
-        continue
-
         action = socket.recv_json().get("action")
+        socket.send_json({"result": "nothing"})
         print('rcv action = {}'.format(action))
         if not action:
             continue
