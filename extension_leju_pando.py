@@ -1,92 +1,60 @@
-import time, threading, subprocess
+import os
+import zmq
+import subprocess
+import pathlib
+import platform
+
 from codelab_adapter import settings
 from codelab_adapter.core_extension import Extension
 
-import queue
-import uuid
-import Adafruit_BluefruitLE
-from Adafruit_BluefruitLE.services import UART
 
-# Adafruit Python BluefruitLE
-# https://github.com/adafruit/Adafruit_Python_BluefruitLE.git
-# TODO: support for Windows platform
+def which(program):
+    """Determines whether program exists
+    """
 
-UART_SERVICE_UUID = uuid.UUID('6E400001-B5A3-F393-E0A9-E50E24DCCA9E')
-TX_CHAR_UUID = uuid.UUID('6E400002-B5A3-F393-E0A9-E50E24DCCA9E')
-RX_CHAR_UUID = uuid.UUID('6E400003-B5A3-F393-E0A9-E50E24DCCA9E')
+    def is_exe(fpath):
+        return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
-CMD_MAP = {
-    "forward": [0xd1],
-    "backward": [0xd2],
-    "left": [0xd3],
-    "right": [0xd4],
-    "stop": [0xda]
-}
-
-ble = Adafruit_BluefruitLE.get_provider()
-ble_cmd_queue = queue.Queue(maxsize=10)
+    fpath, fname = os.path.split(program)
+    if fpath:
+        if is_exe(program):
+            return program
+    else:
+        for path in os.environ["PATH"].split(os.pathsep):
+            path = path.strip('"')
+            exe_file = os.path.join(path, program)
+            if is_exe(exe_file):
+                return exe_file
 
 
-def run_in_background(func):
-    task = threading.Thread(target=func)
-    task.start()
-
-
-class PandoBle:
-    def __init__(self):
-        ble.clear_cached_data()
-        self.adapter = ble.get_default_adapter()
-        self.adapter.power_on()
-        ble.disconnect_devices([UART_SERVICE_UUID])
-        self.device = None
-        self.uart = None
-        self.tx = None
-        self.rx = None
-
-    def scan(self):
-        try:
-            self.adapter.start_scan()
-            self.device = ble.find_device(service_uuids=[UART_SERVICE_UUID])
-            if self.device is None:
-                raise RuntimeError('Failed to find BLE UART device!')
-        finally:
-            self.adapter.stop_scan()
-
-    def connect(self):
-        self.device.connect()
-        self.device.discover([UART_SERVICE_UUID], [TX_CHAR_UUID, RX_CHAR_UUID])
-        self.uart = self.device.find_service(UART_SERVICE_UUID)
-        self.tx = self.uart.find_characteristic(TX_CHAR_UUID)
-
-    def send(self, cmd_list):
-        if cmd_list is None:
-            return
-        self.tx.write_value(bytes(cmd_list))
-
-    def disconnect(self):
-        self.device.disconnect()
-
-    def run(self):
-        while True:
-            time.sleep(0.1)
-            if not ble_cmd_queue.empty():
-                cmd = ble_cmd_queue.get()
-                self.tx.write_value(cmd)
+def run_pando_server():
+    python_path = which('python3')
+    codelab_adapter_server_dir = pathlib.Path.home(
+    ) / "codelab_adapter" / "servers"
+    script = "{}/pando_server.py".format(codelab_adapter_server_dir)
+    shell_cmd = [python_path, script]
+    pando_server = subprocess.Popen(shell_cmd)
+    settings.running_child_procs.append(pando_server)
 
 
 class PandoExtension(Extension):
     def __init__(self):
         name = type(self).__name__
         super().__init__(name)
+        self.prefix = 'pando'
 
     def run(self):
+        # zmq socket
+        port = 38789
+        context = zmq.Context.instance()
+        client = context.socket(zmq.REQ)
+        client.connect("tcp://localhost:%s" % port)
         while True:
-            cmd = None
             message = self.read()
             payload = message.get("payload")
-            if cmd and 'pando_' in payload:
-                cmd = CMD_MAP.get(message.get("payload"))
-                self.logger.debug("cmd:{}".format(cmd))
+            if self.prefix in payload:
+                self.logger.debug("payload: {}".format(payload))
+                client.send_json({"action": payload})
 
 
 export = PandoExtension
