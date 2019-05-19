@@ -481,6 +481,7 @@ class TelloExtension(Extension):
             message = self.read()
             self.logger.debug(message)
             topic = message.get('topic')
+            messageID = message.get('messageID')
             python_code = message.get('data')
             if topic == self.TOPIC:
                 #socket.send_json({"python_code": python_code})
@@ -489,7 +490,7 @@ class TelloExtension(Extension):
                 # socket.send_json(message) # 设置超时
                 # result = socket.recv_json().get("result")
                 # 发往scratch3.0
-                self.publish({"topic": self.TOPIC, "message": result})
+                self.publish({"topic": self.TOPIC, "message": result, "messageID": messageID})
 
         # release socket
         del self.tello
