@@ -45,9 +45,9 @@ def is_positive_int(s):
 def parse_cmd(payload):
     cmd = 0
     if payload.startswith('leju_aelos_cmd_'):
-        cmd = payload.split('_')
-        if is_positive_int(cmd[-1]):
-            cmd = int(cmd[-1])
+        msg = payload.split('_')
+        if is_positive_int(msg[-1]):
+            cmd = int(msg[-1])
     return cmd
 
 
