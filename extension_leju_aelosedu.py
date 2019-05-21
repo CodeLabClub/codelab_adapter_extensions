@@ -14,15 +14,12 @@ def say(word):
     subprocess.call("say {}".format(word), shell=True)
 
 
-say('hello, my name is aelos')
-
-
 class Dongle2401:
     def __init__(self, port, channel):
         self.port = port
         self.channel = channel
         self.dongle = self.open_port(self.port)
-        self.set_channel(channel)
+        # self.set_channel(channel)
 
     def open_port(self, port):
         return serial.Serial(port, 9600)
@@ -51,11 +48,13 @@ def parse_cmd(payload):
     return cmd
 
 
+dongle = Dongle2401(SERIAL_DEVICE, CHANNEL)
+
+
 class LejuAelosRobotExtention(Extension):
     def __init__(self):
         name = type(self).__name__
         super().__init__(name)
-        self.dongle = Dongle2401(SERIAL_DEVICE, CHANNEL)
 
     def run(self):
         while True:
@@ -63,7 +62,7 @@ class LejuAelosRobotExtention(Extension):
             if message["topic"] == "eim":
                 action_num = parse_cmd(message.get('payload'))
                 logger.info(action_num)
-                self.dongle.send([action_num])
+                dongle.send([action_num])
 
 
 export = LejuAelosRobotExtention
