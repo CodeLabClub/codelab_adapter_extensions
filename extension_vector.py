@@ -39,7 +39,8 @@ class VectorExtension(Extension):
         script = "{}/vector_server.py".format(codelab_adapter_server_dir)
 
         cmd = [python3_path, script]
-        vector_server = subprocess.Popen(cmd)
+        CREATE_NO_WINDOW = 0x08000000
+        vector_server = subprocess.Popen(cmd,creationflags=CREATE_NO_WINDOW)
         settings.running_child_procs.append(vector_server)
 
         while self._running:
