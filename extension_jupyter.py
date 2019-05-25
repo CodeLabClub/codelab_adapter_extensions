@@ -38,13 +38,14 @@ class jupyterExtension(Extension):
     def run(self):
 
         if "config.py" in self.currentListDir:
-            cmd = ".\python -m jupyterlab --config=config.py"
+            cmd = ".\pythonw -m jupyterlab --config=config.py"
         else:
-            cmd = ".\python -m jupyterlab"
+            cmd = ".\pythonw -m jupyterlab"
 
 
         try:
-            jupyter_server = subprocess.Popen(cmd,shell=False)
+            CREATE_NO_WINDOW = 0x08000000
+            jupyter_server = subprocess.Popen(cmd,creationflags=CREATE_NO_WINDOW)
             settings.running_child_procs.append(jupyter_server)
         except WindowsError: 
             if "python.exe" in self.currentListDir:
