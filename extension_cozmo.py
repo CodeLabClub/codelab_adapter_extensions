@@ -46,7 +46,8 @@ class CozmoExtension(Extension):
         ) / "codelab_adapter" / "servers"
         script = "{}/cozmo_server.py".format(codelab_adapter_server_dir)
         cmd = [python3_path, script]
-        cozmo_server = subprocess.Popen(cmd)
+        CREATE_NO_WINDOW = 0x08000000
+        cozmo_server = subprocess.Popen(cmd,creationflags=CREATE_NO_WINDOW)
         settings.running_child_procs.append(cozmo_server)
 
         while self._running:
