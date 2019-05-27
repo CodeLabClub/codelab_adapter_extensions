@@ -3,6 +3,7 @@ from codelab_adapter.core_extension import Extension
 import logging
 import math
 import serial
+import serial.tools.list_ports
 
 logger = logging.getLogger(__name__)
 
@@ -49,12 +50,26 @@ def arm_pose(line):
     return int(l_shoulder), int(l_elbow), int(r_shoulder), int(r_elbow)
 
 
+
+def auto_detect_port():
+    device_desc = 'STM32 Virtual COM Port'
+    vid_pid = '0483:5740'
+    ports = serial.tools.list_ports.comports()
+    for port, desc, hwid in sorted(ports):
+        print("port {}: desc {} hwid {}".format(port, desc, hwid))
+        if device_desc in desc and vid_pid in hwid:
+            return port
+    assert False, 'Aelos usb device not found!'
+
+
 class WiredUsb:
-    def __init__(self, port):
+    def __init__(self, port=None):
         self.port = port
         self.dongle = self.open_port(self.port)
 
     def open_port(self, port):
+        if port is None:
+            port = auto_detect_port()
         return serial.Serial(port, 9600)
 
     def send(self, data):
@@ -86,8 +101,7 @@ class WiredUsb:
         self.set_angles(pose)
 
 
-dev_port = '/dev/tty.usbmodem3_____PC26_i_C1'
-wire = WiredUsb(dev_port)
+wire = WiredUsb()
 wire.online_mode()
 wire.set_arms(100, 100, 100, 100)
 
