@@ -1,5 +1,4 @@
-import time, threading, subprocess
-from codelab_adapter import settings
+import time
 from codelab_adapter.core_extension import Extension
 import logging
 import math
@@ -25,7 +24,8 @@ def arm_pose(line):
     # left hand
     l_shoulder = math.asin(abs(x_le - x_ls) / lse) / math.pi * 180
     l_shoulder = l_shoulder if y_le < y_ls else 180 - l_shoulder
-    l_elbow = math.acos((lse**2 + lew**2 - lsw**2) / (2*lse*lew)) / math.pi * 180
+    l_elbow = math.acos((lse**2 + lew**2 - lsw**2) /
+                        (2*lse*lew)) / math.pi * 180
     l_elbow = l_elbow - 90
     if y_lw > y_le:
         l_elbow = 180 - l_elbow
@@ -35,7 +35,8 @@ def arm_pose(line):
     # right hand
     r_shoulder = math.asin(abs(x_re - x_rs) / rse) / math.pi * 180
     r_shoulder = r_shoulder if y_re < y_rs else 180 - r_shoulder
-    r_elbow = math.acos((rse**2 + rew**2 - rsw**2) / (2*rse*rew)) / math.pi * 180
+    r_elbow = math.acos((rse**2 + rew**2 - rsw**2) /
+                        (2*rse*rew)) / math.pi * 180
     r_elbow = r_elbow - 90
     if y_rw > y_re:
         r_elbow = 180 - r_elbow
@@ -76,7 +77,8 @@ class WiredUsb:
         self.send(prefix + data)
 
     def set_arms(self, l_shoulder, l_elbow, r_shoulder, r_elbow):
-        pose = [80, 30, 100, 100, 93, 55, 124, 100, 120, 170, 100, 100, 107, 145, 76, 100]
+        pose = [80, 30, 100, 100, 93, 55, 124, 100,
+                120, 170, 100, 100, 107, 145, 76, 100]
         pose[0] = l_elbow
         pose[1] = l_shoulder
         pose[8] = r_elbow
@@ -111,4 +113,3 @@ class AelosOnline(Extension):
 
 
 export = AelosOnline
-
