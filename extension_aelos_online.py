@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def arm_pose(line):
     max_limit = 175
     min_limit = 15
-    # line = line.replace('\n', '')
+    line = line.replace('aelos_posenet:', '')
     coors = line.split(',')
     coors = list(map(lambda x: float(x), coors))
     x_ls, y_ls, x_le, y_le, x_lw, y_lw = coors[0], coors[1], coors[2], coors[3], coors[4], coors[5]
@@ -116,14 +116,9 @@ class AelosOnline(Extension):
             message = self.read()
             if message["topic"] == "eim":
                 payload = message['payload']
-                logger.info(payload)
-                l_shoulder, l_elbow, r_shoulder, r_elbow = arm_pose(payload)
-                logger.info(l_shoulder)
-                logger.info(l_elbow)
-                logger.info(r_shoulder)
-                logger.info(r_elbow)
-                # wire.set_arms(100, l_elbow, 100, r_elbow)
-                wire.set_arms(l_shoulder, l_elbow, r_shoulder, r_elbow)
+                if 'aelos_posenet:' in payload:
+                    l_shoulder, l_elbow, r_shoulder, r_elbow = arm_pose(payload)
+                    wire.set_arms(l_shoulder, l_elbow, r_shoulder, r_elbow)
 
 
 export = AelosOnline
