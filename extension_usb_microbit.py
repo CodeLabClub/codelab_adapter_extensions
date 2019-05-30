@@ -64,20 +64,28 @@ class UsbMicrobitProxy(Extension):
 
         while self._running:
             # 一读一写 比较稳定
-            scratch3_message = self.scratch3_message
-            self.logger.debug("scratch3_message {}".format(scratch3_message))
-            self.scratch3_message = {}
-            if scratch3_message == {}:
-                scratch3_message = {"topic": self.TOPIC, "payload": ""}
-            scratch3_message = json.dumps(scratch3_message) + "\r\n"
-            scratch3_message_bytes = scratch3_message.encode('utf-8')
-            self.logger.debug(scratch3_message_bytes)
-            self.ser.write(scratch3_message_bytes)
-            # response
-            response_from_microbit = get_response_from_microbit()
-            if response_from_microbit:
-                # message = {"topic":self.TOPIC, "payload":} # todo 不要在microbit中构建消息
-                self.publish(response_from_microbit) 
+            try:
+                scratch3_message = self.scratch3_message
+                self.logger.debug("scratch3_message {}".format(scratch3_message))
+                self.scratch3_message = {}
+                if scratch3_message == {}:
+                    scratch3_message = {"topic": self.TOPIC, "payload": ""}
+                scratch3_message = json.dumps(scratch3_message) + "\r\n"
+                scratch3_message_bytes = scratch3_message.encode('utf-8')
+                self.logger.debug(scratch3_message_bytes)
+                self.ser.write(scratch3_message_bytes)
+                # response
+                response_from_microbit = get_response_from_microbit()
+                if response_from_microbit:
+                    # message = {"topic":self.TOPIC, "payload":} # todo 不要在microbit中构建消息
+                    self.publish(response_from_microbit) 
+            except:
+                try:
+                    port = find_microbit()
+                    self.ser = serial.Serial(port, 115200, timeout=1)
+                except:
+                    pass
+            finally:
                 time.sleep(0.05)
 
 
