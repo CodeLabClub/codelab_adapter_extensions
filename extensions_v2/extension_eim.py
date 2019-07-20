@@ -2,28 +2,26 @@
 EIM: Everything Is Message
 '''
 import time
-import threading
-
 from codelab_adapter.core_extension import Extension
 
 
 class EIMExtension(Extension):
     '''
-    插件功能: 往Scratch远远不断发送消息, 接收scratch过来的消息
-    插件的topic统一为 from_adapter/extensions
+    Everything Is Message
     '''
+
     def __init__(self):
         super().__init__()
-        # self.TOPIC = 'eim' # 默认 from_adapter/extension
-        self.EXTENSION_ID = "eim" # extension_id
+        self.EXTENSION_ID = "eim"
 
-    def message_handle(self, topic, payload):
-        '''
-        handle the message from the scratch
-        '''
-        extension_id = payload.get('extension_id')
-        if extension_id == self.EXTENSION_ID:
+    def extension_message_handle(self, topic, payload):
+        print(topic, payload, type(payload))
+        if type(payload) == str:
             self.logger.info(f'scratch eim message:{payload}')
+            return
+        elif type(payload) == dict:
+            self.logger.info(f'eim message:{payload}')
+            self.publish({"payload": payload})
 
     def run(self):
         '''
@@ -31,16 +29,21 @@ class EIMExtension(Extension):
         '''
         i = 0
         while self._running:
-            message = {"payload": str(i)} # 也允许有topic
+            payload = {}
+            payload["content"] = str(i)
+            payload["extension_id"] = self.EXTENSION_ID
+            message = {"payload": payload}  # topic可选
             self.publish(message)
             self.logger.debug(f'pub {message}')
             time.sleep(1)
             i += 1
-        
-        self.clean_up()
+            '''
+            if i%5 == 0:
+                self.pub_notification(content=i)
+            '''
 
 
 export = EIMExtension
 
 if __name__ == "__main__":
-    EIMExtension().run()  #start_as_thread()
+    EIMExtension().run()  #or start_as_thread()
