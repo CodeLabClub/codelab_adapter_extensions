@@ -29,12 +29,8 @@ class EIMExtension(Extension):
         '''
         i = 0
         while self._running:
-            payload = {}
-            payload["content"] = str(i)
-            payload["extension_id"] = self.EXTENSION_ID
-            message = {"payload": payload}  # topic可选
+            message = {"payload": {"content": str(i)}} # topic可选
             self.publish(message)
-            self.logger.debug(f'pub {message}')
             time.sleep(1)
             i += 1
             '''
