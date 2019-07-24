@@ -35,18 +35,15 @@ class PythonKernelExtension(Extension):
                 exec(python_code)  # 注意安全问题, 但应当支持灵活的教学和创造。 赋予用户能力，但提醒他们别让锤子砸伤脚。
             output = s.getvalue()
         except Exception as e:
-            output = str(e)
-        message = {}
-        message["payload"] = {} 
-        message["payload"]["content"] = str(output).rstrip()
-        if message_id:
-            message["payload"]["message_id"] = message_id
+            output = e
+        payload["content"] = str(output)
+        message = {"payload": payload} # 无论是否有message_id都返回
         self.publish(message)
 
     def run(self):
         "服务于UI"
         while self._running:
-            time.sleep(1)
+            time.sleep(0.5)
 
 
 export = PythonKernelExtension
