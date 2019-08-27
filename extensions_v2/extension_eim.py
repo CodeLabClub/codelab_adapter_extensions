@@ -15,7 +15,7 @@ class EIMExtension(Extension):
         self.EXTENSION_ID = "eim"
 
     def extension_message_handle(self, topic, payload):
-        print(topic, payload, type(payload))
+        # print(topic, payload, type(payload))
         if type(payload) == str:
             self.logger.info(f'scratch eim message:{payload}')
             return
@@ -29,7 +29,8 @@ class EIMExtension(Extension):
         '''
         i = 0
         while self._running:
-            message = {"payload": {"content": str(i)}} # topic可选
+            message = self.message_template()
+            message["payload"]["content"] = str(i) # topic可选
             self.publish(message)
             time.sleep(1)
             i += 1
