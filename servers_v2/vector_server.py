@@ -6,18 +6,10 @@ python3 01_hello_world.py  # should be ok
 '''
 
 import anki_vector
-
-import time
 import queue
-import logging
-from codelab_adapter_client import AdapterNode, threaded
+import time
 
-quit_code = "quit!"
-
-logging.basicConfig(level=logging.DEBUG)
-
-logger = logging.getLogger(__name__)
-
+from codelab_adapter_client import AdapterNode
 
 class VectorNode(AdapterNode):
     '''
@@ -27,9 +19,9 @@ class VectorNode(AdapterNode):
 
     def __init__(self):
         super().__init__()
-        self.logger = logger
         self.EXTENSION_ID = "eim/vector"  # default: eim
         self.q = queue.Queue()
+        # from_jupyter/extensions
 
     def extension_message_handle(self, topic, payload):
         self.q.put(payload)
@@ -40,11 +32,9 @@ class VectorNode(AdapterNode):
 
 
     def run(self):
-        '''
-        如何停掉server
-        '''
         with anki_vector.Robot() as robot:
             while self._running:
+                time.sleep(0.05)
                 if not self.q.empty():
                     payload = self.q.get()
                     self.logger.info(f'python: {payload}')
@@ -63,6 +53,7 @@ class VectorNode(AdapterNode):
                     payload["content"] = str(output)
                     message = {"payload": payload}
                     self.publish(message)
+                
 
 if __name__ == "__main__":
     try:
