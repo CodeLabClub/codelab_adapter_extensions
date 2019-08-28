@@ -15,13 +15,8 @@ class EIMExtension(Extension):
         self.EXTENSION_ID = "eim"
 
     def extension_message_handle(self, topic, payload):
-        # print(topic, payload, type(payload))
-        if type(payload) == str:
-            self.logger.info(f'scratch eim message:{payload}')
-            return
-        elif type(payload) == dict:
-            self.logger.info(f'eim message:{payload}')
-            self.publish({"payload": payload})
+        self.logger.info(f'eim message:{payload}')
+        self.publish({"payload": payload})
 
     def run(self):
         '''
@@ -30,7 +25,7 @@ class EIMExtension(Extension):
         i = 0
         while self._running:
             message = self.message_template()
-            message["payload"]["content"] = str(i) # topic可选
+            message["payload"]["content"] = str(i)
             self.publish(message)
             time.sleep(1)
             i += 1
