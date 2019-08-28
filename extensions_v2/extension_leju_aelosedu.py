@@ -82,18 +82,20 @@ class LejuAelosEduExtention(Extension):
             return
         elif type(payload) == dict:
             self.logger.info(f'eim message:{payload}')
-            arr = parse_content(payload.get('content'))
 
-            if arr is None:
-                return
+            python_code = payload.get('content')
 
-            if arr[0] == 'channel':
-                ch_num = parse_cmd(arr[1])
-                self.usb_dongle.set_channel(ch_num)
+            try:
+                output = eval(python_code, {"__builtins__": None}, {
+                    'usb_dongle': self.usb_dongle
+                })
+            except Exception as e:
+                output = e
+                self.logger.error(output)
 
-            if arr[0] == 'action':
-                act_num = parse_cmd(arr[1])
-                self.usb_dongle.send([act_num])
+            payload["content"] = str(output)
+            message = {"payload": payload}
+            self.publish(message)
 
     def run(self):
         while self._running:
