@@ -1,6 +1,3 @@
-'''
-构建2个管道
-'''
 import itchat, time
 from itchat.content import TEXT
 import zmq
@@ -11,15 +8,11 @@ from codelab_adapter.core_extension import Extension
 
 codelab_adapter_dir = pathlib.Path.home() / "codelab_adapter"
 
-class WechatGateway(Extension):
-    '''
-    todo 作为网关
-    使用插件来启停它
-    '''
 
+class WechatGateway(Extension):
     def __init__(self):
         super().__init__()
-        self.EXTENSION_ID = "eim/wechat"  # 放在内部
+        self.EXTENSION_ID = "eim/wechat"
         self.quit_code = "quit!"
 
     def extension_message_handle(self, topic, payload):
@@ -36,8 +29,8 @@ class WechatGateway(Extension):
             if type == 'user':
                 user2SendMessage = itchat.search_friends(nickName=username)[0]
             user2SendMessage.send(text)
-        except:
-            pass
+        except Exception as e:
+            self.logger.error(str(e))
 
     def run(self):
         self.wechat_run_as_thread()
@@ -66,15 +59,15 @@ class WechatGateway(Extension):
                 "content": content,
             }
             self.publish(message)
-        except:
-            pass
+        except Exception as e:
+            self.logger.error(str(e))
 
     # 群消息
     def group_text_reply(self, msg):
         '''
         将群消息发往scratch
         '''
-        
+
         content = msg.text
         username = msg.actualNickName
         try:
@@ -82,9 +75,8 @@ class WechatGateway(Extension):
             group_name = msg.User.NickName
         except:
             return
-        # todo 主动发信息 第一条信息发两次
         try:
-            # 如果有groupname就是群消息
+            # groupname: 群消息
             message = {}
             message["payload"] = {
                 "username": username,
@@ -92,8 +84,8 @@ class WechatGateway(Extension):
                 "groupname": group_name
             }
             self.publish(message)
-        except:
-            pass
+        except Exception as e:
+            self.logger.error(str(e))
 
     @threaded
     def wechat_run_as_thread(self):
@@ -106,7 +98,8 @@ class WechatGateway(Extension):
         itchat.msg_register(TEXT, isGroupChat=True)(self.group_text_reply)
         itchat.auto_login(
             True, picDir=picDir, statusStorageDir=statusStorageDir)
-        itchat.run(True)
+        itchat.run(True)  # todo 提示有些账号无法登录
+
 
 export = WechatGateway
 
