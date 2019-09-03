@@ -1,8 +1,8 @@
 # codelab_adapter_extensions
-[codelab-adapter](https://codelab-adapter-docs.codelab.club/) extensions.
+![](https://adapterv2.codelab.club/img/toys_party.jpeg)
 
-[codelab-adapter](https://codelab-adapter-docs.codelab.club/)是[Scratch3 Lab](https://blog.just4fun.site/Scratch3-Lab.html)的一个子项目， 它也是[codelab.club](https://blog.just4fun.site/about-codelab-club.html)希望贡献给社区的一个基础设施。
+[Codelab Adapter](https://adapterv2.codelab.club/) extensions.
 
-Scratch3 Lab是一个将Scratch3.0接入开源硬件及AI的实验项目(Scratch3 Lab: connect Scratch3.0 to open-source hardware and AI)。
+CodeLab Adapter 是由[CodeLab](https://www.codelab.club/)构建的基础项目(v2 是最新版本)，致力于连接万物，无论是软件还是硬件，无论是 AI、开源硬件、现实世界的物体、还是虚拟世界的动画角色，在 CodeLab Adapter 的驱动下，皆可彼此互动。
 
-我们的目标是使万物积木化。 这是一些[演示案例](https://codelab-adapter-docs.codelab.club/user_guide/gallery/)。
+目前，我们在 CodeLab Neverland 中使用 CodeLab Adapter。CodeLab Neverland 是一个由 CodeLab Adapter 驱动的可编程空间，空间里的所有事物皆可编程。
