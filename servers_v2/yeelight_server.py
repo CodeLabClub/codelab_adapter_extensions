@@ -58,7 +58,7 @@ class YeelightNode(AdapterNode):
     def __init__(self):
         super().__init__()
         self.EXTENSION_ID = "eim/yeelight"  # default: eim
-        self.q = queue.Queue()
+        self.q = queue.Queue(maxsize=1)
         self.bulb_ctl = YeeLightController()
 
     def extension_message_handle(self, topic, payload):
