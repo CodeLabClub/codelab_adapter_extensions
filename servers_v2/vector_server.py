@@ -47,7 +47,6 @@ class VectorNode(AdapterNode):
                             "anki_vector": anki_vector,
                             "robot": robot
                         })
-                        # exec(python_code) # 安全性问题
                     except Exception as e:
                         output = e
                     payload["content"] = str(output)

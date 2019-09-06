@@ -29,9 +29,9 @@ class BlenderNode(AdapterNode):
         logger.info(f'python_code: {python_code}')
         # extension_python_kernel.py
         try:
-            with self.stdoutIO() as s:
-                exec(python_code)
-            output = s.getvalue()
+            output = eval(python_code, {"__builtins__": None}, {
+                "bpy": bpy,
+            })
         except Exception as e:
             output = e
         payload["content"] = str(output)
