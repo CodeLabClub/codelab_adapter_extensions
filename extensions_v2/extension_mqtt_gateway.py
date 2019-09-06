@@ -10,7 +10,7 @@ import json
 # from hbmqtt.client import MQTTClient, ClientException
 # from hbmqtt.mqtt.constants import QOS_1, QOS_2
 
-from codelab_adapter.settings import FROM_MQTT_TOPIC, TO_MQTT_TOPIC
+from codelab_adapter.settings import FROM_MQTT_TOPIC, TO_MQTT_TOPIC, SCRATCH_TOPIC
 from codelab_adapter.core_extension import Extension
 from codelab_adapter.utils import threaded
 import paho.mqtt.client as mqtt
@@ -24,8 +24,8 @@ class MqttGatewayExtension(Extension):
     '''
 
     def __init__(self):
+        super().__init__(external_message_processor=self.external_message_processor)
         self.EXTENSION_ID = "eim/mqtt_gateway"
-        super().__init__()
         self.set_subscriber_topic(TO_MQTT_TOPIC)  # sub zmq message
         self.mqtt_sub_topics = [FROM_MQTT_TOPIC]
 
@@ -48,26 +48,26 @@ class MqttGatewayExtension(Extension):
         self.client.loop_stop()
         self.terminate()
 
-    def extension_message_handle(self, topic, payload):
+    def external_message_processor(self, topic, payload):
         '''
         zmq -> mqtt
         注意 进出消息格式不同
 
-        Q: 无法进入这里吧， 这里要求extension_id一致
+        设计: 将Scratch的消息都转发？允许mqtt client handle
         '''
         if topic == TO_MQTT_TOPIC:
             self.logger.info(topic, payload)
             payload = json.dumps(payload).encode()
-            self.client.publish(topic, payload)
+            self.client.publish(TO_MQTT_TOPIC, payload)
 
-    def mqtt_on_connect(self, client, userdata, flags, rc):
-        self.logger.info(
-            "MQTT Gateway Connected to MQTT {}:{} with result code {}.".format(
-                self.mqtt_addr, self.mqtt_port, str(rc)))
-        # when mqtt is connected to subscribe to mqtt topics
-        if self.mqtt_sub_topics:
-            for sub in self.mqtt_sub_topics:
-                self.client.subscribe(sub)
+        if topic == SCRATCH_TOPIC:
+            '''
+            转发scratch消息
+            '''
+            zmq_message = {}
+            zmq_message["zmq_topic"] = SCRATCH_TOPIC
+            zmq_message["zmq_payload"] = payload
+            self.client.publish(TO_MQTT_TOPIC, json.dumps(zmq_message).encode())
 
     def mqtt_on_message(self, client, userdata, msg):
         '''
@@ -82,6 +82,15 @@ class MqttGatewayExtension(Extension):
             zmq_payload = payload["zmq_payload"]
             self.logger.info(f'mqtt topic:{topic} payload: {payload}')
             self.publish_payload(zmq_payload, zmq_topic)
+    
+    def mqtt_on_connect(self, client, userdata, flags, rc):
+        self.logger.info(
+            "MQTT Gateway Connected to MQTT {}:{} with result code {}.".format(
+                self.mqtt_addr, self.mqtt_port, str(rc)))
+        # when mqtt is connected to subscribe to mqtt topics
+        if self.mqtt_sub_topics:
+            for sub in self.mqtt_sub_topics:
+                self.client.subscribe(sub)
 
     def run(self):
 

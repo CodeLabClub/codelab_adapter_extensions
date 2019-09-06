@@ -13,13 +13,12 @@ class WechatGateway(Extension):
     def __init__(self):
         super().__init__()
         self.EXTENSION_ID = "eim/wechat"
-        self.quit_code = "quit!"
 
     def extension_message_handle(self, topic, payload):
         '''
         使用scratch发送微信消息
         '''
-        print(topic, payload)
+        self.logger.debug(f"wechat message {payload['content']}")
         username = payload["username"]
         text = payload["content"]
         type = payload.get("type")

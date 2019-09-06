@@ -78,7 +78,7 @@ class UsbMicrobitProxy(Extension):
                 except:
                     pass
             finally:
-                rate = 20
+                rate = 10
                 time.sleep(1/rate)
 
 
