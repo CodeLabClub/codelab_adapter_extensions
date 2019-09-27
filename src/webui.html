@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<!--
+vue: 
+    https://cn.vuejs.org/v2/guide/list.html
+
+websocket: 
+    https://codepen.io/louisjordan/pen/NggLBQ
+    https://www.jianshu.com/p/9d8b2e42328c
+-->
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <script src="/static/vue.min.js"></script>
+        <script src="/static/socket.io.slim.js"></script>
+        <link rel="stylesheet" href="/static/normalize.css" />
+        <link rel="stylesheet" href="/static/element-ui_2_12_0_index.css" />
+        <script src="/static/element-ui_2_12_0_index.js"></script>
+        <link rel="shortcut icon" href="/static/favicon.ico" />
+        <title>CodeLab Adapter Web UI</title>
+        <style>
+            * {
+                box-sizing: border-box;
+            }
+            body {
+                background-color: white;
+            }
+            section {
+                text-align: center;
+                min-width: 500px;
+            }
+            header {
+                padding: 20px 0;
+                background-color: #4e97fe;
+                color: white;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+                box-shadow: 0px 1px 4px 1px rgba(0, 0, 0, 0.35);
+            }
+            header div.container {
+                width: 500px;
+                margin: 0 auto;
+            }
+            div.links {
+                display: flex;
+                justify-content: center;
+                margin-top: 15px;
+            }
+            div.link a {
+                font-size: 13px;
+                color: white;
+                margin: 0 12px;
+            }
+            div.extensions {
+                padding-top: 10px;
+            }
+            div.extension {
+                margin: 0 auto;
+                width: 500px;
+                padding: 5px 90px;
+                display: flex;
+                justify-content: space-between;
+            }
+        </style>
+    </head>
+    <body>
+        <section id="app">
+            <header>
+                <div class="container">
+                    <h2>CodeLab Adapter v2 Web UI</h2>
+                    <p>status: {{ status }}</p>
+                    <p>version: {{ version }}</p>
+                    <el-button round v-on:click="exit_adapter_app"
+                        >exit</el-button
+                    >
+                    <div class="links">
+                        <div class="link" v-for="(url, link_name) in links">
+                            <a target="_blank" :href="url">{{ link_name }}</a>
+                        </div>
+                    </div>
+                </div>
+            </header>
+            <div id="extension-list">
+                <div class="extensions">
+                    <div
+                        class="extension"
+                        v-for="(statu, extension) in extensions_statu"
+                    >
+                        <label for="extension">{{ extension }} </label>
+                        <el-switch
+                            id="extension"
+                            @change="check($event, extension)"
+                            v-model="extensions_statu[extension]"
+                        >
+                        </el-switch>
+                    </div>
+                </div>
+                <ul id="logs">
+                    <li v-for="log in logs.slice().reverse()" class="log">
+                        {{ log.event }}: {{ log.data }}
+                    </li>
+                </ul>
+            </div>
+        </section>
+        <script>
+            const ADAPTER_TOPIC = "adapter/extensions/data";
+            const SCRATCH_TOPIC = "scratch/extensions/command";
+            const EXTENSIONS_OPERATE_TOPIC = "core/extensions/operate";
+            const NODES_OPERATE_TOPIC = "core/nodes/operate";
+            const EXTENSIONS_STATUS_TOPIC = "core/extensions/status";
+            const ADAPTER_STATUS_TOPIC = "core/status";
+            const EXTENSIONS_STATUS_TRIGGER_TOPIC =
+                "core/extensions/status/trigger";
+            const EXTENSION_STATU_CHANGE_TOPIC = "core/extension/statu/change";
+            const NOTIFICATION_TOPIC = "core/notification";
+
+            const EXTENSION_ID = "eim";
+            const extensions_bar = new Vue({
+                el: "#app",
+                data: {
+                    logs: [],
+                    status: "disconnected", // connected
+                    version: "",
+                    //checkedExtensions: [],
+                    //extensions: ["extension_eim", "extension_eim2"],
+                    extensions_statu: {},
+                    links: {
+                        webdebug: "/webdebug",
+                        "view log": "/web_log_page",
+                        scratch3: "https://scratch3v2.codelab.club"
+                    }
+                },
+                methods: {
+                    exit_adapter_app: function(event) {
+                        let turn = "stop";
+                        const message = {
+                            topic: NODES_OPERATE_TOPIC,
+                            payload: {
+                                content: turn,
+                                extension_id: "adapter/app"
+                            }
+                        };
+                        this.socket.emit("actuator", message);
+                    },
+                    check: function(state, extension) {
+                        // console.log(`${e.target.value} ${e.target.checked}`);
+                        console.log(`${extension} ${state}`);
+                        const extension_name = extension;
+                        let turn;
+                        if (state === true) {
+                            turn = "start";
+                            console.log("start");
+                        } else {
+                            turn = "stop";
+                            console.log("stop");
+                        }
+
+                        const message = {
+                            topic: EXTENSIONS_OPERATE_TOPIC,
+                            payload: {
+                                content: turn,
+                                extension_id: EXTENSION_ID,
+                                extension_name: extension_name
+                            }
+                        };
+                        this.socket.emit("actuator", message);
+                    },
+                    connect() {
+                        const url = new URL(window.location.href);
+                        var adapterHost = url.searchParams.get("adapter_host"); // 支持树莓派(分布式使用)
+                        if (!adapterHost) {
+                            var adapterHost = url.hostname;
+                        }
+
+                        this.socket = io(`//${adapterHost}:12358` + "/test", {
+                            transports: ["websocket"]
+                        });
+
+                        this.socket.on("connect", () => {
+                            // 触发一次发布插件状态的请求
+
+                            const message = {
+                                topic: EXTENSIONS_STATUS_TRIGGER_TOPIC,
+                                payload: {
+                                    content: "EXTENSIONS_STATUS_TRIGGER_TOPIC"
+                                }
+                            };
+                            this.socket.emit("actuator", message);
+                            this.status = "connected!";
+                        });
+                        this.socket.on("disconnect", reason => {
+                            this.status = `disconnect! ${reason}`;
+                        });
+                        // onconnect: status
+                        // socket.emit("actuator", { topic: "eim", message: text.message });
+                        this.extensions_statu = {};
+                        const status_checked_map = { start: true, stop: false };
+                        this.socket.on("sensor", msg => {
+                            console.log("recv:", msg.message);
+                            if (
+                                msg.message.topic ===
+                                EXTENSION_STATU_CHANGE_TOPIC
+                            ) {
+                                // todo 开始主动获取一次
+                                // update extension status(start/stop  open/close)
+                                const extension_name =
+                                    msg.message.payload.extension_name;
+                                const content = msg.message.payload.content;
+                                this.extensions_statu[extension_name] =
+                                    status_checked_map[content];
+                                console.log(
+                                    `${extension_name} statu change to ${content}`
+                                );
+
+                                // update extension status. start/stop
+                            }
+
+                            if (msg.message.topic === EXTENSIONS_STATUS_TOPIC) {
+                                const content = msg.message.payload.content;
+                                this.extensions_statu = content;
+                            }
+                            if (msg.message.topic === NOTIFICATION_TOPIC) {
+                                const content = msg.message.payload.content;
+                                console.log("notification:", content);
+                                alert(content);
+                            }
+                            if (msg.message.topic === ADAPTER_STATUS_TOPIC) {
+                                const content = msg.message.payload.content;
+                                console.log("adapter info:", content);
+                                this.version = content.version;
+                            }
+
+                            /*
+              this.logs.push({
+                event: "receive message",
+                data: msg.message
+              });
+              */
+                        });
+                    }
+                },
+                created: function() {
+                    // init
+                    this.connect();
+                }
+            });
+        </script>
+    </body>
+</html>

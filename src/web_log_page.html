@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>view log</title>
+
+        <script src="https://cdn.bootcss.com/socket.io/2.2.0/socket.io.slim.js"></script>
+        <link
+            href="https://cdn.bootcss.com/codemirror/5.19.0/codemirror.css"
+            rel="stylesheet"
+        />
+        <script src="https://cdn.bootcss.com/codemirror/5.19.0/codemirror.js"></script>
+        <link
+            href="https://cdn.bootcss.com/codemirror/5.19.0/theme/solarized.min.css"
+            rel="stylesheet"
+        />
+    </head>
+    <body>
+        <h2><center>view log</center></h2>
+        <p><center style="margin: 15px">新消息出现在顶部(往下滚动)</center></p>
+        <p>grep: <input id="grep" type="text" name="FirstName" value="" /></p>
+        <div id="console"></div>
+        <script>
+            consoleCodeMirror = CodeMirror(document.getElementById("console"), {
+                //lineNumbers: true,
+                styleActiveLine: true,
+                value: "//Message from codelab-adapter",
+                mode: "javascript" //json
+            });
+            var theme = "solarized dark";
+            consoleCodeMirror.setOption("theme", theme);
+
+            // 监听外部事件
+            function put_console(codeMirror, message) {
+                var now = new Date().toLocaleString();
+                var newcode = ` ${now}  ${message}\n${codeMirror.getValue()}`;
+                codeMirror.setValue(newcode);
+                // window.codeMirror = consoleCodeMirror;
+            }
+
+            //  todo 与当前域名一致
+            const url = new URL(window.location.href);
+            var adapterHost = url.searchParams.get("adapter_host"); // 支持树莓派(分布式使用)
+            if (!adapterHost) {
+                var adapterHost = url.hostname;
+            }
+
+            socket = io(`//${adapterHost}:12358` + "/all_zmq_message", {
+                transports: ["websocket"]
+            });
+            // socket.emit("actuator", { topic: "eim", message: text.message });
+            socket.on("view_log", msg => {
+                // console.log(msg.message); // ok
+                var string_message = JSON.stringify(msg.message);
+                console.log(string_message);
+                var grep = document.getElementById("grep").value;
+                window.grep = grep;
+                window.string_message = string_message;
+                if (!grep) {
+                    // 如果没有grep条件，则打印全部
+                    put_console(consoleCodeMirror, string_message);
+                    return;
+                }
+
+                if (string_message.includes(grep)) {
+                    // 如果有grep条件，打印过滤之后的
+                    put_console(consoleCodeMirror, string_message);
+                    return;
+                }
+            });
+        </script>
+    </body>
+</html>

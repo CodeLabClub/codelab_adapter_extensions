@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+        <title>Message Browser</title>
+        <link
+            href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"
+            rel="stylesheet"
+        />
+        <script src="https://cdn.bootcss.com/jquery/3.1.1/jquery.min.js"></script>
+        <script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <!--need jquery-->
+
+        <script src="https://cdn.bootcss.com/socket.io/2.2.0/socket.io.slim.js"></script>
+        <link
+            href="https://cdn.bootcss.com/codemirror/5.19.0/codemirror.css"
+            rel="stylesheet"
+        />
+        <script src="https://cdn.bootcss.com/codemirror/5.19.0/codemirror.js"></script>
+        <link
+            href="https://cdn.bootcss.com/codemirror/5.19.0/theme/solarized.min.css"
+            rel="stylesheet"
+        />
+        <script src="https://cdn.bootcss.com/codemirror/5.19.0/mode/python/python.min.js"></script>
+    </head>
+    <!--edit ~/codelab_adapter/src/message_browser.html 实时生效-->
+    <body>
+        <!--标签页 不同message + console-->
+
+        <div class="container-fluid">
+            <div class="row-fluid">
+                <div class="span12"><h3>Message from codelab-adapter</h3></div>
+                <div
+                    style="margin-top:10px"
+                    class="alert alert-info"
+                    role="alert"
+                >
+                    新消息出现在顶部(往下滚动)
+                </div>
+                <div class="span12"><div id="console"></div></div>
+            </div>
+            <hr />
+            <div class="row-fluid" style="margin: 10px">
+                <div class="span12"><h3>Message to codelab-adapter</h3></div>
+                <div class="span12">
+                    <div class="tabbable" id="tabs-604082">
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a href="#panel-456287" data-toggle="tab"
+                                    >eim</a
+                                >
+                            </li>
+                            <li>
+                                <a href="#panel-943211" data-toggle="tab"
+                                    >eim/python</a
+                                >
+                            </li>
+                            <li>
+                                <a href="#panel-943212" data-toggle="tab"
+                                    >REST API</a
+                                >
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="panel-456287">
+                                <div
+                                    style="margin-top:10px"
+                                    class="alert alert-info"
+                                    role="alert"
+                                >
+                                    可用于发送任何消息
+                                </div>
+                                <input
+                                    id="eim_input"
+                                    class="form-control form-control-lg"
+                                    type="text"
+                                    placeholder="input message"
+                                    style="margin-top:10px"
+                                    value="{&quot;topic&quot;:&quot;from_scratch/extensions&quot;,&quot;payload&quot;:{&quot;content&quot;: &quot;message&quot;, &quot;extension_id&quot;: &quot;eim&quot;}}"
+                                />
+                                <!--html 转义 https://www.sojson.com/rehtml-->
+                                <button
+                                    style="margin-top:5px"
+                                    class="btn btn-info"
+                                    type="button"
+                                    onclick="send_eim_message()"
+                                >
+                                    broadcast
+                                </button>
+                            </div>
+                            <div class="tab-pane" id="panel-943211">
+                                <div
+                                    style="margin-top:10px"
+                                    class="alert alert-info"
+                                    role="alert"
+                                >
+                                    使用时请打开extension_python_kernel插件
+                                </div>
+
+                                <div class="span12">
+                                    <div id="code_playgroud"></div>
+                                    <button
+                                        style="margin-top:5px"
+                                        class="btn btn-info"
+                                        type="button"
+                                        onclick="send_python_code()"
+                                    >
+                                        broadcast
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="tab-pane" id="panel-943212">
+                                <div
+                                    style="margin-top:10px"
+                                    class="alert alert-info"
+                                    role="alert"
+                                >
+                                        <pre>
+var xhr = new XMLHttpRequest();
+var url = "https://codelab-adapter.codelab.club:12358/api/message"
+xhr.open("POST", url, true);
+var sendData = {"topic":"from_scratch/extensions","payload":{"content": "REST API", "extension_id": "eim"}};
+xhr.setRequestHeader('content-type', 'application/json');
+xhr.send(JSON.stringify(sendData));
+                                        </pre>
+                                </div>
+
+                                <input
+                                    id="rest_input"
+                                    class="form-control form-control-lg"
+                                    type="text"
+                                    placeholder="input message"
+                                    style="margin-top:10px"
+                                    value="{&quot;topic&quot;:&quot;from_scratch/extensions&quot;,&quot;payload&quot;:{&quot;content&quot;: &quot;REST API&quot;, &quot;extension_id&quot;: &quot;eim&quot;}}"
+                                />
+                                <button
+                                    style="margin-top:5px"
+                                    class="btn btn-info"
+                                    type="button"
+                                    onclick="send_rest_api()"
+                                >
+                                    broadcast
+                                </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            /*
+    const url = new URL(window.location.href);
+    var adapterHost = url.searchParams.get("adapter_host");
+    if (!adapterHost) {
+      var adapterHost = "codelab-adapter.codelab.club";
+    }
+
+    this.socket = io(`//${adapterHost}:12358` + "/test", {
+      transports: ["websocket"]
+    });
+    */
+            const SCRATCH_TOPIC = "from_scratch/extensions"
+            pythonCodeMirror = CodeMirror(
+                document.getElementById("code_playgroud"),
+                {
+                    lineNumbers: true,
+                    styleActiveLine: true,
+                    value: "print('hello world')",
+                    mode: "python"
+                }
+            );
+            var theme = "solarized dark";
+            pythonCodeMirror.setOption("theme", theme);
+
+            consoleCodeMirror = CodeMirror(document.getElementById("console"), {
+                //lineNumbers: true,
+                styleActiveLine: true,
+                value: "//Message from codelab-adapter",
+                mode: "javascript" //json
+            });
+            var theme = "solarized dark";
+            consoleCodeMirror.setOption("theme", theme);
+
+            // 监听外部事件
+            function put_console(codeMirror, message) {
+                var now = new Date().toLocaleString();
+                var newcode = ` ${now}  ${message}\n${codeMirror.getValue()}`;
+                codeMirror.setValue(newcode);
+                // window.codeMirror = consoleCodeMirror;
+            }
+            const url = new URL(window.location.href);
+            var adapterHost = url.searchParams.get("adapter_host"); // 支持树莓派(分布式使用)
+            if (!adapterHost) {
+              var adapterHost = url.hostname;
+            }
+
+            var socket = io(`//${adapterHost}:12358` + "/test", {
+              transports: ["websocket"]
+            });
+            // socket.emit("actuator", { topic: "eim", message: text.message });
+            socket.on("sensor", msg => {
+                console.log(msg);
+                put_console(consoleCodeMirror, JSON.stringify(msg.message));
+            });
+
+            function send_python_code() {
+                const extension_id = "eim/python";
+                const code = pythonCodeMirror.getValue();
+                const content = code;
+                console.log("python code:\n", code);
+                socket.emit("actuator", { topic: SCRATCH_TOPIC, payload: {content: content,extension_id: extension_id} });
+            }
+            function send_rest_api(){
+                var rest_input = document.getElementById("rest_input").value;
+                var xhr = new XMLHttpRequest();
+                var url = `//${adapterHost}:12358/api/message`
+                xhr.open("POST", url, true);
+                // var sendData = {topic: "eim", payload: "hello"};
+                xhr.setRequestHeader('content-type', 'application/json');
+                //xhr.send(JSON.stringify(sendData));
+                xhr.send(rest_input);
+            }
+
+            function send_eim_message() {
+                //
+                var payload = document.getElementById("eim_input").value;
+                window.message = payload;
+                console.log("eim payload", payload);
+                socket.emit("actuator", JSON.parse(payload));
+            }
+        </script>
+    </body>
+</html>
