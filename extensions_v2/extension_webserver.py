@@ -1,17 +1,30 @@
 '''
 使用aiohttp
 todo 使用bottle
-''' 
+todo webhook
+'''
 
-import time
+import time, socket
 from codelab_adapter.core_extension import Extension
 from codelab_adapter.utils import threaded
 import webbrowser
 from bottle import route, run, template
+# queue
+import queue
+q = queue.Queue()
 
-@route('/hello/<name>')
+@route('/webserver/hello')
 def index(name):
-    return template('<b>Hello {{name}}</b>!', name=name)
+    html = '''
+    ok!
+    '''
+    if name == "hello":
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        html = "\nok!<p>IP:" + s.getsockname()[0] + "</p>\n"
+    # if name == "wand":
+    q.put(name)
+    return template(html, name=name)
 
 class WebServerExtension(Extension):
     def __init__(self):
@@ -26,8 +39,12 @@ class WebServerExtension(Extension):
     def run(self):
         self.run_webserver_as_thread()
         time.sleep(0.5)
-        webbrowser.open(f'http://127.0.0.1:{self.port}/hello/bottle')
+        webbrowser.open(f'http://127.0.0.1:{self.port}/webserver/hello')
         while self._running:
-            time.sleep(1)
+            message_web = q.get()
+            message = self.message_template()
+            message["payload"]["content"] = message_web
+            self.publish(message)
+
 
 export = WebServerExtension
