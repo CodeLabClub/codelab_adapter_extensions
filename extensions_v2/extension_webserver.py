@@ -1,6 +1,5 @@
 '''
-使用aiohttp
-todo 使用bottle
+todo 使用 bottle
 todo webhook
 '''
 
@@ -13,18 +12,17 @@ from bottle import route, run, template
 import queue
 q = queue.Queue()
 
-@route('/webserver/hello')
-def index(name):
+@route('/webserver/<message>')
+def index(message):
     html = '''
     ok!
     '''
-    if name == "hello":
+    if message == "hello":
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
         html = "\nok!<p>IP:" + s.getsockname()[0] + "</p>\n"
-    # if name == "wand":
-    q.put(name)
-    return template(html, name=name)
+    q.put(message)
+    return template(html, name=message)
 
 class WebServerExtension(Extension):
     def __init__(self):
