@@ -37,7 +37,7 @@ class VectorNode(AdapterNode):
                 time.sleep(0.05)
                 if not self.q.empty():
                     payload = self.q.get()
-                    self.logger.info(f'python: {payload}')
+                    self.logger.info('python: {payload}')
                     message_id = payload.get("message_id")
                     python_code = payload["content"]
 
