@@ -8,9 +8,12 @@ from codelab_adapter.core_extension import Extension
 from codelab_adapter.utils import verify_token
 from codelab_adapter.settings import TOKEN
 
-# 安全性原则: 打开这个插件前，提醒社区用户确认积木中没有危险的Python代码， 允许社区成员举报危险代码
-# 在EIM中运行Python代码，通用
-
+'''
+当前插件只允许运行表达式
+如果你希望执行任意python代码，请使用: https://github.com/CodeLabClub/codelab_adapter_extensions/blob/master/extensions_v2/extension_python_kernel_exec.py，注意风险
+安全性原则: 打开这个插件前，提醒社区用户确认积木中没有危险的Python代码， 允许社区成员举报危险代码
+在EIM中运行Python代码，通用
+'''
 
 class PyHelper:
     def open_url(self, url):
@@ -36,6 +39,24 @@ class PythonKernelExtension(Extension):
         yield stdout
         sys.stdout = old
 
+    def run_python_code(self, code):
+        '''
+        mode
+            1  exec
+            2  eval
+            3  pass
+        '''
+        try:
+            # 出于安全考虑, 放弃使用exec，如果需要，可以自行下载exec版本
+            # eval(expression, globals=None, locals=None)
+            # 如果只是调用(插件指责）可以使用json-rpc
+            output = eval(code, {"__builtins__": None}, {
+                "PyHelper": self.PyHelper,
+            })
+        except Exception as e:
+            output = e
+        return output
+
     @verify_token
     def extension_message_handle(self, topic, payload):
         '''
@@ -44,16 +65,7 @@ class PythonKernelExtension(Extension):
         self.logger.info(f'python code: {payload["content"]}')
         message_id = payload.get("message_id")
         python_code = payload["content"]
-
-        try:
-            # 出于安全考虑, 放弃使用exec，如果需要，可以自行下载exec版本
-            # eval(expression, globals=None, locals=None)
-            # 如果只是调用(插件指责）可以使用json-rpc
-            output = eval(python_code, {"__builtins__": None}, {
-                "PyHelper": self.PyHelper,
-            })
-        except Exception as e:
-            output = e
+        output = self.run_python_code(python_code)
         payload["content"] = str(output)
         message = {"payload": payload}  # 无论是否有message_id都返回
         self.publish(message)

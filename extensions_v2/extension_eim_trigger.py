@@ -3,9 +3,6 @@ import importlib, sys
 from codelab_adapter import settings
 from codelab_adapter.core_extension import Extension
 import zmq
-'''
-检测文件是否存在 不存在就创建 都在插件里做
-'''
 
 
 class EimTriggerExtension(Extension):
@@ -18,7 +15,7 @@ class EimTriggerExtension(Extension):
         try:
             importlib.import_module(module_name)
         except Exception as e:
-            self.pub_notification(f'{e}')
+            self.pub_notification(f'{e}', type="ERROR")
             return
         module = sys.modules[module_name]
         importlib.reload(module)
@@ -33,7 +30,7 @@ class EimTriggerExtension(Extension):
                     message = {"payload": {"content": response}}
                     self.publish(message)
             except zmq.error.ZMQError as e:
-                self.logger.error(f'{e}') # 终止之后 发不出消息
+                self.logger.error(f'{e}')
             except Exception as e:
                 self.logger.error(f'{e}')
                 # self.pub_notification(f'{e}')

@@ -13,9 +13,9 @@ def check_env():
 
 class MicrobitRadioProxy(Extension):
     def __init__(self):
-        name = type(self).__name__
-        super().__init__(name)
+        super().__init__()
         self.EXTENSION_ID = "eim/radioMicrobit"
+        
         self.q = queue.Queue()
         self.bucket = TokenBucket(10, 5)  # rate limit
 
@@ -36,7 +36,7 @@ class MicrobitRadioProxy(Extension):
             # 等待用户连接microbit
             if not env_is_valid:
                 self.logger.info("错误信息: %s", "请插入microbit")
-                self.pub_notification("请插入microbit")
+                self.pub_notification("请插入microbit", type="ERROR")
                 time.sleep(5)
             else:
                 port = find_microbit()

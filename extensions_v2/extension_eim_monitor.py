@@ -7,9 +7,6 @@ import queue
 
 class EimMonitorExtension(Extension):
     def __init__(self):
-        '''
-        参考 home assistant
-        '''
         super().__init__()
         self.EXTENSION_ID = "eim"
         self.q = queue.Queue()
@@ -22,7 +19,7 @@ class EimMonitorExtension(Extension):
         try:
             importlib.import_module(module_name)
         except Exception as e:
-            self.pub_notification(f'{e}')
+            self.pub_notification(f'{e}', type="ERROR")
             return
         module = sys.modules["eim_monitor"]
         importlib.reload(module)

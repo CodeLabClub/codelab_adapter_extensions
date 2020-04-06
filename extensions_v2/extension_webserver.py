@@ -26,8 +26,7 @@ def index(message):
 
 class WebServerExtension(Extension):
     def __init__(self):
-        name = type(self).__name__  # class name
-        super().__init__(name)
+        super().__init__()
         self.port = 8080
 
     @threaded
