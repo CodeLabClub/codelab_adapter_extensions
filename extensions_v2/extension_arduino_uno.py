@@ -1,7 +1,3 @@
-# https://github.com/MrYsLab/s3-extend/blob/master/s3_extend/gateways/arduino_gateway.pys
-# 作为node运行
-# 上报数据 关注: publish_payload,callback
-# python3.7
 import argparse
 import asyncio
 import logging
@@ -9,8 +5,7 @@ import pathlib
 import sys
 import functools
 
-from codelab_adapter.utils import  TokenBucket
-
+from codelab_adapter.utils import TokenBucket
 
 from pymata_express.private_constants import PrivateConstants
 from pymata_express.pymata_express import PymataExpress
@@ -25,10 +20,12 @@ class ArduinoGateway(GatewayBaseAIO):
 
     # NOTE: This class requires the use of Python 3.7 or above
 
-    # serial_port = None
-
-    def __init__(self, event_loop=None, com_port=None,
-                 arduino_instance_id=None, keep_alive=False, log=True):
+    def __init__(self,
+                 event_loop=None,
+                 com_port=None,
+                 arduino_instance_id=None,
+                 keep_alive=False,
+                 log=True):
         self.bucket = TokenBucket(10, 5)
         self.EXTENSION_ID = "eim/arduino"
         # set the event loop to be used. accept user's if provided
@@ -47,8 +44,9 @@ class ArduinoGateway(GatewayBaseAIO):
                                              com_port=com_port)
             # if user wants to set an instance id, then pass it in
             elif arduino_instance_id:
-                self.arduino = PymataExpress(loop=self.event_loop,
-                                             arduino_instance_id=arduino_instance_id)
+                self.arduino = PymataExpress(
+                    loop=self.event_loop,
+                    arduino_instance_id=arduino_instance_id)
             # default settings
             else:
                 self.arduino = PymataExpress(loop=self.event_loop)
@@ -65,11 +63,10 @@ class ArduinoGateway(GatewayBaseAIO):
 
         # Initialize the parent
         super().__init__()
-        
 
         self.first_analog_pin = self.arduino.first_analog_pin
         self.keep_alive = keep_alive
-        
+
         # self.event_loop.create_task(pub_notification_coroutine)
 
     def init_pins_dictionary(self):
@@ -80,7 +77,8 @@ class ArduinoGateway(GatewayBaseAIO):
 
         NOTE: that this a a non-asyncio method.
         """
-        report = self.event_loop.run_until_complete(self.arduino.get_capability_report())
+        report = self.event_loop.run_until_complete(
+            self.arduino.get_capability_report())
         x = 0
         pin = 0
         while x < len(report):
@@ -98,14 +96,14 @@ class ArduinoGateway(GatewayBaseAIO):
         # set up entry for i2c as pin 200 ( a pseudo pin number)
         self.pins_dictionary[200] = GatewayBaseAIO.DIGITAL_INPUT_MODE
 
-
     async def digital_write(self, topic, payload):
         """
         This method performs a digital write
         :param topic: message topic
         :param payload content: {"command": "digital_write", "pin": “PIN”, "value": “VALUE”}
         """
-        await self.arduino.digital_write(payload['content']["pin"], payload['content']['value'])
+        await self.arduino.digital_write(payload['content']["pin"],
+                                         payload['content']['value'])
 
     async def disable_analog_reporting(self, topic, payload):
         """
@@ -157,7 +155,8 @@ class ArduinoGateway(GatewayBaseAIO):
 
         await self.arduino.i2c_read(payload['content']['addr'],
                                     payload['content']['register'],
-                                    payload['content']['number_of_bytes'], callback=self.i2c_callback)
+                                    payload['content']['number_of_bytes'],
+                                    callback=self.i2c_callback)
 
     async def i2c_write(self, topic, payload):
         """
@@ -172,7 +171,8 @@ class ArduinoGateway(GatewayBaseAIO):
                          "addr": “I2C ADDRESS, "register": “I2C REGISTER”,
                          "data": [“DATA IN LIST FORM”]}
         """
-        await self.arduino.i2c_write(payload['content']['addr'], payload['content']['data'])
+        await self.arduino.i2c_write(payload['content']['addr'],
+                                     payload['content']['data'])
 
     async def play_tone(self, topic, payload):
         """
@@ -198,7 +198,8 @@ class ArduinoGateway(GatewayBaseAIO):
                          "tag":”TAG”,
                           “value”: “VALUE”}
         """
-        await self.arduino.analog_write(payload['content']["pin"], payload['content']['value'])
+        await self.arduino.analog_write(payload['content']["pin"],
+                                        payload['content']['value'])
 
     async def servo_position(self, topic, payload):
         """
@@ -211,7 +212,8 @@ class ArduinoGateway(GatewayBaseAIO):
                          "pin": “PIN”,'tag': 'servo',
                         “position”: “POSITION”}
         """
-        await self.arduino.servo_write(payload['content']["pin"], payload['content']["position"])
+        await self.arduino.servo_write(payload['content']["pin"],
+                                       payload['content']["position"])
 
     async def set_mode_analog_input(self, topic, payload):
         """
@@ -222,7 +224,8 @@ class ArduinoGateway(GatewayBaseAIO):
         pin = payload['content']["pin"]
         self.pins_dictionary[pin + self.first_analog_pin][GatewayBaseAIO.PIN_MODE] = \
             GatewayBaseAIO.ANALOG_INPUT_MODE
-        await self.arduino.set_pin_mode_analog_input(pin, self.analog_input_callback)
+        await self.arduino.set_pin_mode_analog_input(
+            pin, self.analog_input_callback)
 
     async def set_mode_digital_input(self, topic, payload):
         """
@@ -231,8 +234,10 @@ class ArduinoGateway(GatewayBaseAIO):
         :param payload content: {"command": "set_mode_digital_input", "pin": “PIN”, "tag":”TAG” }
         """
         pin = payload['content']["pin"]
-        self.pins_dictionary[pin][GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.DIGITAL_INPUT_MODE
-        await self.arduino.set_pin_mode_digital_input(pin, self.digital_input_callback)
+        self.pins_dictionary[pin][
+            GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.DIGITAL_INPUT_MODE
+        await self.arduino.set_pin_mode_digital_input(
+            pin, self.digital_input_callback)
 
     async def set_mode_digital_input_pullup(self, topic, payload):
         """
@@ -241,8 +246,10 @@ class ArduinoGateway(GatewayBaseAIO):
         :param payload content: message payload
         """
         pin = payload['content']["pin"]
-        self.pins_dictionary[pin][GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.DIGITAL_INPUT_PULLUP_MODE
-        await self.arduino.set_pin_mode_digital_input_pullup(pin, self.digital_input_callback)
+        self.pins_dictionary[pin][
+            GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.DIGITAL_INPUT_PULLUP_MODE
+        await self.arduino.set_pin_mode_digital_input_pullup(
+            pin, self.digital_input_callback)
 
     async def set_mode_digital_output(self, topic, payload):
         """
@@ -251,7 +258,8 @@ class ArduinoGateway(GatewayBaseAIO):
         :param payload content: {"command": "set_mode_digital_output", "pin": PIN, "tag":”TAG” }
         """
         pin = payload['content']["pin"]
-        self.pins_dictionary[pin][GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.DIGITAL_OUTPUT_MODE
+        self.pins_dictionary[pin][
+            GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.DIGITAL_OUTPUT_MODE
         await self.arduino.set_pin_mode_digital_output(pin)
 
     async def set_mode_i2c(self, topic, payload):
@@ -260,7 +268,8 @@ class ArduinoGateway(GatewayBaseAIO):
         :param topic: message topic
         :param payload content: {"command": "set_mode_i2c"}
         """
-        self.pins_dictionary[200][GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.I2C_MODE
+        self.pins_dictionary[200][
+            GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.I2C_MODE
         await self.arduino.set_pin_mode_i2c()
 
     async def set_mode_pwm(self, topic, payload):
@@ -270,7 +279,8 @@ class ArduinoGateway(GatewayBaseAIO):
         :param payload content: {"command": "set_mode_pwm", "pin": “PIN”, "tag":”TAG” }
         """
         pin = payload['content']["pin"]
-        self.pins_dictionary[pin][GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.PWM_OUTPUT_MODE
+        self.pins_dictionary[pin][
+            GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.PWM_OUTPUT_MODE
         await self.arduino.set_pin_mode_pwm(pin)
 
     async def set_mode_servo(self, topic, payload):
@@ -280,7 +290,8 @@ class ArduinoGateway(GatewayBaseAIO):
         :param payload content: {"command": "set_mode_servo", "pin": “PIN”, "tag":”TAG” }
         """
         pin = payload['content']["pin"]
-        self.pins_dictionary[pin][GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.SERVO_MODE
+        self.pins_dictionary[pin][
+            GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.SERVO_MODE
         await self.arduino.set_pin_mode_servo(pin)
 
     async def set_mode_sonar(self, topic, payload):
@@ -293,10 +304,14 @@ class ArduinoGateway(GatewayBaseAIO):
 
         trigger = payload['content']["trigger_pin"]
         echo = payload['content']["echo_pin"]
-        self.pins_dictionary[trigger][GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.SONAR_MODE
-        self.pins_dictionary[echo][GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.SONAR_MODE
+        self.pins_dictionary[trigger][
+            GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.SONAR_MODE
+        self.pins_dictionary[echo][
+            GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.SONAR_MODE
 
-        await self.arduino.set_pin_mode_sonar(trigger, echo, cb=self.sonar_callback)
+        await self.arduino.set_pin_mode_sonar(trigger,
+                                              echo,
+                                              cb=self.sonar_callback)
 
     async def set_mode_stepper(self, topic, payload):
         """
@@ -307,9 +322,11 @@ class ArduinoGateway(GatewayBaseAIO):
                         "steps_per_revolution": “NUMBER OF STEPS”}
         """
         for pin in payload['content']['pins']:
-            self.pins_dictionary[pin][GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.STEPPER_MODE
-        await self.arduino.set_pin_mode_stepper(payload['content']['steps_per_revolution'],
-                                                payload['content']['pins'])
+            self.pins_dictionary[pin][
+                GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.STEPPER_MODE
+        await self.arduino.set_pin_mode_stepper(
+            payload['content']['steps_per_revolution'],
+            payload['content']['pins'])
 
     async def set_mode_tone(self, topic, payload):
         """
@@ -318,7 +335,8 @@ class ArduinoGateway(GatewayBaseAIO):
         :param payload content:{"command": "set_mode_tone", "pin": “PIN”, "tag":”TAG” }
         """
         pin = payload['content']["pin"]
-        self.pins_dictionary[pin][GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.TONE_MODE
+        self.pins_dictionary[pin][
+            GatewayBaseAIO.PIN_MODE] = GatewayBaseAIO.TONE_MODE
         await self.arduino.set_pin_mode_tone(pin)
 
     async def stepper_write(self, topic, payload):
@@ -340,18 +358,27 @@ class ArduinoGateway(GatewayBaseAIO):
         """
         # data = [pin, current reported value, pin_mode, timestamp]
         self.pins_dictionary[data[0]][GatewayBaseAIO.LAST_VALUE] = data[1]
-        
+
         message = self.message_template()
-        message["payload"]["content"] = {'report': 'digital_input', 'pin': data[0],
-                   'value': data[1], 'timestamp': data[3]}
+        message["payload"]["content"] = {
+            'report': 'digital_input',
+            'pin': data[0],
+            'value': data[1],
+            'timestamp': data[3]
+        }
         await self.publish_with_tokenbucket(message)
 
     async def analog_input_callback(self, data):
         # data = [pin, current reported value, pin_mode, timestamp]
-        self.pins_dictionary[data[0] + self.arduino.first_analog_pin][GatewayBaseAIO.LAST_VALUE] = data[1]
+        self.pins_dictionary[data[0] + self.arduino.first_analog_pin][
+            GatewayBaseAIO.LAST_VALUE] = data[1]
         message = self.message_template()
-        message["payload"]["content"] = {'report': 'analog_input', 'pin': data[0],
-                   'value': data[1], 'timestamp': data[3]}
+        message["payload"]["content"] = {
+            'report': 'analog_input',
+            'pin': data[0],
+            'value': data[1],
+            'timestamp': data[3]
+        }
         await self.publish_with_tokenbucket(message)
 
     async def i2c_callback(self, data):
@@ -377,7 +404,10 @@ class ArduinoGateway(GatewayBaseAIO):
         """
         self.pins_dictionary[data[0]][GatewayBaseAIO.LAST_VALUE] = data[1]
         message = self.message_template()
-        message["payload"]["content"] = {'report': 'sonar_data', 'value': data[1]}
+        message["payload"]["content"] = {
+            'report': 'sonar_data',
+            'value': data[1]
+        }
         await self.publish_with_tokenbucket(message)
 
     def my_handler(self, tp, value, tb):
@@ -390,7 +420,7 @@ class ArduinoGateway(GatewayBaseAIO):
         """
         self.logger.exception("Uncaught exception: {0}".format(str(value)))
 
-    async def publish_with_tokenbucket(self,message):
+    async def publish_with_tokenbucket(self, message):
         if self.bucket.consume(1):
             await self.publish(message)
 
@@ -402,37 +432,30 @@ class ArduinoGateway(GatewayBaseAIO):
         if self.keep_alive:
             await self.arduino.keep_alive()
         # sit in an endless loop to receive protocol messages
-        await self.receive_loop() # pub_notification should after receive_loop
+        await self.receive_loop()  # pub_notification should after receive_loop
         # 在此之后才能发送，publisher先建立起来，消息可以后发
+
     # The following methods and are called
     # by the gateway base class in its incoming_message_processing
     # method. They overwrite the default methods in the gateway_base.
-
 
     # noinspection DuplicatedCode
     def run(self):
         # get the event loop
         # this is for python 3.8
         if sys.platform == 'win32':
-            asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+            asyncio.set_event_loop_policy(
+                asyncio.WindowsSelectorEventLoopPolicy())
 
-        # loop = asyncio.get_event_loop()
-
-
-        # replace with the name of your class
-        # app = ArduinoGateway(event_loop=loop)
-        # app.pub_notification("Arduino found and connected to port!")
         try:
-            # 0.5秒后发，如果成功的话
-            self.event_loop.create_task(self.pub_notification(f'Arduino UNO Connected!', type="SUCCESS"))
-            self.event_loop.run_until_complete(self.main()) # thread 之后才允许通信
+            self.event_loop.create_task(
+                self.pub_notification(f'Arduino UNO Connected!',
+                                      type="SUCCESS"))
+            self.event_loop.run_until_complete(self.main())
             self.logger.debug("arduino thread end")
             self.event_loop.run_until_complete(self.arduino.shutdown())
         except (KeyboardInterrupt, asyncio.CancelledError, RuntimeError):
             pass
-            # self.event_loop.stop()
-            # self.event_loop.close()
-            # sys.exit(0)
 
 
 export = ArduinoGateway
