@@ -13,7 +13,7 @@ from codelab_adapter_client import AdapterNode
 class HCINode(AdapterNode):
     '''
     Everything Is Message
-    ref: https://github.com/Scratch3Lab/codelab_adapter_extensions/blob/master/extensions_v2/extension_python_kernel.py
+    ref: https://github.com/CodeLabClub/codelab_adapter_extensions/blob/master/extensions_v2/extension_python_kernel.py
     '''
 
     def __init__(self):

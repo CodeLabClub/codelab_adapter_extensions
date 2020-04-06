@@ -14,7 +14,9 @@ from codelab_adapter_client import AdapterNode
 class VectorNode(AdapterNode):
     '''
     Everything Is Message
-    ref: https://github.com/Scratch3Lab/codelab_adapter_extensions/blob/master/extensions_v2/extension_python_kernel.py
+    ref: https://github.com/CodeLabClub/codelab_adapter_extensions/blob/master/extensions_v2/extension_python_kernel.py
+    
+    node pub it's status: pid
     '''
 
     def __init__(self):
@@ -33,6 +35,7 @@ class VectorNode(AdapterNode):
 
     def run(self):
         with anki_vector.Robot() as robot:
+            self.pub_notification("Vector Connected!", type="SUCCESS")
             while self._running:
                 time.sleep(0.05)
                 if not self.q.empty():
@@ -60,5 +63,7 @@ if __name__ == "__main__":
         node.receive_loop_as_thread(
         )  # run extension_message_handle, noblock(threaded)
         node.run()
-    except KeyboardInterrupt:
+    # except KeyboardInterrupt:
+    except Exception as e:
+        node.logger.error(str(e))
         node.terminate()  # Clean up before exiting.

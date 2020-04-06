@@ -26,6 +26,7 @@ class CozmoNode(AdapterNode):
         self.terminate()
 
     def cozmo_program(self, robot):
+        self.pub_notification("Vector Connected!", type="SUCCESS")
         while self._running:
             time.sleep(0.05)
             if not self.q.empty():
@@ -54,5 +55,6 @@ if __name__ == "__main__":
         node = CozmoNode()
         node.receive_loop_as_thread()
         node.run()
-    except KeyboardInterrupt:
+    except Exception as e:
+        node.logger.error(str(e))
         node.terminate()
