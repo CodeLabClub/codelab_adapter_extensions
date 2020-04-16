@@ -11,7 +11,7 @@ class EimTriggerExtension(Extension):
     
     def __init__(self):
         super().__init__()
-        self.EXTENSION_ID = "eim"
+        self.NODE_ID = "eim"
 
     def run(self):
         module_name = "eim_trigger"

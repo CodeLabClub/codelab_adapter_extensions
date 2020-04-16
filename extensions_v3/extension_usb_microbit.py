@@ -29,13 +29,13 @@ class UsbMicrobitProxy(Extension):
     def __init__(self, bucket_token=20, bucket_fill_rate=10):
         super().__init__(bucket_token=bucket_token,
                          bucket_fill_rate=bucket_fill_rate)
-        self.EXTENSION_ID = "eim/usbMicrobit"
+        self.NODE_ID = self.generate_node_id(__file__)
 
         self.q = queue.Queue()
 
     def extension_message_handle(self, topic, payload):
         '''
-            test: codelab-message-pub -j '{"topic":"scratch/extensions/command","payload":{"extension_id":"eim/usbMicrobit", "content":"display.show(\"c\")"}}'
+            test: codelab-message-pub -j '{"topic":"scratch/extensions/command","payload":{"node_id":"eim/usbMicrobit", "content":"display.show(\"c\")"}}'
             '''
         self.q.put(payload)
 
@@ -47,7 +47,7 @@ class UsbMicrobitProxy(Extension):
             if not env_is_valid:
                 self.logger.error("No micro:bit found")
                 self.pub_notification("No micro:bit found",
-                                      type="ERROR")  # todo 针对extension_id的提醒
+                                      type="ERROR")  # todo 针对node_id的提醒
                 time.sleep(5)
             else:
                 port = find_microbit()
@@ -77,14 +77,14 @@ class UsbMicrobitProxy(Extension):
                     payload = self.q.get()
                     message_id = payload.get("message_id")
                     scratch3_message = {
-                        "topic": self.EXTENSION_ID,
+                        "topic": self.NODE_ID,
                         "payload": ""
                     }
                     scratch3_message["payload"] = payload["content"]
                 else:
                     message_id = ""
                     scratch3_message = {
-                        "topic": self.EXTENSION_ID,
+                        "topic": self.NODE_ID,
                         "payload": ""
                     }
                 scratch3_message = json.dumps(scratch3_message) + "\r\n"

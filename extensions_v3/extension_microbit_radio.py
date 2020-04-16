@@ -20,13 +20,13 @@ class MicrobitRadioProxy(Extension):
     
     def __init__(self, bucket_token=20, bucket_fill_rate=10):
         super().__init__(bucket_token=bucket_token, bucket_fill_rate=bucket_fill_rate)
-        self.EXTENSION_ID = "eim/radioMicrobit"
+        self.NODE_ID = self.generate_node_id(__file__) # 使用eim？
 
         self.q = queue.Queue()
 
     def extension_message_handle(self, topic, payload):
         '''
-            test: codelab-message-pub -j '{"topic":"scratch/extensions/command","payload":{"extension_id":"eim/usbMicrobit", "content":"display.show(\"c\")"}}'
+            test: codelab-message-pub -j '{"topic":"scratch/extensions/command","payload":{"node_id":"eim/usbMicrobit", "content":"display.show(\"c\")"}}'
             '''
         # self.q.put(payload)
         content = payload["content"] + "\r\n"

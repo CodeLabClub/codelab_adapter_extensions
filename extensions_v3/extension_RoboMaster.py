@@ -11,7 +11,7 @@ class RoboMasterExtension(Extension):
     
     def __init__(self):
         super().__init__()
-        self.EXTENSION_ID = "eim/RoboMaster"
+        self.NODE_ID = self.generate_node_id(__file__)
         self.q = queue.Queue()
 
     def get_robot_ip(self):

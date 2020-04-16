@@ -5,11 +5,21 @@ wget https://github.com/anki/vector-python-sdk/raw/master/examples/tutorials/01_
 python3 01_hello_world.py  # should be ok
 '''
 
-import anki_vector
+import os
 import queue
 import time
 
+from loguru import logger
+import anki_vector
+
 from codelab_adapter_client import AdapterNode
+from codelab_adapter_client.utils import get_or_create_node_logger_dir
+
+# log for debug
+node_logger_dir = get_or_create_node_logger_dir()
+debug_log = str(node_logger_dir / "debug.log")
+logger.add(debug_log, rotation="1 MB", level="DEBUG")
+
 
 class VectorNode(AdapterNode):
     '''
@@ -18,10 +28,9 @@ class VectorNode(AdapterNode):
     
     node pub it's status: pid
     '''
-
     def __init__(self):
-        super().__init__()
-        self.EXTENSION_ID = "eim/vector"  # default: eim
+        super().__init__(logger=logger) # todo log
+        self.NODE_ID = self.generate_node_id(__file__)
         self.HELP_URL = "https://adapter.codelab.club/extension_guide/vector/"
         self.q = queue.Queue()
         # from_jupyter/extensions
@@ -33,9 +42,9 @@ class VectorNode(AdapterNode):
     def exit_message_handle(self, topic, payload):
         self.terminate()
 
-
     def run(self):
         with anki_vector.Robot() as robot:
+            # with 以内 vector 错误无法被捕获，sdk做了特殊处理
             self.pub_notification("Vector Connected!", type="SUCCESS")
             while self._running:
                 time.sleep(0.05)
@@ -56,7 +65,7 @@ class VectorNode(AdapterNode):
                     payload["content"] = str(output)
                     message = {"payload": payload}
                     self.publish(message)
-                
+
 
 if __name__ == "__main__":
     try:
@@ -65,9 +74,11 @@ if __name__ == "__main__":
         )  # run extension_message_handle, noblock(threaded)
         node.run()
     except KeyboardInterrupt:
-        node.terminate()  # Clean up before exiting.s
+        # 依赖这个退出
+        if node._running:
+            node.terminate()  # Clean up before exiting.s
     except Exception as e:
-        node.logger.error(str(e))
-        node.pub_notification(str(e), type="ERROR")
-        time.sleep(0.05)
-        node.terminate()  # Clean up before exiting.
+        node.logger.error(str(e))  # 为何是空？
+        # node.pub_notification(str(e), type="ERROR")
+        if node._running:
+            node.terminate()  # Clean up before exiting.

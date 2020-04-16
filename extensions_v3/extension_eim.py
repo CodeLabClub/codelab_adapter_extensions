@@ -22,7 +22,7 @@ class EIMExtension(Extension):
 
     def __init__(self):
         super().__init__()
-        self.EXTENSION_ID = "eim"  # default : eim
+        self.NODE_ID = "eim"  # default : eim
 
     def extension_message_handle(self, topic, payload):
         self.logger.info(f'eim message:{payload}')

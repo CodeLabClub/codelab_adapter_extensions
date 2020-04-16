@@ -16,7 +16,7 @@ from codelab_adapter_client import AdapterNode
 class CozmoNode(AdapterNode):
     def __init__(self):
         super().__init__()
-        self.EXTENSION_ID = "eim/cozmo"  # default: eim
+        self.NODE_ID = self.generate_node_id(__file__)
         self.HELP_URL = "https://adapter.codelab.club/extension_guide/cozmo/"
         self.q = queue.Queue()
 

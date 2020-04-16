@@ -8,7 +8,7 @@ import functools
 from pymata_express.private_constants import PrivateConstants
 from pymata_express.pymata_express import PymataExpress
 
-from codelab_adapter.gateways.gateway_base import GatewayBaseAIO
+from codelab_adapter.gateway_base import GatewayBaseAIO
 
 
 # noinspection PyAbstractClass,PyMethodMayBeStatic,PyRedundantParentheses,DuplicatedCode
@@ -31,7 +31,7 @@ class ArduinoGateway(GatewayBaseAIO):
                  log=True,
                  bucket_token=20,
                  bucket_fill_rate=10):
-        self.EXTENSION_ID = "eim/arduino"
+        self.NODE_ID = self.generate_node_id(__file__)
 
         # set the event loop to be used. accept user's if provided
         self.event_loop = event_loop

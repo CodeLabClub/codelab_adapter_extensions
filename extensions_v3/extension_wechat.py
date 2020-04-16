@@ -14,7 +14,7 @@ class WechatGateway(Extension):
 
     def __init__(self):
         super().__init__()
-        self.EXTENSION_ID = "eim/wechat"
+        self.NODE_ID = self.generate_node_id(__file__)
         
     def extension_message_handle(self, topic, payload):
         '''
@@ -91,10 +91,10 @@ class WechatGateway(Extension):
     @threaded
     def wechat_run_as_thread(self):
         # todo kill itchat
-        picDir = str(codelab_adapter_dir / "servers" /
+        picDir = str(codelab_adapter_dir / "nodes" /
                      "adapter_QR.png")  # fix 打包软件打开本地图片的权限问题
         statusStorageDir = str(
-            codelab_adapter_dir / "servers" / 'adapter_itchat.pkl')
+            codelab_adapter_dir / "nodes" / 'adapter_itchat.pkl')
         itchat.msg_register([TEXT])(self.text_reply)
         itchat.msg_register(TEXT, isGroupChat=True)(self.group_text_reply)
         itchat.auto_login(
