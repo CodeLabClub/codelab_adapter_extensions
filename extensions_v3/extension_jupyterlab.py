@@ -87,11 +87,12 @@ class JupyterlabExtension(Extension):
         stop thread
         '''
         if self._running:
-            self.pub_notification("try to stop jupyter")
+            self.pub_notification("try to stop jupyterlab")
             if self.jupyter_proc:
                 self.jupyter_proc.kill()  # 尝试发送信号，然后关闭
                 self.jupyter_proc.wait()
-                self.pub_notification("jupyter stopped")
+                # todo win: stop
+                self.pub_notification("jupyterlab stopped")
                 time.sleep(0.1)
             super().terminate()
 

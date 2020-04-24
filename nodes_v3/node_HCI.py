@@ -9,6 +9,8 @@ import time
 import pyautogui # try ，如果没有安装 抛出消息
 from codelab_adapter_client import AdapterNode
 
+import codelab_adapter_client
+assert codelab_adapter_client.__version__ >= "1.6.0"
 
 class HCINode(AdapterNode):
     '''

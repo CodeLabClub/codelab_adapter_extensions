@@ -15,6 +15,9 @@ import anki_vector
 from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.utils import get_or_create_node_logger_dir
 
+import codelab_adapter_client
+assert codelab_adapter_client.__version__ >= "1.6.0"
+
 # log for debug
 node_logger_dir = get_or_create_node_logger_dir()
 debug_log = str(node_logger_dir / "debug.log")
@@ -62,6 +65,7 @@ class VectorNode(AdapterNode):
                         })
                     except Exception as e:
                         output = e
+                        self.pub_notification(str(e), type="ERROR")
                     payload["content"] = str(output)
                     message = {"payload": payload}
                     self.publish(message)

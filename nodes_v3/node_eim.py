@@ -4,6 +4,9 @@ from loguru import logger
 from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.utils import get_or_create_node_logger_dir
 
+import codelab_adapter_client
+assert codelab_adapter_client.__version__ >= "1.6.0"
+
 # log for debug
 node_logger_dir = get_or_create_node_logger_dir()
 debug_log = str(node_logger_dir / "debug.log")

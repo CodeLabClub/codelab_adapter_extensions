@@ -5,9 +5,8 @@ import time
 import subprocess
 import webbrowser
 from codelab_adapter.core_extension import Extension
-from codelab_adapter.utils import verify_token
+from codelab_adapter.utils import verify_token, open_path_in_system_file_manager
 from codelab_adapter.settings import TOKEN
-
 '''
 当前插件只允许运行表达式
 如果你希望执行任意python代码，请使用: https://github.com/CodeLabClub/codelab_adapter_extensions/blob/master/extensions_v2/extension_python_kernel_exec.py，注意风险
@@ -15,34 +14,25 @@ from codelab_adapter.settings import TOKEN
 也可以在Scratch EIM插件中运行Python代码
 '''
 
+
 class PyHelper:
     def open_url(self, url):
         webbrowser.open(url)
 
-    def mac_open(self, path):
-        open_cmd = "/usr/bin/open"  # which open
-        subprocess.call(f"{open_cmd} {path}", shell=True)
+    def open(self, path):
+        open_path_in_system_file_manager(path)
 
 
 class PythonKernelExtension(Extension):
-    
+
     HELP_URL = "http://adapter.codelab.club/extension_guide/extension_python_kernel/"
     WEIGHT = 95
 
     def __init__(self):
         super().__init__()
-        self.NODE_ID = self.generate_node_id(__file__) # old: "eim/python"
+        self.NODE_ID = self.generate_node_id(__file__)  # old: "eim/python"
         self.logger.debug(f'NODE_ID -> {self.NODE_ID}')
         self.PyHelper = PyHelper()
-
-    @contextlib.contextmanager
-    def stdoutIO(self, stdout=None):
-        old = sys.stdout
-        if stdout is None:
-            stdout = StringIO()
-        sys.stdout = stdout
-        yield stdout
-        sys.stdout = old
 
     def run_python_code(self, code):
         '''
@@ -76,7 +66,7 @@ class PythonKernelExtension(Extension):
         self.publish(message)
 
     def run(self):
-        "避免插件直接退出"
+        "避免插件结束退出"
         while self._running:
             time.sleep(0.5)
 
