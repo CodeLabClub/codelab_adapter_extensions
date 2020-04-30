@@ -8,14 +8,14 @@ from codelab_adapter.core_extension import Extension
 
 class PomodoroExtension(Extension):
     HELP_URL = "https://adapter.codelab.club/extension_guide/eim/"  # Documentation page for the project
-    WEIGHT = 100  # weight for sorting, default : 0
+    WEIGHT = 1  # weight for sorting, default : 0
     VERSION = 1.0  # extension version
 
     def __init__(self):
         super().__init__()
         self.NODE_ID = "eim"  # default : eim
 
-    def send_messafge(self):
+    def send_message(self):
         self.logger.info(f'send eim message')
         message = self.message_template(
         )  # use self.logger.debug to view the message structure
@@ -36,8 +36,8 @@ class PomodoroExtension(Extension):
 
             if i % pomodoro_seconds == 0:
                 # 整除
-                self.send_messafge()
-                self.pub_notification(content="起身看看窗外风景", type="warn")
+                self.send_message()
+                self.pub_notification(content="起身看看窗外风景", type="warning")
 
 
 export = PomodoroExtension
