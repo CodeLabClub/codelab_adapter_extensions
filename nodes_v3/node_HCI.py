@@ -1,9 +1,3 @@
-'''
-pip3 install gpiozero pigpio --user
-# docs: https://gpiozero.readthedocs.io/en/stable/remote_gpio.html
-'''
-# GPIOZERO_PIN_FACTORY=pigpio PIGPIO_ADDR= "raspberrypi.local"# 192.168.1.3
-
 import queue
 import time
 import pyautogui # try ，如果没有安装 抛出消息
