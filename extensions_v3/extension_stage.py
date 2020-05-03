@@ -37,7 +37,7 @@ def decode_image(src, name):
     filename = "{}.{}".format(name, ext)
     with open(filename, "wb") as f:
         f.write(img)
-
+    # do something with the image...
     return filename
 
 
