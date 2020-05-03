@@ -16,7 +16,7 @@ from loguru import logger
 class BlenderNode(AdapterNode):
     def __init__(self):
         super().__init__()
-        self.NODE_ID = "eim/blender"
+        self.NODE_ID = "eim/node_blender"
 
     @contextlib.contextmanager
     def stdoutIO(self, stdout=None):
@@ -32,7 +32,7 @@ class BlenderNode(AdapterNode):
         logger.info(f'python_code: {python_code}')
         # extension_python.py
         try:
-            output = eval(python_code, {"__builtins__": None}, {
+            output = exec(python_code, {"__builtins__": None}, {
                 "bpy": bpy,
             })
         except Exception as e:
