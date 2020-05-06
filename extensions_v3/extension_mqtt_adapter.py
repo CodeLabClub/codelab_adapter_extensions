@@ -15,6 +15,9 @@ class MqttAdapterExtension(Extension):
 
     hbmqtt_pub --url mqtt://127.0.0.1 -t to_scratch -m "mqtt message" # eim message
     hbmqtt_sub --url mqtt://127.0.0.1 -t from_scratch
+
+    todo:
+        与 broker 合并？
     '''
     def __init__(self):
         super().__init__()
@@ -49,6 +52,10 @@ class MqttAdapterExtension(Extension):
         content = payload["content"]
         # payload = json.dumps(payload).encode()
         self.client.publish("from_scratch", content.encode())
+
+        # reply to scratch block
+        payload["content"] = "ok"
+        self.publish({"payload":payload})
 
     def mqtt_on_message(self, client, userdata, msg):
         '''
