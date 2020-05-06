@@ -1,10 +1,3 @@
-'''
-to_mqtt
-from_mqtt
-
-构建一个简单的
-'''
-
 import asyncio
 import os
 import time
