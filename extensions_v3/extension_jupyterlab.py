@@ -31,29 +31,28 @@ class JupyterlabExtension(Extension):
         self.jupyter_proc = None
 
     def install_jupyter(self):  # to install jupyterlab
-        if USE_CN_PIP_MIRRORS:
-            cn_i_option = get_pip_cn_i_option()  # pip xxx -i cn_i_option
-            install_jupyterlab_cmd = f'{self.python_path} -m pip install jupyterlab -i {cn_i_option}'
-            self.pub_notification(f"jupyterlab is being installed...")
-            self.install_proc = launch_proc(
-                install_jupyterlab_cmd,
-                shell=True,
-                logger=self.logger,
-                stdin=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE)  # work with windows
-            res = self.install_proc.communicate()
-            self.logger.debug(res)
-            stdout, stderr = res
-            self.logger.info("jupyterlab installed!")
-            self.pub_notification("jupyterlab installed!")
-            self.env_manage.set_env(None)  # update env
-            self.pub_notification("ready to open jupyterlab...")
-            if stderr:
-                stderr = stderr.decode()
-                self.logger.error(stderr)
-                self.pub_notification(f"{stderr}")
-            self.run_jupyterlab()
+        cn_i_option = get_pip_cn_i_option()  # pip xxx -i cn_i_option
+        install_jupyterlab_cmd = f'{self.python_path} -m pip install jupyterlab -i {cn_i_option}'
+        self.pub_notification(f"jupyterlab is being installed...")
+        self.install_proc = launch_proc(
+            install_jupyterlab_cmd,
+            shell=True,
+            logger=self.logger,
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE)  # work with windows
+        res = self.install_proc.communicate()
+        self.logger.debug(res)
+        stdout, stderr = res
+        self.logger.info("jupyterlab installed!")
+        self.pub_notification("jupyterlab installed!")
+        self.env_manage.set_env(None)  # update env
+        self.pub_notification("ready to open jupyterlab...")
+        if stderr:
+            stderr = stderr.decode()
+            self.logger.error(stderr)
+            self.pub_notification(f"{stderr}")
+        self.run_jupyterlab()
 
     def run_jupyterlab(self):
         cmd = f'{self.python_path} -m jupyterlab --notebook-dir="{self.adapter_home_path}"'
@@ -74,7 +73,7 @@ class JupyterlabExtension(Extension):
             html_message = f'缺少 Python3，<a target="_blank" href="https://adapter.codelab.club/Python_Projects/install_python/">帮助文档</a>'
             self.pub_html_notification(html_message)
             return
-            
+
         if not env["treasure box"].get("jupyterlab"):
             self.install_jupyter()
         else:
