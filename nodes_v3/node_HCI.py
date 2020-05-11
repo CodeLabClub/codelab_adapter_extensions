@@ -1,20 +1,38 @@
+'''
+HCI: human–machine interaction
+本插件支持将任何输入映射为鼠标键盘行为
+
+PyAutoGUI only runs on Windows, Mac, and Linux.
+If you lose control and need to stop the current PyAutoGUI function, keep moving the mouse cursor up and to the left. 
+
+tips:
+    currentMouseX, currentMouseY = pyautogui.position()
+    pyautogui.moveTo(100, 150)
+    pyautogui.click()
+    pyautogui.moveRel(None, 10)  # move mouse 10 pixels down
+    pyautogui.typewrite('Hello world!', interval=0.25)
+
+'''
+
 import queue
 import time
-import pyautogui # try ，如果没有安装 抛出消息
+import pyautogui  # todo 自动安装
 from codelab_adapter_client import AdapterNode
 
-import codelab_adapter_client
-assert codelab_adapter_client.__version__ >= "1.6.0"
 
 class HCINode(AdapterNode):
     '''
     Everything Is Message
     ref: https://github.com/CodeLabClub/codelab_adapter_extensions/blob/master/extensions_v2/extension_python_kernel.py
     '''
+    NODE_ID = "eim/node_HCI"
+    WEIGHT = 98
+    HELP_URL = "https://adapter.codelab.club/extension_guide/HCI/"
+    VERSION = "1.1.0"
+    DESCRIPTION = "a cute robot"
 
     def __init__(self):
         super().__init__()
-        self.NODE_ID = self.generate_node_id(__file__)  # default: eim
         self.q = queue.Queue()
 
     def extension_message_handle(self, topic, payload):

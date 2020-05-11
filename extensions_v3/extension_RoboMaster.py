@@ -7,11 +7,11 @@ from codelab_adapter.core_extension import Extension
 
 
 class RoboMasterExtension(Extension):
+    NODE_ID = "eim/extension_RoboMaster"
     HELP_URL = "http://adapter.codelab.club/extension_guide/RoboMaster/"
     
     def __init__(self):
         super().__init__()
-        self.NODE_ID = self.generate_node_id(__file__)
         self.q = queue.Queue()
 
     def get_robot_ip(self):

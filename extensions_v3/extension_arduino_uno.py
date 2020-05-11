@@ -21,8 +21,10 @@ class ArduinoGateway(GatewayBaseAIO):
 
     # NOTE: This class requires the use of Python 3.7 or above
     
+    NODE_ID = "eim/extension_arduino_uno"
     HELP_URL = "http://adapter.codelab.club/extension_guide/arduino_UNO/"
     WEIGHT = 94
+    
     def __init__(self,
                  event_loop=None,
                  com_port=None,
@@ -31,7 +33,6 @@ class ArduinoGateway(GatewayBaseAIO):
                  log=True,
                  bucket_token=20,
                  bucket_fill_rate=10):
-        self.NODE_ID = self.generate_node_id(__file__)
 
         # set the event loop to be used. accept user's if provided
         self.event_loop = event_loop

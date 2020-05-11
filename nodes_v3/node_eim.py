@@ -4,18 +4,16 @@ from loguru import logger
 from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.utils import get_or_create_node_logger_dir
 
-import codelab_adapter_client
-assert codelab_adapter_client.__version__ >= "1.6.0"
-
 # log for debug
 node_logger_dir = get_or_create_node_logger_dir()
 debug_log = str(node_logger_dir / "debug.log")
 logger.add(debug_log, rotation="1 MB", level="DEBUG")
 
+
 class EIMNode(AdapterNode):
     def __init__(self):
         super().__init__(logger=logger)
-        self.NODE_ID = "eim"
+        self.NODE_ID = self.generate_node_id(__file__)
 
     def send_message_to_scratch(self, content):
         message = self.message_template()
@@ -38,6 +36,7 @@ class EIMNode(AdapterNode):
             time.sleep(1)
             i += 1
 
+
 if __name__ == "__main__":
     try:
         node = EIMNode()
@@ -47,4 +46,3 @@ if __name__ == "__main__":
         # node.logger.debug("KeyboardInterrupt") # work mac
         if node._running:
             node.terminate()  # Clean up before exiting.
-        

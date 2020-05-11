@@ -7,17 +7,11 @@ ref:
 '''
 import queue
 import time
-
+import importlib
 from loguru import logger
 
-import codelab_adapter_client
 from codelab_adapter_client import AdapterNode
-from codelab_adapter_client.utils import get_or_create_node_logger_dir
-from cozmo.util import degrees, distance_mm, speed_mmps
-import cozmo
-
-
-assert codelab_adapter_client.__version__ >= "1.6.0"
+from codelab_adapter_client.utils import get_or_create_node_logger_dir, install_requirement
 
 # log for debug
 node_logger_dir = get_or_create_node_logger_dir()
@@ -26,14 +20,29 @@ logger.add(debug_log, rotation="1 MB", level="DEBUG")
 
 
 class CozmoNode(AdapterNode):
-    VERSION = "1.1.0"
+    NODE_ID = "eim/node_sonicPi"
+    WEIGHT = 100
+    HELP_URL = "https://adapter.codelab.club/extension_guide/cozmo/"
+    VERSION = "1.2.0"
+    DESCRIPTION = "a cute robot"
+    REQUIREMENTS = ["cozmo"]
 
     def __init__(self):
-        # bucket_token 每秒钟发送事件数
         super().__init__(logger=logger)
-        self.NODE_ID = self.generate_node_id(__file__)
-        self.HELP_URL = "https://adapter.codelab.club/extension_guide/cozmo/"
         self.q = queue.Queue()
+
+    def _import_requirement_or_import(self):
+        requirement = self.REQUIREMENTS
+        try:
+            importlib.import_module("cozmo")
+        except ModuleNotFoundError:
+            self.pub_notification(f'try to install {" ".join(requirement)}...')
+            install_requirement(requirement)
+            self.pub_notification(f'{" ".join(requirement)} installed!')
+        importlib.import_module("cozmo")
+        import cozmo
+        from cozmo.util import degrees, distance_mm, speed_mmps
+        global cozmo, degrees, distance_mm, speed_mmps # make it global
 
     def extension_message_handle(self, topic, payload):
         self.q.put(payload)
@@ -96,7 +105,9 @@ class CozmoNode(AdapterNode):
         self.logger.debug(face.name)
         self.logger.debug(face.known_expression)
         event_param = face.known_expression
-        self.logger.debug(f'face name -> {face.name}, face expression -> {face.known_expression}')
+        self.logger.debug(
+            f'face name -> {face.name}, face expression -> {face.known_expression}'
+        )
         if event_param:
             self.pub_event(event_name, event_param)
 
@@ -128,7 +139,6 @@ class CozmoNode(AdapterNode):
         event_param = pet.pet_type
         self.pub_event(event_name, event_param)
 
-
     def onRobotObservedMotion(self, evt, **kwargs):
         event_name = "RobotObservedMotion"  # EvtRobotObservedMotion
         logger.debug(event_name)
@@ -157,13 +167,15 @@ class CozmoNode(AdapterNode):
         # face
         robot.add_event_handler(cozmo.faces.EvtFaceAppeared,
                                 self.onFaceAppeared)
-        robot.add_event_handler(cozmo.faces.EvtFaceObserved, self.onFaceObserved)
+        robot.add_event_handler(cozmo.faces.EvtFaceObserved,
+                                self.onFaceObserved)
         robot.add_event_handler(cozmo.faces.EvtFaceDisappeared,
                                 self.onFaceDisappeared)
 
         # pets
         robot.add_event_handler(cozmo.pets.EvtPetAppeared, self.onPetAppeared)
-        robot.add_event_handler(cozmo.pets.EvtPetDisappeared, self.onPetDisappeared)
+        robot.add_event_handler(cozmo.pets.EvtPetDisappeared,
+                                self.onPetDisappeared)
         # robot.add_event_handler(cozmo.pets.EvtPetObserved, self.onPetObserved)
 
         # world Camera
@@ -191,6 +203,7 @@ class CozmoNode(AdapterNode):
                 self.publish(message)
 
     def run(self):
+        self._import_requirement_or_import()
         cozmo.run_program(self.cozmo_program)
 
 

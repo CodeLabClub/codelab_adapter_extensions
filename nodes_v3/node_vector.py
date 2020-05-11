@@ -10,13 +10,10 @@ import queue
 import time
 
 from loguru import logger
-import anki_vector
+import anki_vector # 需要手动配置，就不自动安装了
 
 from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.utils import get_or_create_node_logger_dir
-
-import codelab_adapter_client
-assert codelab_adapter_client.__version__ >= "1.6.0"
 
 # log for debug
 node_logger_dir = get_or_create_node_logger_dir()
@@ -31,10 +28,16 @@ class VectorNode(AdapterNode):
     
     node pub it's status: pid
     '''
+
+    NODE_ID = "eim/node_vector" # 手写, 没有魔法
+    WEIGHT = 99
+    HELP_URL = "https://adapter.codelab.club/extension_guide/vector/"
+    VERSION = "1.0.0"
+    DESCRIPTION = "a cute robot"
+
     def __init__(self):
         super().__init__(logger=logger) # todo log
-        self.NODE_ID = self.generate_node_id(__file__)
-        self.HELP_URL = "https://adapter.codelab.club/extension_guide/vector/"
+        # self.NODE_ID = self.generate_node_id(__file__) # 检查时发现
         self.q = queue.Queue()
         # from_jupyter/extensions
 

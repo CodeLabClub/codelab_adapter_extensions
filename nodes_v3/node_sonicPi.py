@@ -1,31 +1,41 @@
 '''
 pip install python-sonic --user
 '''
-from io import StringIO
-import contextlib
 import sys
 import time
 import os  # env
-
+import subprocess
 from loguru import logger
-from codelab_adapter_client import AdapterNode
-from codelab_adapter_client.utils import get_or_create_node_logger_dir
+from codelab_adapter_client import AdapterNode  # codelab_adapter_client 确保已经安装，由adapter维护，首次启动时，检查version
+from codelab_adapter_client.utils import get_or_create_node_logger_dir, install_requirement
 
 # GPIOZERO_PIN_FACTORY=pigpio PIGPIO_ADDR= "raspberrypi.local"# 192.168.1.3
 # os.environ["GPIOZERO_PIN_FACTORY"] = "pigpio"
 # os.environ["PIGPIO_ADDR"] = "raspberrypi.local"
-
-from psonic import *
 
 node_logger_dir = get_or_create_node_logger_dir()
 debug_log = str(node_logger_dir / "debug.log")
 logger.add(debug_log, rotation="1 MB", level="DEBUG")
 
 
-class McpiNode(AdapterNode):
+class SonicPiNode(AdapterNode):
+    NODE_ID = "eim/node_sonicPi"
+    REQUIREMENTS = ["python-sonic"]
+
     def __init__(self):
         super().__init__(logger=logger)
-        self.NODE_ID = self.generate_node_id(__file__)
+
+    def _import_requirement_or_import(self):
+        requirement = self.REQUIREMENTS
+        try:
+            import psonic
+        except ModuleNotFoundError:
+            self.pub_notification(f'try to install {" ".join(requirement)}...')
+            # 只有 local python 下才可用，adapter内置的python无法使用pip（extension）
+            install_requirement(requirement)
+            self.pub_notification(f'{" ".join(requirement)} installed!')
+        import psonic  # 使用点语法 from x import * 不在顶层 无效
+        global psonic
 
     def run_python_code(self, code):
         try:
@@ -45,13 +55,14 @@ class McpiNode(AdapterNode):
 
     def run(self):
         "避免插件结束退出"
+        self._import_requirement_or_import()
         while self._running:
             time.sleep(0.5)
 
 
 if __name__ == "__main__":
     try:
-        node = McpiNode()
+        node = SonicPiNode()
         node.receive_loop_as_thread()
         node.run()
     except KeyboardInterrupt:

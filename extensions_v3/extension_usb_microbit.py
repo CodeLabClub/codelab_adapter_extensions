@@ -23,13 +23,14 @@ class UsbMicrobitProxy(Extension):
     '''
     use TokenBucket to limit message rate(pub) https://github.com/CodeLabClub/codelab_adapter_client_python/blob/master/codelab_adapter_client/utils.py#L25
     '''
+    
+    NODE_ID = "eim/extension_usb_microbit"
     HELP_URL = "http://adapter.codelab.club/extension_guide/microbit/"
     WEIGHT = 99
     
     def __init__(self, bucket_token=20, bucket_fill_rate=10):
         super().__init__(bucket_token=bucket_token,
                          bucket_fill_rate=bucket_fill_rate)
-        self.NODE_ID = self.generate_node_id(__file__)
 
         self.q = queue.Queue()
 

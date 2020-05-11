@@ -9,12 +9,13 @@ from codelab_adapter.core_extension import Extension
 
 class EimMonitorExtension(Extension):
     
+    NODE_ID = "eim"
     HELP_URL = "http://adapter.codelab.club/extension_guide/eim_monitor/"
     WEIGHT = 96
     
     def __init__(self):
         super().__init__()
-        self.NODE_ID = "eim"
+        
 
         self.q = queue.Queue()
 

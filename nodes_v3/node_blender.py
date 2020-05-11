@@ -14,9 +14,9 @@ from loguru import logger
 
 
 class BlenderNode(AdapterNode):
+    NODE_ID = "eim/node_blender"
     def __init__(self):
         super().__init__()
-        self.NODE_ID = "eim/node_blender"
 
     @contextlib.contextmanager
     def stdoutIO(self, stdout=None):

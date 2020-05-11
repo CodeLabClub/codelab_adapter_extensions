@@ -26,9 +26,12 @@ def index(name):
 
 
 class CalypsoExtension(Extension):
+
+    NODE_ID = 'eim/extension_calypso'
+
     def __init__(self):
         super().__init__()
-        self.NODE_ID = self.generate_node_id(__file__)
+        self.
         self.HELP_URL = "http://adapter.codelab.club/extension_guide/Calypso/"
         self.port = 18081
 

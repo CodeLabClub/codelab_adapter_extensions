@@ -42,9 +42,10 @@ def decode_image(src, name):
 
 
 class StageExtension(Extension):
+    NODE_ID = "eim/extension_stage"
+
     def __init__(self):
         super().__init__()
-        self.NODE_ID = self.generate_node_id(__file__)
 
     def extension_message_handle(self, topic, payload):
         self.logger.info(f'the message payload from scratch: {payload}')

@@ -6,12 +6,12 @@ import zmq
 
 
 class EimTriggerExtension(Extension):
+    NODE_ID = "eim"
     HELP_URL = "http://adapter.codelab.club/extension_guide/eim_trigger/"
     WEIGHT = 97
     
     def __init__(self):
         super().__init__()
-        self.NODE_ID = "eim"
 
     def run(self):
         module_name = "eim_trigger"

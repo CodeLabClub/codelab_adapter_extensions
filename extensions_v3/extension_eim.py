@@ -16,13 +16,16 @@ class EIMExtension(Extension):
     It is recommended to think of the EIMExtension as a extension template, based on which to build any extension you want    
     '''
 
+    NODE_ID = "eim"
     HELP_URL = "https://adapter.codelab.club/extension_guide/eim/"  # Documentation page for the project
     WEIGHT = 100  # weight for sorting, default : 0
-    VERSION = 1.0  # extension version
+    VERSION = "1.0"  # extension version
+    DESCRIPTION = "Every Is a Message"
+    ICON_URL = ""
+    REQUIRES_ADAPTER = "" # ">= 3.2.0"
 
     def __init__(self):
         super().__init__()
-        self.NODE_ID = "eim"  # default : eim
 
     def extension_message_handle(self, topic, payload):
         self.logger.info(f'eim message:{payload}')
