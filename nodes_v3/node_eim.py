@@ -11,9 +11,9 @@ logger.add(debug_log, rotation="1 MB", level="DEBUG")
 
 
 class EIMNode(AdapterNode):
+    NODE_ID = "eim/node_eim"
     def __init__(self):
         super().__init__(logger=logger)
-        self.NODE_ID = self.generate_node_id(__file__)
 
     def send_message_to_scratch(self, content):
         message = self.message_template()

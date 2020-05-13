@@ -65,7 +65,11 @@ class RPINode(AdapterNode):
         "避免插件结束退出"
         self._import_requirement_or_import()
         self.factory = PiGPIOFactory(host='raspberrypi.local')  # 192.168.1.3
-        # 反馈 连接成功， 与失败
+        # 连接成功
+        if self.factory:
+            # 反馈 连接成功。 失败将弹出通知
+            self.pub_notification("Pi Connected!", type="SUCCESS")
+        
         self.led = LED(17, pin_factory=self.factory)
         while self._running:
             time.sleep(0.5)

@@ -20,10 +20,10 @@ logger.add(debug_log, rotation="1 MB", level="DEBUG")
 
 
 class CozmoNode(AdapterNode):
-    NODE_ID = "eim/node_sonicPi"
+    NODE_ID = "eim/node_cozmo"
     WEIGHT = 100
     HELP_URL = "https://adapter.codelab.club/extension_guide/cozmo/"
-    VERSION = "1.2.0"
+    VERSION = "1.2.1"
     DESCRIPTION = "a cute robot"
     REQUIREMENTS = ["cozmo"]
 
