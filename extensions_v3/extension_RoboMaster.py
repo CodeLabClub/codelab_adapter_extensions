@@ -9,7 +9,8 @@ from codelab_adapter.core_extension import Extension
 class RoboMasterExtension(Extension):
     NODE_ID = "eim/extension_RoboMaster"
     HELP_URL = "http://adapter.codelab.club/extension_guide/RoboMaster/"
-    
+    DESCRIPTION = "开火！RoboMaster"
+
     def __init__(self):
         super().__init__()
         self.q = queue.Queue()
@@ -48,7 +49,7 @@ class RoboMasterExtension(Extension):
         buf = command_socket.recv(1024) # todo: timeout
         # todo 开启事件上报, 默认开启，使用一个新的socket线程，接收事件。使用bucket token
         self.logger.info(f"connect: {buf}")
-        self.pub_notification("RoboMaster Connected!", type="SUCCESS")
+        self.pub_notification("Device(RoboMaster) Connected!", type="SUCCESS")
         while self._running:
             # wait for the command for the client(scratch/web app)
             time.sleep(0.05)

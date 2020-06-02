@@ -43,15 +43,21 @@ def decode_image(src, name):
 
 class StageExtension(Extension):
     NODE_ID = "eim/extension_stage"
+    HELP_URL = "https://adapter.codelab.club/extension_guide/stage/"  # Documentation page for the project
+    WEIGHT = 0  # weight for sorting, default : 0
+    VERSION = "1.0"  # extension version
+    DESCRIPTION = "将舞台区 图像/视频 发往 Adapter"
+    ICON_URL = ""
+    REQUIRES_ADAPTER = "" # ">= 3.2.0"
 
     def __init__(self):
         super().__init__()
 
     def extension_message_handle(self, topic, payload):
-        self.logger.info(f'the message payload from scratch: {payload}')
+        # self.logger.info(f'the message payload from scratch: {payload}')
         content = payload.get("content", None)  # video积木可能为空
         if content and type(content) == str:
-            self.logger.debug(f"data -> {content}")
+            # self.logger.debug(f"data -> {content}")
             codelab_adapter_dir = pathlib.Path.home() / "codelab_adapter"
 
             imgdata = content

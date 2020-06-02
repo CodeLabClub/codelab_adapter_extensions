@@ -10,6 +10,7 @@ class PomodoroExtension(Extension):
     HELP_URL = "https://adapter.codelab.club/extension_guide/eim/"  # Documentation page for the project
     WEIGHT = 1  # weight for sorting, default : 0
     VERSION = 1.0  # extension version
+    DESCRIPTION = "启动一个番茄时钟"
 
     def __init__(self):
         super().__init__()

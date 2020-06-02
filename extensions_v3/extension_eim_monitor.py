@@ -12,6 +12,8 @@ class EimMonitorExtension(Extension):
     NODE_ID = "eim"
     HELP_URL = "http://adapter.codelab.club/extension_guide/eim_monitor/"
     WEIGHT = 96
+    DESCRIPTION = "响应一条eim消息"
+    
     
     def __init__(self):
         super().__init__()

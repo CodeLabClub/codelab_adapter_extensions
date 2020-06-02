@@ -16,10 +16,10 @@ from codelab_adapter_client.utils import get_python3_path, install_requirement, 
 class JupyterlabExtension(Extension):
 
     NODE_ID = "eim/extension_jupyterlab"
-    HELP_URL = "http://adapter.codelab.club/extension_guide/eim_trigger/"
+    HELP_URL = "https://adapter.codelab.club/extension_guide/jupyterlab/"
     WEIGHT = 97
     VERSION = "1.0"  # extension version
-    DESCRIPTION = "JupyterLab extension"
+    DESCRIPTION = "使用 JupyterLab 开始你的 Python 之旅"
     REQUIREMENTS = ["jupyterlab"]
 
     def __init__(self):

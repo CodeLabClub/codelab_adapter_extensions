@@ -24,7 +24,7 @@ class CozmoNode(AdapterNode):
     WEIGHT = 100
     HELP_URL = "https://adapter.codelab.club/extension_guide/cozmo/"
     VERSION = "1.2.1"
-    DESCRIPTION = "a cute robot"
+    DESCRIPTION = "最好的 AI 教育机器人之一"
     REQUIREMENTS = ["cozmo"]
 
     def __init__(self):

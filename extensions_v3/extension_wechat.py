@@ -17,6 +17,7 @@ class WechatGateway(Extension):
 
     NODE_ID = "eim/extension_wechat"
     HELP_URL = "https://adapter.codelab.club/extension_guide/wechat/"
+    DESCRIPTION = "将微信积木化" # wechat -- 勉强能用的聊天工具
 
     def __init__(self):
         super().__init__()

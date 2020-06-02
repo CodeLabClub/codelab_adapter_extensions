@@ -24,6 +24,7 @@ class ArduinoGateway(GatewayBaseAIO):
     NODE_ID = "eim/extension_arduino_uno"
     HELP_URL = "http://adapter.codelab.club/extension_guide/arduino_UNO/"
     WEIGHT = 94
+    DESCRIPTION = "将Arduino积木化"
     
     def __init__(self,
                  event_loop=None,

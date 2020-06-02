@@ -27,6 +27,7 @@ class UsbMicrobitProxy(Extension):
     NODE_ID = "eim/extension_usb_microbit"
     HELP_URL = "http://adapter.codelab.club/extension_guide/microbit/"
     WEIGHT = 99
+    DESCRIPTION = "使用 Microbit， 为物理世界编程"
     
     def __init__(self, bucket_token=20, bucket_fill_rate=10):
         super().__init__(bucket_token=bucket_token,
@@ -62,7 +63,7 @@ class UsbMicrobitProxy(Extension):
                 if data:
                     data = data.decode()
                     try:
-                        data = eval(data)
+                        data = eval(data) # todo, 来自 Microbit的数据 暂无安全问题
                     except (ValueError, SyntaxError):
                         pass
                     else:

@@ -9,6 +9,7 @@ class EimTriggerExtension(Extension):
     NODE_ID = "eim"
     HELP_URL = "http://adapter.codelab.club/extension_guide/eim_trigger/"
     WEIGHT = 97
+    DESCRIPTION = "触发一条eim消息"
     
     def __init__(self):
         super().__init__()

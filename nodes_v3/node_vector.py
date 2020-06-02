@@ -33,7 +33,7 @@ class VectorNode(AdapterNode):
     WEIGHT = 99
     HELP_URL = "https://adapter.codelab.club/extension_guide/vector/"
     VERSION = "1.0.0"
-    DESCRIPTION = "a cute robot"
+    DESCRIPTION = "最好的 AI 教育机器人之一， Cozmo的下一代"
 
     def __init__(self):
         super().__init__(logger=logger) # todo log

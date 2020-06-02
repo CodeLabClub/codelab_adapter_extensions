@@ -1,5 +1,3 @@
-from io import StringIO
-import contextlib
 import sys
 import time
 import subprocess

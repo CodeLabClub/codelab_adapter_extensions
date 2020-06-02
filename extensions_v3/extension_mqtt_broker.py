@@ -15,9 +15,13 @@ from codelab_adapter.utils import threaded
 
 
 class MqttBrokerExtension(Extension):
+    NODE_ID = "eim/extension_mqtt_broker"
+    HELP_URL = "https://adapter.codelab.club/extension_guide/MQTT_Broker/"
+    DESCRIPTION = "在本地启动一个轻量级 MQTT Broker"
+
+
     def __init__(self):
         super().__init__()
-        self.NODE_ID = self.generate_node_id(__file__)
 
     async def broker_coro(self):
         # https://hbmqtt.readthedocs.io/en/latest/references/broker.html#broker-configuration

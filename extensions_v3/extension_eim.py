@@ -20,7 +20,7 @@ class EIMExtension(Extension):
     HELP_URL = "https://adapter.codelab.club/extension_guide/eim/"  # Documentation page for the project
     WEIGHT = 100  # weight for sorting, default : 0
     VERSION = "1.0"  # extension version
-    DESCRIPTION = "Every Is a Message"
+    DESCRIPTION = "Everything Is a Message"
     ICON_URL = ""
     REQUIRES_ADAPTER = "" # ">= 3.2.0"
 

@@ -21,6 +21,8 @@ logger.add(debug_log, rotation="1 MB", level="DEBUG")
 class SonicPiNode(AdapterNode):
     NODE_ID = "eim/node_sonicPi"
     REQUIREMENTS = ["python-sonic"]
+    HELP_URL = "https://adapter.codelab.club/extension_guide/sonicPi/"
+    DESCRIPTION = "Sonic Pi 是可编程的音乐创作和演奏工具"
 
     def __init__(self):
         super().__init__(logger=logger)
@@ -39,7 +41,7 @@ class SonicPiNode(AdapterNode):
 
     def run_python_code(self, code):
         try:
-            output = eval(code)
+            output = eval(code, {"__builtins__": None}, {"psonic": psonic}) #  psonic 全局
         except Exception as e:
             output = e
         return output

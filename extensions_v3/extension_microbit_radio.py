@@ -20,7 +20,7 @@ class MicrobitRadioProxy(Extension):
     HELP_URL = "http://adapter.codelab.club/extension_guide/microbit_radio/"
     WEIGHT = 98
     VERSION = "1.0"  # extension version
-    DESCRIPTION = "microbit radio"
+    DESCRIPTION = "Microbit radio 信号中继"
 
     def __init__(self, bucket_token=20, bucket_fill_rate=10):
         super().__init__(bucket_token=bucket_token, bucket_fill_rate=bucket_fill_rate)

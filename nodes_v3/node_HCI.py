@@ -28,8 +28,8 @@ class HCINode(AdapterNode):
     NODE_ID = "eim/node_HCI"
     WEIGHT = 98
     HELP_URL = "https://adapter.codelab.club/extension_guide/HCI/"
+    DESCRIPTION = "接管鼠标键盘"
     VERSION = "1.1.0"
-    DESCRIPTION = "a cute robot"
 
     def __init__(self):
         super().__init__()

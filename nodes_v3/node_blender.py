@@ -2,41 +2,33 @@
 '''
 运行在 blender 环境下
 '''
-from io import StringIO
-import contextlib
 import sys
 import time
 
 from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.utils import threaded
-import bpy # 
+import bpy  #
 from loguru import logger
 
 
 class BlenderNode(AdapterNode):
     NODE_ID = "eim/node_blender"
+
     def __init__(self):
         super().__init__()
 
-    @contextlib.contextmanager
-    def stdoutIO(self, stdout=None):
-        old = sys.stdout
-        if stdout is None:
-            stdout = StringIO()
-        sys.stdout = stdout
-        yield stdout
-        sys.stdout = old
+    def run_python_code(self, code):
+        try:
+            output = eval(code, {"__builtins__": None}, {"bpy": bpy})
+        except Exception as e:
+            output = e
+        return output
 
     def extension_message_handle(self, topic, payload):
         python_code = payload["content"]
         logger.info(f'python_code: {python_code}')
-        # extension_python.py
-        try:
-            output = exec(python_code, {"__builtins__": None}, {
-                "bpy": bpy,
-            })
-        except Exception as e:
-            output = e
+        output = self.run_python_code(python_code)
+
         payload["content"] = str(output)
         message = {"payload": payload}
         self.publish(message)

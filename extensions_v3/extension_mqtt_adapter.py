@@ -19,9 +19,12 @@ class MqttAdapterExtension(Extension):
     todo:
         与 broker 合并？
     '''
+    NODE_ID = "eim"
+    HELP_URL = "https://adapter.codelab.club/extension_guide/MQTT_adapter/"
+    DESCRIPTION = "桥接 mqtt 与 Scratch"
+
     def __init__(self):
         super().__init__()
-        self.NODE_ID = "eim"
 
         # mqtt settings
         self.mqtt_addr = "127.0.0.1"
