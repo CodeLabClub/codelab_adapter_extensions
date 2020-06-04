@@ -3,14 +3,12 @@ https://github.com/UBTEDU/Yan_ADK
 http://192.168.31.109:9090/v1/ui/#!/devices/get_devices_battery
 https://app.swaggerhub.com/apis-docs/UBTEDU/apollo_cn/1.0.0#/devices/getDevicesVersions
 
-todo 使用rest api， 不用 openadk
-    前端传入ip，返回连接成功与否信息
+todo 
+    使用rest api， 不用 openadk
 
 调试技巧
-    直接使用python 在terminal里运行插件
+    直接使用python 在terminal里运行 node 插件
 '''
-from io import StringIO
-import contextlib
 import sys
 import time
 import os  # env
@@ -19,10 +17,6 @@ from loguru import logger
 from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.utils import get_or_create_node_logger_dir, install_requirement
 from pprint import pprint
-
-# GPIOZERO_PIN_FACTORY=pigpio PIGPIO_ADDR= "raspberrypi.local"# 192.168.1.3
-# os.environ["GPIOZERO_PIN_FACTORY"] = "pigpio"
-# os.environ["PIGPIO_ADDR"] = "raspberrypi.local"
 
 node_logger_dir = get_or_create_node_logger_dir()
 debug_log = str(node_logger_dir / "debug.log")
@@ -41,11 +35,12 @@ class Robot:
         self.configuration.host = f'http://{robot_ip}:9090/v1'  # /ui
         if self.ping_robot() == "online":
             if self.node:
-                self.node.pub_notification("Device(Yanshee) Connected!", type="SUCCESS")  # 由一个积木建立连接到时触发
+                self.node.pub_notification("Device(Yanshee) Connected!",
+                                           type="SUCCESS")  # 由一个积木建立连接到时触发
             self.is_connected = True
             return True
 
-    # 装饰器 require connect
+    # todo 装饰器 require connect
     def ping_robot(self):
         if not self.configuration:
             return
@@ -154,7 +149,8 @@ class YansheeNode(AdapterNode):
 
         # 检查是否连接
         if (not self.robot.is_connected) and ("connect" not in python_code):
-            self.pub_notification("Please connect Device(Yanshee)", type="WARNING")
+            self.pub_notification("Please connect Device(Yanshee)",
+                                  type="WARNING")
             return
 
         output = self.run_python_code(python_code)
