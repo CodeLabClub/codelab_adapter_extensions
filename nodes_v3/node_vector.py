@@ -10,7 +10,7 @@ import queue
 import time
 
 from loguru import logger
-import anki_vector # 需要手动配置，就不自动安装了
+import anki_vector  # 需要手动配置，就不自动安装了
 
 from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.utils import get_or_create_node_logger_dir
@@ -29,14 +29,14 @@ class VectorNode(AdapterNode):
     node pub it's status: pid
     '''
 
-    NODE_ID = "eim/node_vector" # 手写, 没有魔法
+    NODE_ID = "eim/node_vector"  # 手写, 没有魔法
     WEIGHT = 99
     HELP_URL = "https://adapter.codelab.club/extension_guide/vector/"
     VERSION = "1.0.0"
     DESCRIPTION = "最好的 AI 教育机器人之一， Cozmo的下一代"
 
     def __init__(self):
-        super().__init__(logger=logger) # todo log
+        super().__init__(logger=logger)  # todo log
         # self.NODE_ID = self.generate_node_id(__file__) # 检查时发现
         self.q = queue.Queue()
         # from_jupyter/extensions
@@ -44,14 +44,94 @@ class VectorNode(AdapterNode):
     def extension_message_handle(self, topic, payload):
         self.q.put(payload)
 
+    def pub_event(self, event_name, event_param=""):
+        message = self.message_template()
+        message["payload"]["message_type"] = "device_event"
+        message["payload"]["content"] = {
+            "event_name": event_name,
+            "event_param": event_param
+        }
+        self.publish(message)
+
     # exit_message_handle 只是node需要 self.ternimate()
     def exit_message_handle(self, topic, payload):
         self.terminate()
 
+    def handle_object_appeared(self, robot, event_type, event):
+        # This will be called whenever an EvtObjectAppeared is dispatched -
+        # whenever an Object comes into view.
+        # print(f"--------- Vector started seeing an object --------- \n{event.obj}")
+        object_id = event.obj.object_id
+        event_param = object_id
+        event_name = "ObjectAppeared"
+        self.pub_event(event_name, event_param)
+
+    def handle_object_disappeared(self, robot, event_type, event):
+        # This will be called whenever an EvtObjectDisappeared is dispatched -
+        # whenever an Object goes out of view.
+        object_id = event.obj.object_id
+        event_param = object_id
+        event_name = "ObjectDisappeared"
+        self.pub_event(event_name, event_param)
+
+    def handle_object_tapped(self, robot, event_type, event):
+        # This will be called whenever an EvtObjectDisappeared is dispatched -
+        # whenever an Object goes out of view.
+        print("ObjectTapped")
+        object_id = event.obj.object_id
+        event_param = object_id
+        event_name = "ObjectTapped"
+        self.pub_event(event_name, event_param)
+
+    def handle_object_moved(self, robot, event_type, event):
+        # This will be called whenever an EvtObjectDisappeared is dispatched -
+        # whenever an Object goes out of view.
+        object_id = event.obj.object_id
+        event_param = object_id
+        event_name = "ObjectMovingStarted"
+        self.pub_event(event_name, event_param)
+
+
+    '''
+    def handle_face_appeared(self, robot, event_type, event):
+        print(f"--------- Vector observed an face --------- \\n{event.face}")
+
+    def handle_face_disappeared(self, robot, event_type, event):
+        # This will be called whenever an EvtFaceDisappeared is dispatched -
+        # whenever an face goes out of view.
+        print(
+            f"--------- Vector stopped seeing an face --------- \\n{event.face}"
+        )
+    '''
+
     def run(self):
+        # enable_face_detection = True, show_viewer=True  https://github.com/anki/vector-python-sdk/blob/8ea77411dc56b16039b802e7c60c25a6475dcf8b/anki_vector/faces.py#L165
         with anki_vector.Robot() as robot:
             # with 以内 vector 错误无法被捕获，sdk做了特殊处理
             self.pub_notification("Vector Connected!", type="SUCCESS")
+
+            # event
+            ## object event
+
+            robot.events.subscribe(self.handle_object_appeared,
+                                   anki_vector.events.Events.object_appeared)
+            robot.events.subscribe(
+                self.handle_object_disappeared,
+                anki_vector.events.Events.object_disappeared)
+            '''
+            robot.events.subscribe(self.handle_object_tapped,
+                                   anki_vector.events.Events.object_tapped)
+            robot.events.subscribe(self.handle_object_moved,
+                                   anki_vector.events.Events.object_moved)
+            '''
+            ## face
+            '''
+            robot.events.subscribe(self.handle_face_appeared,
+                                   anki_vector.events.Events.face_appeared)
+            robot.events.subscribe(self.handle_face_disappeared,
+                                   anki_vector.events.Events.face_disappeared)
+            '''
+
             while self._running:
                 time.sleep(0.05)
                 if not self.q.empty():

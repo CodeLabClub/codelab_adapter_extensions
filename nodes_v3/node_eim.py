@@ -11,7 +11,7 @@ logger.add(debug_log, rotation="1 MB", level="DEBUG")
 
 
 class EIMNode(AdapterNode):
-    NODE_ID = "eim/node_eim"
+    NODE_ID = "eim"
     
     def __init__(self):
         super().__init__(logger=logger)

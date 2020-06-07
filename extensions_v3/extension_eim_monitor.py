@@ -22,7 +22,11 @@ class EimMonitorExtension(Extension):
         self.q = queue.Queue()
 
     def extension_message_handle(self, topic, payload):
-        self.q.put(payload)
+        content = payload["content"]
+        response = sys.modules["eim_monitor"].monitor(content, self.logger)
+        payload["content"] = response
+        message = {"payload": payload}
+        self.publish(message)
 
     def run(self):
         module_name = "eim_monitor"
@@ -35,14 +39,6 @@ class EimMonitorExtension(Extension):
         importlib.reload(module)
 
         while self._running:
-            if not self.q.empty():
-                payload = self.q.get()
-                content = payload["content"]
-                response = sys.modules["eim_monitor"].monitor(
-                    content, self.logger)
-                payload["content"] = response
-                message = {"payload": payload}
-                self.publish(message)
             time.sleep(0.1)
 
 

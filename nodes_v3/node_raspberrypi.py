@@ -22,6 +22,7 @@ node_logger_dir = get_or_create_node_logger_dir()
 debug_log = str(node_logger_dir / "debug.log")
 logger.add(debug_log, rotation="1 MB", level="DEBUG")
 
+
 class RaspberryPi:
     def __init__(self, node=None):
         self.node = node
@@ -33,12 +34,13 @@ class RaspberryPi:
         self.factory = PiGPIOFactory(host=ip)  # 192.168.1.3
         if self.factory:
             if self.node:
-                node.pub_notification("Device(RaspberryPi) Connected!",
-                                      type="SUCCESS")  # 由一个积木建立连接到时触发
+                node.pub_notification(
+                    "Device(RaspberryPi) Connected!",
+                    type="SUCCESS")  # 由一个积木建立连接到时触发
             self.is_connected = True
+            self.led = LED(17, pin_factory=self.factory)
             return True
 
-        self.led = LED(17, pin_factory=self.factory)
 
 class RPINode(AdapterNode):
     NODE_ID = "eim/node_raspberrypi"
@@ -65,8 +67,9 @@ class RPINode(AdapterNode):
     def run_python_code(self, code):
         try:
             output = eval(code, {"__builtins__": None}, {
-                "led": self.led,
-                "factory": self.factory
+                "connect": self.rpi.connect,
+                "led": self.rpi.led,
+                "factory": self.rpi.factory
             })
         except Exception as e:
             output = e
@@ -74,10 +77,9 @@ class RPINode(AdapterNode):
 
     def extension_message_handle(self, topic, payload):
         self.logger.info(f'code: {payload["content"]}')
-        message_id = payload.get("message_id")
         python_code = payload["content"]
         if (not self.rpi.is_connected) and ("connect" not in python_code):
-            self.pub_notification("Please connect Minecraf", type="WARNING")
+            self.pub_notification("Please connect RaspberryPi", type="WARNING")
             return
         output = self.run_python_code(python_code)
         payload["content"] = str(output)

@@ -20,7 +20,7 @@ debug_log = str(node_logger_dir / "debug.log")
 logger.add(debug_log, rotation="1 MB", level="DEBUG")
 
 
-class MC:
+class MyMinecraftClient:
     def __init__(self, node=None):
         self.node = node
         self.is_connected = False
@@ -46,12 +46,12 @@ class McpiNode(AdapterNode):
     NODE_ID = "eim/node_minecraft"
     REQUIREMENTS = ["mcpi", "minecraftstuff"]
     HELP_URL = "https://adapter.codelab.club/extension_guide/minecraft/"
-    DESCRIPTION = "《Minecraf》是一款开放世界游戏"
+    DESCRIPTION = "《Minecraft》是一款开放世界游戏"
 
     def __init__(self):
         super().__init__(logger=logger)
         self.NODE_ID = self.generate_node_id(__file__)
-        self._mc = MC(self)
+        self.mc_client = MyMinecraftClient(self)
 
     def _import_requirement_or_import(self):
         requirement = self.REQUIREMENTS
@@ -71,8 +71,9 @@ class McpiNode(AdapterNode):
     def run_python_code(self, code):
         try:
             output = eval(code, {"__builtins__": None}, {
-                "mc": self._mc.mc,
-                "mcTurtle": self._mc.mcTurtle,
+                "connect": self.mc_client.connect,
+                "mc": self.mc_client.mc,
+                "mcTurtle": self.mc_client.mcTurtle,
             })
         except Exception as e:
             output = e
@@ -82,9 +83,8 @@ class McpiNode(AdapterNode):
         self.logger.info(f'code: {payload["content"]}')
         message_id = payload.get("message_id")
         python_code = payload["content"]
-        # connect
-        # 检查是否连接
-        if (not self._mc.is_connected) and ("connect" not in python_code):
+
+        if (not self.mc_client.is_connected) and ("connect" not in python_code):
             self.pub_notification("Please connect Minecraf", type="WARNING")
             return
 
