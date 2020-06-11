@@ -44,7 +44,7 @@ class RoboMasterExtension(Extension):
     def run(self):
         command_socket = self.create_command_socket()
         # 默认建立连接
-        connect_msg = "command"
+        connect_msg = "command;"
         command_socket.send(connect_msg.encode('utf-8'))
         buf = command_socket.recv(1024) # todo: timeout
         # todo 开启事件上报, 默认开启，使用一个新的socket线程，接收事件。使用bucket token
