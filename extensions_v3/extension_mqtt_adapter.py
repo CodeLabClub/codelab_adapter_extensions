@@ -11,6 +11,10 @@ import paho.mqtt.client as mqtt
 
 class MqttAdapterExtension(Extension):
     '''
+    mqtt tet server
+        test.mosquitto.org
+        hbmqtt_pub --url mqtt://iot.codelab.club -t to_scratch -m "mqtt message"
+        
     MqttAdapter的职责: 转发进出的消息: scratch <--> mqtt
 
     hbmqtt_pub --url mqtt://127.0.0.1 -t to_scratch -m "mqtt message" # eim message
@@ -27,15 +31,17 @@ class MqttAdapterExtension(Extension):
         super().__init__()
 
         # mqtt settings
-        self.mqtt_addr = "127.0.0.1"
+        self.mqtt_addr = "iot.codelab.club"
         self.mqtt_port = 1883
+        self.username = "guest"
+        self.password = "test"
 
         self.mqtt_sub_topics = ["to_scratch"]
         # mqtt client
         self.client = mqtt.Client()
         self.client.on_connect = self.mqtt_on_connect
         self.client.on_message = self.mqtt_on_message
-        # self.client.username_pw_set(self.username, self.password)
+        self.client.username_pw_set(self.username, self.password)
         self.client.connect(self.mqtt_addr, self.mqtt_port, 60)
         self.client.loop_start()  # as thread
 
@@ -51,7 +57,7 @@ class MqttAdapterExtension(Extension):
         self.logger.info(f'eim message:{payload}')
         # 来自Scratch
         # self.publish({"payload": payload})
-        self.logger.info(topic, payload)
+        # self.logger.info(topic, payload)
         content = payload["content"]
         # payload = json.dumps(payload).encode()
         self.client.publish("from_scratch", content.encode())
