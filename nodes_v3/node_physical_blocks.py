@@ -160,9 +160,13 @@ class PhysicalBlocksExtension(AdapterNode):
             # 两个角点的坐标，求夹脚
             index = ids.index(marker_id)
             target_corner = corners[index]
-            x1 = target_corner[:, 0].mean()
-            y1 = target_corner[:, 1].mean()
-            return {"x": float(x1), "y": float(y1)}[xy]
+            # x1 = target_corner[:, 0].mean()
+            # y1 = target_corner[:, 1].mean()
+            x1, y1 = target_corner[:, 0][0] # 左上角的点，第1个
+            x1_scratch = x1  - 240
+            y1_scratch = -1*y1 + 180
+            # target_corner[:, 1][0] # 右上角的点，第2个
+            return {"x": float(x1_scratch), "y": float(y1_scratch)}[xy]
         return "None"
 
     def get_markers_id_list(self, img, content):

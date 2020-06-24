@@ -30,16 +30,17 @@ class EimMonitorExtension(Extension):
 
     def run(self):
         module_name = "eim_monitor"
+        # todo try else
         try:
             importlib.import_module(module_name)
         except Exception as e:
             self.pub_notification(f'{e}', type="ERROR")
-            return
-        module = sys.modules["eim_monitor"]
-        importlib.reload(module)
+        else:
+            module = sys.modules["eim_monitor"]
+            importlib.reload(module)
 
-        while self._running:
-            time.sleep(0.1)
+            while self._running:
+                time.sleep(0.1)
 
 
 export = EimMonitorExtension

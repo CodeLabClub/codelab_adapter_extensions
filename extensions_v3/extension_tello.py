@@ -499,9 +499,10 @@ class TelloExtension(Extension):
         '''
         stop thread
         '''
-        del self.tello
-        self.clean_up()
-        self.logger.info(f"{self} terminate!")
-
+        if self._running:
+            del self.tello # todo fix: port been used
+            # self.clean_up()
+            self.logger.info(f"{self} terminate!")
+            super().terminate()
 
 export = TelloExtension
