@@ -504,5 +504,6 @@ class TelloExtension(Extension):
             # self.clean_up()
             self.logger.info(f"{self} terminate!")
             super().terminate()
+        time.sleep(0.1)
 
 export = TelloExtension
