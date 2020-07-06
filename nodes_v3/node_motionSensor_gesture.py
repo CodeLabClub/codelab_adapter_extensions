@@ -1,13 +1,6 @@
 import time
 from codelab_adapter_client import AdapterNode
-
-# 指向 sdk path
-import sys, os
-kano_sdk_path = "/Users/wuwenjie/mylab/codelabclub/community-sdk"
-sys.path.append(kano_sdk_path)
-
-from communitysdk import list_connected_devices, MotionSensorKit
-
+from codelab_adapter_client.utils import get_or_create_node_logger_dir, install_requirement
 
 class KanoMotionExtension(AdapterNode):
     NODE_ID = "eim/node_motionSensor"
@@ -16,9 +9,22 @@ class KanoMotionExtension(AdapterNode):
     DESCRIPTION = "kano motion sensor"
     ICON_URL = ""
     REQUIRES_ADAPTER = ""  # ">= 3.2.0"
+    REQUIREMENTS = ["kano-community-sdk"]
 
     def __init__(self):
         super().__init__()
+
+    def _import_requirement_or_import(self):
+        requirement = self.REQUIREMENTS
+        try:
+            from communitysdk import list_connected_devices, MotionSensorKit
+        except ModuleNotFoundError:
+            self.pub_notification(f'try to install {" ".join(requirement)}...')
+            # 只有 local python 下才可用，adapter内置的python无法使用pip（extension）
+            install_requirement(requirement)
+            self.pub_notification(f'{" ".join(requirement)} installed!')
+        from communitysdk import list_connected_devices, MotionSensorKit
+        global list_connected_devices, MotionSensorKit
 
     def extension_message_handle(self, topic, payload):
         self.logger.info(f'eim message:{payload}')
@@ -50,6 +56,8 @@ class KanoMotionExtension(AdapterNode):
         '''
         run as thread
         '''
+        self._import_requirement_or_import()
+
         devices = list_connected_devices()  # hack后
         msk_filter = filter(lambda device: isinstance(device, MotionSensorKit),
                             devices)
