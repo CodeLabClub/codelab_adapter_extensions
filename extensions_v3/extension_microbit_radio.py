@@ -34,6 +34,10 @@ class MicrobitRadioProxy(Extension):
         # self.q.put(payload)
         content = payload["content"] + "\r\n"
         self.ser.write(content.encode('utf-8'))
+        # reply to scratch
+        payload["content"] = "ok"
+        message = {"payload": payload}
+        self.publish(message)
 
     def run(self):
         while self._running:

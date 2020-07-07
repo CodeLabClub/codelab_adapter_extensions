@@ -21,10 +21,16 @@ class RoboMasterExtension(Extension):
         '''
         ip_sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         ip_sock.bind(('0.0.0.0', 40926))
-        # wait...
-        ip_str = ip_sock.recvfrom(1024) # block
-        host = ip_str[-1][0]
-        return host
+        # set timeout
+        try:
+            ip_sock.settimeout(3)
+            # wait...
+            ip_str = ip_sock.recvfrom(1024) # block
+            host = ip_str[-1][0]
+            return host
+        except Exception as e:
+            self.pub_notification(str(e),type="ERROR")
+            raise e
 
     def create_command_socket(self):
         command_port = 40923
