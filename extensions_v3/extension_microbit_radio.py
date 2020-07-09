@@ -19,7 +19,7 @@ class MicrobitRadioProxy(Extension):
     NODE_ID = "eim/extension_microbit_radio"
     HELP_URL = "http://adapter.codelab.club/extension_guide/microbit_radio/"
     WEIGHT = 98
-    VERSION = "1.0"  # extension version
+    VERSION = "1.1"  # 简化makecode对字符串的处理，移除\r
     DESCRIPTION = "Microbit radio 信号中继"
 
     def __init__(self, bucket_token=20, bucket_fill_rate=10):
@@ -32,7 +32,7 @@ class MicrobitRadioProxy(Extension):
             test: codelab-message-pub -j '{"topic":"scratch/extensions/command","payload":{"node_id":"eim/usbMicrobit", "content":"display.show(\"c\")"}}'
             '''
         # self.q.put(payload)
-        content = payload["content"] + "\r\n"
+        content = payload["content"] + "\n" # "\r\n" # 避免\r作为字符
         self.ser.write(content.encode('utf-8'))
         # reply to scratch
         payload["content"] = "ok"
