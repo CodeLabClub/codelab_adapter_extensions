@@ -1,37 +1,6 @@
-# list ports serial.tools.list_ports
-# set port
-# write xxx
-# read
 '''
-import serial
-from serial.tools.list_ports import comports as list_serial_ports
-
-for i in list_serial_ports():print(i[0])
-
 python -m serial.tools.miniterm <port_name> -h
 python -m serial.tools.list_ports
-
->>> import serial
->>> ser = serial.Serial('/dev/ttyUSB0')  # open serial port
->>> print(ser.name)         # check which port was really used
->>> ser.write(b'hello')     # write a string
->>> ser.close()             # close port
-
-with serial.Serial() as ser:
-    ser.baudrate = 19200
-    ser.port = 'COM1'
-    ser.open()
-    ser.write(b'hello')
-
-help 与 microbit 一起做实验。读输入
-    makecode 写测试
-
-交互式
-
-usage
-    serialHelper.write("a")
-
-刷新端口
 
 todo
     parity 启用奇偶校验
@@ -96,6 +65,7 @@ class SerialExtension(Extension):
     HELP_URL = "http://adapter.codelab.club/extension_guide/serial_adapter/"
     VERSION = "1.0"  # extension version
     DESCRIPTION = "serial adapter"
+    WEIGHT = 93
 
     def __init__(self):
         super().__init__()

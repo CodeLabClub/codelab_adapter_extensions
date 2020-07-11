@@ -1,26 +1,3 @@
-# 广播 xx   command
-#   xx接收到的信息 hat
-# 发现
-# 自动生成可以发送的地址 类似ha 显示和实质
-# 给xxx发送信息
-'''
-import networkzero as nw0
-
-address = nw0.advertise("hello")
-
-while True: # thread
-    name = nw0.wait_for_message_from(address)
-    nw0.send_reply_to(address, "Hello " + name)
-
-hello = nw0.discover("hello")
-reply = nw0.send_message_to(hello, "World!")
-print(reply)
-reply = nw0.send_message_to(hello, "Tim")
-print(reply)
-
-nw0.discover_all
-'''
-
 import queue
 import time
 
@@ -33,8 +10,10 @@ nw0_message_queue = queue.Queue()
 
 
 class Nw0Helper:
-    def __init__(self, logger):
-        self.logger = logger
+    def __init__(self, extensionInstance):
+        self.extensionInstance = extensionInstance
+        self.logger = extensionInstance.logger
+        self.addresses = None  # 当前连接的port
 
     @threaded
     def _wait_for_message(self, name, address):
@@ -63,6 +42,15 @@ class Nw0Helper:
         addresses = nw0.discover_all()
         return addresses
 
+    def update_addresses(self):
+        addresses = nw0.discover_all()
+        message = self.extensionInstance.message_template()
+        message["payload"]["content"] = {
+            "addresses": addresses, # [['a','xxx'],]
+        }
+        self.extensionInstance.publish(message)
+        return "ok"
+
     def send_message_to(self, address, content):
         reply = nw0.send_message_to(address, content)
         return reply
@@ -74,10 +62,12 @@ class NW0Extension(Extension):
     HELP_URL = "http://adapter.codelab.club/extension_guide/NetworkZero/"
     VERSION = "1.0"  # extension version
     DESCRIPTION = "NetworkZero"
+    WEIGHT = 94.1
+    REQUIRES_ADAPTER = ">= 3.4.0"
 
     def __init__(self):
         super().__init__()
-        self.nw0Helper = Nw0Helper(self.logger)
+        self.nw0Helper = Nw0Helper(self)
 
     def run_python_code(self, code):
         # fork from python extension

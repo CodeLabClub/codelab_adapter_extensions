@@ -81,6 +81,7 @@ class PhysicalBlocksExtension(AdapterNode):
     HELP_URL = "https://adapter.codelab.club/extension_guide/physical_blocks/"
     DESCRIPTION = "在一张桌子上对实物进行编程"
     REQUIREMENTS = ["opencv-contrib-python"]
+    WEIGHT = 100
 
     def __init__(self):
         super().__init__()

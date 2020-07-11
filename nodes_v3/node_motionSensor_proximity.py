@@ -12,6 +12,7 @@ class KanoMotionExtension(AdapterNode):
     ICON_URL = ""
     REQUIRES_ADAPTER = ""  # ">= 3.2.0"
     REQUIREMENTS = ["kano-community-sdk"]
+    
 
     def __init__(self):
         super().__init__()
