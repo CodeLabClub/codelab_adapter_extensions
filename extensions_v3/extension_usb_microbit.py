@@ -1,9 +1,7 @@
-import serial
-import time
-import json
 import queue
+import time
 
-from codelab_adapter.utils import find_microbit
+from codelab_adapter.usb_microbit_helper import MicrobitHelper
 from codelab_adapter.core_extension import Extension
 '''
 todo:
@@ -14,106 +12,69 @@ todo:
 '''
 
 
-def check_env():
-    # 检查环境是否满足要求。 todo: 处理多个microbit的情况
-    return find_microbit()
-
-
 class UsbMicrobitProxy(Extension):
     '''
     use TokenBucket to limit message rate(pub) https://github.com/CodeLabClub/codelab_adapter_client_python/blob/master/codelab_adapter_client/utils.py#L25
     '''
-    
+
     NODE_ID = "eim/extension_usb_microbit"
     HELP_URL = "http://adapter.codelab.club/extension_guide/microbit/"
     WEIGHT = 99
     DESCRIPTION = "使用 Microbit， 为物理世界编程"
-    
+
     def __init__(self, bucket_token=20, bucket_fill_rate=10):
         super().__init__(bucket_token=bucket_token,
                          bucket_fill_rate=bucket_fill_rate)
-
+        self.microbitHelper = MicrobitHelper(self)
         self.q = queue.Queue()
+
+    def run_python_code(self, code):
+        # fork from python extension
+        try:
+            output = eval(code, {"__builtins__": None}, {
+                "microbitHelper": self.microbitHelper,
+            })
+        except Exception as e:
+            output = str(e)
+        return output
 
     def extension_message_handle(self, topic, payload):
         '''
             test: codelab-message-pub -j '{"topic":"scratch/extensions/command","payload":{"node_id":"eim/usbMicrobit", "content":"display.show(\"c\")"}}'
-            '''
-        self.q.put(payload)
+        '''
+        self.logger.info(f'python code: {payload["content"]}')
+        message_id = payload.get("message_id")
+        python_code = payload["content"]
+        if "microbitHelper" in python_code:
+            output = self.run_python_code(python_code)
+            payload["content"] = output
+            message = {"payload": payload}  # 无论是否有message_id都返回
+            self.publish(message)
+        else:
+            self.q.put(python_code)
 
     def run(self):
         while self._running:
-            env_is_valid = check_env()
-            # 等待用户连接microbit
-            # todo: 由前端选择 jupyter stdin channel
-            if not env_is_valid:
-                self.logger.error("No micro:bit found")
-                self.pub_notification("No micro:bit found",
-                                      type="ERROR")  # todo 针对node_id的提醒
-                time.sleep(5)
-            else:
-                port = find_microbit()
-                self.ser = serial.Serial(port, 115200, timeout=1)
-                break
-        self.pub_notification("micro:bit Connected!", type="SUCCESS")
-
-        def get_response_from_microbit():
-            try:
-                data = self.ser.readline()
-                if data:
-                    data = data.decode()
-                    try:
-                        data = eval(data) # todo, 来自 Microbit的数据 暂无安全问题
-                    except (ValueError, SyntaxError):
-                        pass
-                    else:
-                        return data
-            except UnicodeDecodeError:
-                pass
-            return None
-
-        while self._running:
-            # 一读一写 比较稳定, todo: CQRS , todo makecode create hex
-            try:
-                if not self.q.empty():
-                    payload = self.q.get()
-                    message_id = payload.get("message_id")
-                    scratch3_message = {
-                        "topic": self.NODE_ID,
-                        "payload": ""
-                    }
-                    scratch3_message["payload"] = payload["content"]
-                else:
-                    message_id = ""
-                    scratch3_message = {
-                        "topic": self.NODE_ID,
-                        "payload": ""
-                    }
-                scratch3_message = json.dumps(scratch3_message) + "\r\n"
-                scratch3_message_bytes = scratch3_message.encode('utf-8')
-                self.logger.debug(scratch3_message_bytes)
-                self.ser.write(scratch3_message_bytes)
-                # response
-                response_from_microbit = get_response_from_microbit()
-                if response_from_microbit:
-                    message = {
-                        "payload": {
-                            "content": response_from_microbit["payload"]
-                        }
-                    }
-                    if message_id:
-                        message["payload"]["message_id"] = message_id
-                    self.publish(message)
-            except:
-                # todo: 错误信息不明确
+            # 写入才能读出
+            # 检查是否打开
+            if self.microbitHelper.ser:
                 try:
-                    port = find_microbit()
-                    self.ser = serial.Serial(port, 115200, timeout=1)
-                except:
-                    pass
-            finally:
-                rate = 10
-                time.sleep(1 / rate)
+                    self.microbitHelper.send_command()
+                    # 一读一写 比较稳定, todo: CQRS , todo makecode create hex
+                    response_from_microbit = self.microbitHelper.get_response_from_microbit(
+                    )
+                    if response_from_microbit:
+                        message = self.message_template()
+                        message["payload"]["content"] = response_from_microbit[
+                            "payload"]
+                        self.publish(message)
+                    rate = 10
+                    time.sleep(1 / rate)
+                except Exception as e:
+                    self.logger.debug(str(e))
+                    time.sleep(0.5)
+            else:
+                time.sleep(0.5)
 
 
 export = UsbMicrobitProxy

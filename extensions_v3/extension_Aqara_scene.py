@@ -1,36 +1,62 @@
+import hashlib
+import subprocess
 import sys
 import time
-import subprocess
 import webbrowser
+
+import requests
+
 from codelab_adapter.core_extension import Extension
-from codelab_adapter.utils import verify_token, open_path_in_system_file_manager
 from codelab_adapter.settings import TOKEN
-'''
-当前插件只允许运行表达式
-如果你希望执行任意python代码，请使用: https://github.com/CodeLabClub/codelab_adapter_extensions/blob/master/extensions_v2/extension_python_kernel_exec.py，注意风险
-安全性原则: 打开这个插件前，提醒社区用户确认积木中没有危险的Python代码， 允许社区成员举报危险代码
-也可以在Scratch EIM插件中运行Python代码
-'''
+from codelab_adapter.utils import (open_path_in_system_file_manager,
+                                   verify_token)
 
 
-class PyHelper:
-    def open_url(self, url):
-        webbrowser.open(url)
+class PyHelper:    
 
-    def open(self, path):
-        open_path_in_system_file_manager(path)
+    def set_id_key(self, app_id, app_key):
+        self.app_id = app_id
+        self.app_key = app_key
 
-    def bin2dec(self, string):
-        return str(int(string, 2))
+    def _get_headers(self, access_token):
+        time_str = str(int(round(time.time() * 1000)))
+
+        hl = hashlib.md5()
+        hl.update(
+            f"accesstoken={access_token}&appid={self.app_id}&time={time_str}&{self.app_key}"
+            .encode('utf-8'))
+        sign = hl.hexdigest()
+
+        headers = {
+            "Appid": self.app_id,
+            "Accesstoken": access_token,
+            "Time": time_str,
+            "Content-Type": "application/json",
+            "Sign": sign
+        }
+        return headers
+
+    def run_scene(self, id, access_token):
+        headers = self._get_headers(access_token)
+        proxies = {
+            "http": None,
+            "https": None,
+        }
+        res = requests.post(
+            "https://aiot-open-3rd.aqara.cn/3rd/v1.0/open/scene/run",
+            proxies=proxies,
+            headers=headers,
+            json={"sceneId": id})
+        return res.json()
 
 
 class PythonKernelExtension(Extension):
 
-    NODE_ID = "eim/extension_python"
-    HELP_URL = "http://adapter.codelab.club/extension_guide/extension_python_kernel/"
+    NODE_ID = "eim/extension_Aqara_scene"
+    HELP_URL = "http://adapter.codelab.club/extension_guide/extension_Aqara_scene/"
     WEIGHT = 95
     VERSION = "1.0"  # extension version
-    DESCRIPTION = "Python eval"
+    DESCRIPTION = "Aqara scene"
 
     def __init__(self):
         super().__init__()
