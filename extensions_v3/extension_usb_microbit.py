@@ -1,7 +1,7 @@
 import queue
 import time
 
-from codelab_adapter.usb_microbit_helper import MicrobitHelper
+from codelab_adapter.microbit_helper import UsbMicrobitHelper
 from codelab_adapter.core_extension import Extension
 '''
 todo:
@@ -25,7 +25,7 @@ class UsbMicrobitProxy(Extension):
     def __init__(self, bucket_token=20, bucket_fill_rate=10):
         super().__init__(bucket_token=bucket_token,
                          bucket_fill_rate=bucket_fill_rate)
-        self.microbitHelper = MicrobitHelper(self)
+        self.microbitHelper = UsbMicrobitHelper(self)
         self.q = queue.Queue()
 
     def run_python_code(self, code):
@@ -40,7 +40,7 @@ class UsbMicrobitProxy(Extension):
 
     def extension_message_handle(self, topic, payload):
         '''
-            test: codelab-message-pub -j '{"topic":"scratch/extensions/command","payload":{"node_id":"eim/usbMicrobit", "content":"display.show(\"c\")"}}'
+            test: codelab-message-pub -j '{"topic":"scratch/extensions/command","payload":{"node_id":"eim/extension_usb_microbit", "content":"display.show(\"c\")"}}'
         '''
         self.logger.info(f'python code: {payload["content"]}')
         message_id = payload.get("message_id")
