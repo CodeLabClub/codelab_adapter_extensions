@@ -12,7 +12,8 @@ from loguru import logger
 
 from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.utils import get_or_create_node_logger_dir, install_requirement
-
+# import os
+# logger.warning(dict(os.environ))
 # log for debug
 node_logger_dir = get_or_create_node_logger_dir()
 debug_log = str(node_logger_dir / "debug.log")

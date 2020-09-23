@@ -39,8 +39,8 @@ class WebServerExtension(Extension):
     HELP_URL = "https://adapter.codelab.club/extension_guide/webserver/"
     DESCRIPTION = "运行一个简易网站"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.port = 18080
 
     @threaded

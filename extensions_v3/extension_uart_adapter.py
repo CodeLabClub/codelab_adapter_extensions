@@ -10,8 +10,8 @@ class SerialExtension(Extension):
     DESCRIPTION = "serial adapter"
     WEIGHT = 93
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.serialHelper = serialHelper(self)
 
     def run_python_code(self, code):

@@ -15,8 +15,8 @@ class EimMonitorExtension(Extension):
     DESCRIPTION = "响应一条eim消息"
     
     
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         
 
         self.q = queue.Queue()

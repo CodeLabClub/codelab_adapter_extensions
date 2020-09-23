@@ -22,8 +22,8 @@ class JupyterlabExtension(Extension):
     DESCRIPTION = "使用 JupyterLab 开始你的 Python 之旅"
     REQUIREMENTS = ["jupyterlab"]
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
         self.adapter_home_path = get_adapter_home_path()
         self.python_path = get_python3_path()

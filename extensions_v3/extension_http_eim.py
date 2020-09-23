@@ -76,8 +76,8 @@ class WebServerExtension(Extension):
     HELP_URL = "https://adapter.codelab.club/extension_guide/webserver/"
     DESCRIPTION = "http eim adapter"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.port = PORT
 
     @threaded

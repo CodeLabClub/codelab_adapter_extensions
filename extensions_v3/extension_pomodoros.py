@@ -12,8 +12,8 @@ class PomodoroExtension(Extension):
     VERSION = 1.0  # extension version
     DESCRIPTION = "启动一个番茄时钟"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.NODE_ID = "eim"  # default : eim
 
     def send_message(self):

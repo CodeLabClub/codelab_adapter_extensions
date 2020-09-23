@@ -2,6 +2,9 @@ import time
 
 from codelab_adapter.core_extension import Extension
 from codelab_adapter.microbit_helper import MicrobitRadioHelper
+'''
+todo 错误信息报告 通知
+'''
 
 
 class MicrobitRadioProxy(Extension):
@@ -15,9 +18,11 @@ class MicrobitRadioProxy(Extension):
     VERSION = "1.1"  # 简化makecode对字符串的处理，移除\r
     DESCRIPTION = "Microbit radio 信号中转站"
 
-    def __init__(self, bucket_token=20, bucket_fill_rate=10):
-        super().__init__(bucket_token=bucket_token,
-                         bucket_fill_rate=bucket_fill_rate)
+    def __init__(self, **kwargs):  # kwargs 接受启动参数
+        super().__init__(
+            bucket_token=200,  #  默认是100条 hub模式消息量大
+            bucket_fill_rate=100,
+            **kwargs)
         self.microbitHelper = MicrobitRadioHelper(self)
 
     def run_python_code(self, code):
@@ -28,6 +33,8 @@ class MicrobitRadioProxy(Extension):
             })
         except Exception as e:
             output = str(e)
+            # 也作为提醒
+            self.pub_notification(str(e), type="ERROR")
         return output
 
     def extension_message_handle(self, topic, payload):
@@ -46,6 +53,7 @@ class MicrobitRadioProxy(Extension):
     def run(self):
         while self._running:
             if self.microbitHelper.ser:
+                # node -> microbit adapter
                 response_from_microbit = self.microbitHelper.get_response_from_microbit(
                 )
                 # print(response_from_microbit)
@@ -56,6 +64,7 @@ class MicrobitRadioProxy(Extension):
                     self.publish(message)
             else:
                 time.sleep(0.5)
+                # 广播不在线
 
 
 export = MicrobitRadioProxy

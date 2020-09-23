@@ -16,8 +16,8 @@ class NW0Extension(Extension):
     WEIGHT = 94.1
     REQUIRES_ADAPTER = ">= 3.4.0"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.nw0Helper = Nw0Helper(self, nw0_message_queue)
 
     def run_python_code(self, code):

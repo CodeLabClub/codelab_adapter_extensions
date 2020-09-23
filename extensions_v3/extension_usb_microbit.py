@@ -22,9 +22,9 @@ class UsbMicrobitProxy(Extension):
     WEIGHT = 99
     DESCRIPTION = "使用 Microbit， 为物理世界编程"
 
-    def __init__(self, bucket_token=20, bucket_fill_rate=10):
+    def __init__(self, bucket_token=20, bucket_fill_rate=10, **kwargs):
         super().__init__(bucket_token=bucket_token,
-                         bucket_fill_rate=bucket_fill_rate)
+                         bucket_fill_rate=bucket_fill_rate, **kwargs)
         self.microbitHelper = UsbMicrobitHelper(self)
         self.q = queue.Queue()
 

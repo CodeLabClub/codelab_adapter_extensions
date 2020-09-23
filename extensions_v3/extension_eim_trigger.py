@@ -11,8 +11,8 @@ class EimTriggerExtension(Extension):
     WEIGHT = 97
     DESCRIPTION = "触发一条eim消息"
     
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def run(self):
         module_name = "eim_trigger"

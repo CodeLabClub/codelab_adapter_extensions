@@ -50,8 +50,8 @@ class StageExtension(Extension):
     ICON_URL = ""
     REQUIRES_ADAPTER = "" # ">= 3.2.0"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def extension_message_handle(self, topic, payload):
         # self.logger.info(f'the message payload from scratch: {payload}')

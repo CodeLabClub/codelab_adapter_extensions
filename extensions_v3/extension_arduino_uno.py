@@ -12,7 +12,7 @@ from codelab_adapter.gateway_base import GatewayBaseAIO
 
 
 # noinspection PyAbstractClass,PyMethodMayBeStatic,PyRedundantParentheses,DuplicatedCode
-class ArduinoGateway(GatewayBaseAIO):
+class ArduinoGateway(GatewayBaseAIO): # 直接回复
     '''
     use TokenBucket to limit message rate(pub) https://github.com/CodeLabClub/codelab_adapter_client_python/blob/master/codelab_adapter_client/utils.py#L25
     '''
@@ -33,7 +33,9 @@ class ArduinoGateway(GatewayBaseAIO):
                  keep_alive=False,
                  log=True,
                  bucket_token=20,
-                 bucket_fill_rate=10):
+                 bucket_fill_rate=10,
+                 **kwargs # 暂未处理启动提醒
+                 ):
 
         # set the event loop to be used. accept user's if provided
         self.event_loop = event_loop
@@ -69,7 +71,7 @@ class ArduinoGateway(GatewayBaseAIO):
         self.first_analog_pin = self.arduino.first_analog_pin
 
         # Initialize the parent
-        super().__init__(bucket_token=bucket_token, bucket_fill_rate=bucket_fill_rate)
+        super().__init__(bucket_token=bucket_token, bucket_fill_rate=bucket_fill_rate, **kwargs)
 
         self.first_analog_pin = self.arduino.first_analog_pin
         self.keep_alive = keep_alive

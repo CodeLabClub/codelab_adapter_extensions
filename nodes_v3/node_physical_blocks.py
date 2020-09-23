@@ -102,6 +102,7 @@ class PhysicalBlocksExtension(AdapterNode):
         frame = img
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
+        # aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_100) # 
         parameters = cv2.aruco.DetectorParameters_create()
         corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(
             frame, aruco_dict, parameters=parameters)

@@ -476,8 +476,8 @@ class TelloExtension(Extension):
     VERSION = "1.0"  # extension version
     DESCRIPTION = "tello"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.tello = Tello('', 8889)
 
     def extension_message_handle(self, topic, payload):

@@ -20,8 +20,8 @@ class MqttBrokerExtension(Extension):
     DESCRIPTION = "在本地启动一个轻量级 MQTT Broker"
 
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     async def broker_coro(self):
         # https://hbmqtt.readthedocs.io/en/latest/references/broker.html#broker-configuration

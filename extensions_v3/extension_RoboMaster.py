@@ -11,8 +11,8 @@ class RoboMasterExtension(Extension):
     HELP_URL = "http://adapter.codelab.club/extension_guide/RoboMaster/"
     DESCRIPTION = "开火！RoboMaster"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.q = queue.Queue()
 
     def get_robot_ip(self):

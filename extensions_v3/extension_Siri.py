@@ -78,8 +78,8 @@ class WebServerExtension(Extension):
     HELP_URL = "https://adapter.codelab.club/extension_guide/siri/"
     DESCRIPTION = "Hey Siri"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.port = PORT
 
     @threaded

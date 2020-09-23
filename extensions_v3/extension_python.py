@@ -32,8 +32,8 @@ class PythonKernelExtension(Extension):
     VERSION = "1.0"  # extension version
     DESCRIPTION = "Python eval"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.PyHelper = PyHelper()
 
     def run_python_code(self, code):

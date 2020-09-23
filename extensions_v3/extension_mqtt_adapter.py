@@ -27,8 +27,8 @@ class MqttAdapterExtension(Extension):
     HELP_URL = "https://adapter.codelab.club/extension_guide/MQTT_adapter/"
     DESCRIPTION = "桥接 mqtt 与 Scratch"
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
         # mqtt settings
         self.mqtt_addr = "iot.codelab.club"
