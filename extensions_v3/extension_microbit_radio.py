@@ -34,7 +34,7 @@ class MicrobitRadioProxy(Extension):
         except Exception as e:
             output = str(e)
             # 也作为提醒
-            self.pub_notification(str(e), type="ERROR")
+            self.pub_notification(output, type="ERROR")
         return output
 
     def extension_message_handle(self, topic, payload):
