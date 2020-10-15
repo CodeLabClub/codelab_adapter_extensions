@@ -1,3 +1,4 @@
+# please rename the file to extension_python_exec.py
 from io import StringIO
 import contextlib
 import sys
