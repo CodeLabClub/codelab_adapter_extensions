@@ -31,7 +31,7 @@ def decode_image(src, name):
     '''
     # img = cv2.imread(io.BytesIO(base64.urlsafe_b64decode(data)))
     decoded_data = base64.urlsafe_b64decode(data)
-    np_data = np.fromstring(decoded_data,np.uint8)
+    np_data = np.fromstring(decoded_data, np.uint8)
     img = cv2.imdecode(np_data, cv2.IMREAD_COLOR)
     return img
 
@@ -46,27 +46,29 @@ def base64_cv2(base64_str):
     return image
 '''
 
+
 def vector_angle(a, b):
     # 正负号
     # import numpy as np
-    x= np.array(a)
-    y= np.array(b)
+    x = np.array(a)
+    y = np.array(b)
     # 两个向量
-    Lx=np.sqrt(x.dot(x))
-    Ly=np.sqrt(y.dot(y))
+    Lx = np.sqrt(x.dot(x))
+    Ly = np.sqrt(y.dot(y))
     #相当于勾股定理，求得斜线的长度
-    cos_angle=x.dot(y)/(Lx*Ly)
+    cos_angle = x.dot(y) / (Lx * Ly)
     #求得cos_sita的值再反过来计算，绝对长度乘以cos角度为矢量长度，初中知识。。
     # print(cos_angle)
-    angle=np.arccos(cos_angle)
+    angle = np.arccos(cos_angle)
     # angle2=angle*360/2/np.pi
-    angle2=angle*360/2/np.pi
+    angle2 = angle * 360 / 2 / np.pi
     #变为角度
     if b[1] < 0:
         return -1 * angle2
     else:
         return angle2
     # print(angle2)
+
 
 class PhysicalBlocksExtension(AdapterNode):
     '''
@@ -84,7 +86,7 @@ class PhysicalBlocksExtension(AdapterNode):
     WEIGHT = 100
 
     def __init__(self):
-        super().__init__()
+        super().__init__() # logger=logger
 
     def _install_requirement_or_import(self):
         requirement = self.REQUIREMENTS
@@ -102,7 +104,7 @@ class PhysicalBlocksExtension(AdapterNode):
         frame = img
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
         aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_4X4_50)
-        # aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_100) # 
+        # aruco_dict = cv2.aruco.Dictionary_get(cv2.aruco.DICT_5X5_100) #
         parameters = cv2.aruco.DetectorParameters_create()
         corners, ids, rejectedImgPoints = cv2.aruco.detectMarkers(
             frame, aruco_dict, parameters=parameters)
@@ -138,15 +140,15 @@ class PhysicalBlocksExtension(AdapterNode):
             # 找到id
             index = ids.index(marker_id)
             target_corner = corners[index]
-            x1, y1 = target_corner[:, 0][0] # 左上角的点，第1个
-            x2, y2 = target_corner[:, 1][0] # 右上角的点，第2个
+            x1, y1 = target_corner[:, 0][0]  # 左上角的点，第1个
+            x2, y2 = target_corner[:, 1][0]  # 右上角的点，第2个
             # todo 求角度
             a = [1, 0]
-            b = [x2-x1,y2-y1]
+            b = [x2 - x1, y2 - y1]
             return vector_angle(a, b)
             # return {"x1": float(x1), "y1": float(y1)}
         else:
-            return "None" # 角度不会是 负数
+            return "None"  # 角度不会是 负数
 
     def get_marker_position(self, img, content):
         marker_id = int(content.get("marker_id"))
@@ -164,9 +166,9 @@ class PhysicalBlocksExtension(AdapterNode):
             target_corner = corners[index]
             # x1 = target_corner[:, 0].mean()
             # y1 = target_corner[:, 1].mean()
-            x1, y1 = target_corner[:, 0][0] # 左上角的点，第1个
-            x1_scratch = x1  - 240
-            y1_scratch = -1*y1 + 180
+            x1, y1 = target_corner[:, 0][0]  # 左上角的点，第1个
+            x1_scratch = x1 - 240
+            y1_scratch = -1 * y1 + 180
             # target_corner[:, 1][0] # 右上角的点，第2个
             return {"x": float(x1_scratch), "y": float(y1_scratch)}[xy]
         return "None"
@@ -188,7 +190,7 @@ class PhysicalBlocksExtension(AdapterNode):
         name = codelab_adapter_dir / 'physical_blocks'
         # 图片保存到本地 ~/codelab_adapter/physical_blocks.png
         # filename = decode_image(imgdata, name) # todo 优化，不要保存
-        img = decode_image(imgdata, name) 
+        img = decode_image(imgdata, name)
         if action_map.get(action, None):
             result = action_map.get(action)(img, content)
 
@@ -215,6 +217,9 @@ class PhysicalBlocksExtension(AdapterNode):
             imgdata = content['imgdata']
             message_id = payload['message_id']
             self._handle(action, imgdata, message_id, content)
+        else:
+            payload["content"] = "image data error"
+            self.publish({"payload":payload})
 
     def run(self):
         self._install_requirement_or_import()

@@ -1,4 +1,5 @@
 import time
+import os
 from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.utils import get_or_create_node_logger_dir, install_requirement
 

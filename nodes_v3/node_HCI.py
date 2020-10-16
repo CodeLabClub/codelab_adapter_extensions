@@ -16,8 +16,9 @@ tips:
 
 import queue
 import time
-import pyautogui  # todo 自动安装
+# import pyautogui  # todo 自动安装
 from codelab_adapter_client import AdapterNode
+from codelab_adapter_client.utils import get_or_create_node_logger_dir, install_requirement
 
 
 class HCINode(AdapterNode):
@@ -30,10 +31,23 @@ class HCINode(AdapterNode):
     HELP_URL = "https://adapter.codelab.club/extension_guide/HCI/"
     DESCRIPTION = "接管鼠标键盘"
     VERSION = "1.1.0"
+    REQUIREMENTS = ["pyautogui"]
 
     def __init__(self):
         super().__init__()
         self.q = queue.Queue()
+
+    def _import_requirement_or_import(self):
+        requirement = self.REQUIREMENTS
+        try:
+            import pyautogui
+        except ModuleNotFoundError:
+            self.pub_notification(f'try to install {" ".join(requirement)}...')
+            # 只有 local python 下才可用，adapter内置的python无法使用pip（extension）
+            install_requirement(requirement)
+            self.pub_notification(f'{" ".join(requirement)} installed!')
+        import pyautogui  # 使用点语法 from x import * 不在顶层 无效
+        global pyautogui
 
     def extension_message_handle(self, topic, payload):
         # self.q.put(payload)
@@ -54,6 +68,7 @@ class HCINode(AdapterNode):
         self.terminate()
 
     def run(self):
+        self._import_requirement_or_import()
         while self._running:
             time.sleep(0.5)
 

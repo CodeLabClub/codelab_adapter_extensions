@@ -13,8 +13,8 @@ import bottle
 from bottle import route, run, template, view, request
 
 from codelab_adapter.core_extension import Extension
-from codelab_adapter.utils import threaded, get_local_ip
-from codelab_adapter_client.utils import get_adapter_home_path
+from codelab_adapter.utils import threaded
+from codelab_adapter_client.utils import get_adapter_home_path, get_local_ip
 # html 文件所在目录
 PORT = 18081
 message_queue = queue.Queue()

@@ -51,7 +51,11 @@ class UsbMicrobitProxy(Extension):
             message = {"payload": payload}  # 无论是否有message_id都返回
             self.publish(message)
         else:
-            self.q.put(python_code)
+            self.q.put(python_code) # 写入
+            # todo 返回值
+            payload["content"] = "ok"
+            message = {"payload": payload}
+            self.publish(message)
 
     def run(self):
         while self._running:

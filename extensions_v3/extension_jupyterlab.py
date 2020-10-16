@@ -9,8 +9,8 @@ import signal
 from codelab_adapter.core_extension import Extension
 from codelab_adapter.launcher import launch_proc  # just like subprocess.Popen, but better cross-platform support
 from codelab_adapter.local_env import EnvManage
-from codelab_adapter.utils import get_html_message_for_no_local_python
-from codelab_adapter_client.utils import get_python3_path, install_requirement, get_adapter_home_path
+from codelab_adapter.utils import get_python3_path, get_html_message_for_no_local_python, is_mac, is_win
+from codelab_adapter_client.utils import install_requirement, get_adapter_home_path
 
 
 class JupyterlabExtension(Extension):
@@ -38,10 +38,31 @@ class JupyterlabExtension(Extension):
             self.env_manage.set_env(None)  # update env
 
     def run_jupyterlab(self):
-        cmd = [
-            self.python_path, "-m", "jupyterlab", "--notebook-dir",
-            str(self.adapter_home_path)
-        ]
+        Adapter_APP_index = None
+        if is_win():
+            Adapter_APP_index = 1
+            app_dir = pathlib.Path(
+                sys.executable
+            ).parents[Adapter_APP_index] / "python/lib/site-packages/share/jupyter/lab"
+        if is_mac():
+            # mac, unix?
+            Adapter_APP_index = 2
+            app_dir = pathlib.Path(
+                sys.executable
+            ).parents[Adapter_APP_index] / "app_packages/share/jupyter/lab"
+
+        if Adapter_APP_index:
+            cmd = [
+                self.python_path, "-m", "jupyterlab", "--notebook-dir",
+                str(self.adapter_home_path), "--app-dir",
+                str(app_dir)
+            ]
+        else:
+            # linux
+            cmd = [
+                self.python_path, "-m", "jupyterlab", "--notebook-dir",
+                str(self.adapter_home_path)
+            ]
         try:
             self.jupyter_proc = launch_proc(
                 cmd,
@@ -67,7 +88,7 @@ class JupyterlabExtension(Extension):
         while self._running:
             time.sleep(1)
 
-    def terminate(self):
+    def terminate(self, **kwargs):
         '''
         stop thread
         '''
