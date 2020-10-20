@@ -9,12 +9,24 @@ import webbrowser
 import queue
 
 import requests
-import bottle
-from bottle import route, run, template, view, request
 
 from codelab_adapter.core_extension import Extension
-from codelab_adapter.utils import threaded
+from codelab_adapter.utils import threaded, is_win
 from codelab_adapter_client.utils import get_adapter_home_path, get_local_ip
+
+# windows pythonw
+if is_win():
+    import io
+    from contextlib import redirect_stdout, redirect_stderr
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+    with redirect_stdout(stdout), redirect_stderr(stderr):
+        import bottle # flask fix windows sys.stdout.write, itchat(node)
+        from bottle import route, run, template, view, request
+else:
+    import bottle # flask fix windows sys.stdout.write, itchat(node)
+    from bottle import route, run, template, view, request
+
 # html 文件所在目录
 PORT = 18081
 message_queue = queue.Queue()
@@ -84,7 +96,7 @@ class WebServerExtension(Extension):
 
     @threaded
     def _run_webserver_as_thread(self):
-        try:
+        try:            
             run(host='0.0.0.0', port=self.port)
         except OSError as e:
             self.logger.warning(str(e))

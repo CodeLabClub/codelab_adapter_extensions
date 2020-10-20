@@ -1,11 +1,34 @@
 import time
-
+from extension_usb_microbit import MicrobitHelper # extensions/extension_usb_microbit.py
 from codelab_adapter.core_extension import Extension
-from codelab_adapter.microbit_helper import MicrobitRadioHelper
+# from codelab_adapter.microbit_helper import MicrobitRadioHelper
 '''
 todo 错误信息报告 通知
 '''
 
+class MicrobitRadioHelper(MicrobitHelper):
+    def __init__(self, extensionInstance):
+        self.extensionInstance = extensionInstance
+        super().__init__(extensionInstance)
+    
+    def get_response_from_microbit(self):
+        if self.ser:
+            try:
+                data = self.ser.readline() # timeout?
+                # self.logger.info(repr(data))
+                data_str = data.decode()
+                return data_str.strip()
+            except Exception as e:
+                self.extensionInstance.logger.error(e)
+                self.extensionInstance.pub_notification(str(e), type="ERROR")
+                time.sleep(0.1) # 提示设备未连接
+                # 强行拔掉后，自行退出
+                self.extensionInstance.terminate()
+        else:
+            self.extensionInstance.logger.error("Please connect micro:bit!")
+            self.extensionInstance.pub_notification("Please connect micro:bit!", type="ERROR")
+            # time.sleep(1)
+            self.extensionInstance.terminate()
 
 class MicrobitRadioProxy(Extension):
     '''
@@ -20,7 +43,7 @@ class MicrobitRadioProxy(Extension):
 
     def __init__(self, **kwargs):  # kwargs 接受启动参数
         super().__init__(
-            bucket_token=200,  #  默认是100条 hub模式消息量大
+            bucket_token=100,  #  默认是100条 hub模式消息量大
             bucket_fill_rate=100,
             **kwargs)
         self.microbitHelper = MicrobitRadioHelper(self)
@@ -65,6 +88,12 @@ class MicrobitRadioProxy(Extension):
             else:
                 time.sleep(0.5)
                 # 广播不在线
-
+    def terminate(self):
+        try:
+            if self.microbitHelper.ser:
+                self.microbitHelper.ser.close()
+        except Exception as e:
+            self.logger.error(e)
+        super().terminate()
 
 export = MicrobitRadioProxy

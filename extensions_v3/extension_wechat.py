@@ -3,13 +3,25 @@ todo
     自动登陆默认不启用，可通过配置项启用
     kill itchat thread
 '''
-import itchat, time
-from itchat.content import TEXT
+
 import zmq
 import pathlib
 import threading
-from codelab_adapter.utils import threaded
+from codelab_adapter.utils import threaded, is_win
 from codelab_adapter.core_extension import Extension
+
+if is_win():
+    import io
+    from contextlib import redirect_stdout, redirect_stderr
+    stdout = io.StringIO()
+    stderr = io.StringIO()
+    with redirect_stdout(stdout), redirect_stderr(stderr):
+        import itchat, time
+        from itchat.content import TEXT
+else:
+    import itchat, time
+    from itchat.content import TEXT
+
 
 codelab_adapter_dir = pathlib.Path.home() / "codelab_adapter"
 

@@ -1,101 +1,107 @@
-from microbit import *  # sleep, uart, button_a, display
-import random
+from microbit import *
+import radio
+import gc
+import machine
 
-# todo 使用exec 直接运行代码，realtalk风格
+__version__ = "0.4"
+
+class Servo:
+    def __init__(self, pin):
+        self.pin = pin
+        self.pin.set_analog_period(20)
+        self.status = 0
+        self.angle(0)
+
+    def angle(self, d=None):
+        if d is None:
+            return self.status
+        else:
+            self.pin.write_analog(int(1023 * (0.5 + d/90) / 20))
+            self.status = d
+
+# https://microbit-micropython.readthedocs.io/en/v1.0.1/radio.html
+# https://microbit-challenges.readthedocs.io/en/latest/tutorials/radio.html#putting-it-together
+radio.on()
+radio.config(channel=1)
+radio.config(power=7)
 
 uart.init(115200)
+# display.scroll("welcome!", wait=False, loop=False)
+display.show(Image.HAPPY)
+# TOPIC = "eim/usbMicrobit"
 
-display.scroll("codelab", wait=False, loop=False)
-
-TOPIC = "eim/usbMicrobit"
-
-'''
-写成server风格: 响应式
-  硬件内部: read-write
-  client:  write-read
-
-why:
-  *  通信方式更简单（不需要协程！），易于拓展为蓝牙、wifi(socket)之类
-  *  sensor_pub和actuator_sub一致
-    *  发送传感器数据是对请求数据的回应 write 具体传感器数据值
-    *  接收执行指令也是对请求数据的回应 write done
-  *  由proxy控制rate
-  *  理想情况下这种通信也用zmq，但出于现实原因，我们得使用蓝牙，wifi之类的，而且未必有zmq库
-
-build:
-    在python.microbit.org编译为hex，需要删除中文。
-'''
-
-
+servo = Servo(pin2)
 def get_sensors():
-    '''
-    here: sensor pub message
-    '''
-    # while True:
     a = button_a.is_pressed()
     b = button_b.is_pressed()
     x = accelerometer.get_x()
     y = accelerometer.get_y()
     z = accelerometer.get_z()
-
+    pin_one_analog_input = pin1.read_analog()
+    pin_two_analog_input = pin2.read_analog()
+    gesture = accelerometer.current_gesture()
+    details = radio.receive_full()
+    # msg, rssi, timestamp = details
     dic = {
-        # "id": "microbit",
-        "topic": TOPIC,
+        # "topic": TOPIC,
         "payload": {
             "button_a": a,
             "button_b": b,
             "x": x,
             "y": y,
-            "z": z
+            "z": z,
+            "pin_one_analog_input": pin_one_analog_input,
+            "pin_two_analog_input": pin_two_analog_input,
+            "gesture": gesture,
+            "radio_data": details
         }
     }
     return dic
 
-def get_topic_and_data(b):
-    # 两种请求都使用一样的结构,只是topic不同
+def get_msgid_and_data(b):
+    if gc.mem_free() < 2000:
+        gc.collect()
     try:
         b = b.strip()
         json_str = str(b, 'utf-8')
         json = eval(json_str)
-        # :todo check key data, topic
-        if not json.get('topic'):
-            return
-        topic = str(json.get('topic'))
+        # :todo check key data, msgid
+        msgid = str(json.get('msgid'))
         data = str(json.get("payload"))
-        return topic, data
+        return msgid, data
     except Exception as e:
-        # 舍弃无效的数据
         display.show(str("!"))
-        return
+        return "err", str(e)
 
-
-def on_callback_req(topic, python_code):
-    '''
-    对请求的响应
-    '''
+def on_callback_req(msgid, python_code):
     try:
-        exec(python_code)
-        err = ""
+        output = eval(python_code)
     except Exception as e:
-        err = str(e)
+        output = str(e)
 
-    result = get_sensors()
-    result["err"] = err 
-    # result["result"] = "test" # 额外塞入运行结果
-    uart.write(bytes(str(result)+"\n", 'utf-8')) # 不断返回, 只此一处write
-
+    result = get_sensors() # payload
+    result["output"] = output
+    result["msgid"] = msgid
+    result["version"] = __version__
+    uart.write(bytes(str(result)+"\n", 'utf-8'))
 
 r_merge = b''
-
 while True:
-    r = uart.readline()  # readline不保证返回完整的一行，自行拼接，使用一个具体的例子思考 b'{"a": 1}'
+    if gc.mem_free() < 2000:
+        gc.collect()
+    # r = uart.readline(1024)
+    r = uart.readline()
     if r:
         r_merge += r
         if r_merge.startswith(b'{') and r_merge.endswith(b'\r\n'):
-            # 如果拼出了完整的内容
-            d = get_topic_and_data(r_merge)
+            d = get_msgid_and_data(r_merge)
             if d:
-                # 如果数据有效
-                topic, python_code = d
-                on_callback_req(topic, python_code)
+                if d[0] == "err":
+                    result = {"payload":"input error"}
+                    result["output"] = d[1]
+                    uart.write(bytes(str(result)+"\n", 'utf-8'))
+                    machine.reset()
+                else:
+                    msgid, python_code = d
+                    on_callback_req(msgid, python_code)
             r_merge = b''
