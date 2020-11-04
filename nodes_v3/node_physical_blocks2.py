@@ -105,7 +105,7 @@ class PhysicalBlocksExtension(AdapterNode):
     WEIGHT = 99.9
 
     def __init__(self):
-        super().__init__()  # logger=logger
+        super().__init__(logger=logger)  # logger=logger
 
     def _get_marker_corners_ids(self, img):
         frame = img
@@ -125,14 +125,23 @@ class PhysicalBlocksExtension(AdapterNode):
             markers_info.items(),
             key=lambda items: items[1]["center_x"] + 3 * items[1]["center_y"])
 
-    def _get_center_xy(self, corner):
+    def _get_center_xy(self, img, corner):
         x = corner[:, 0].mean()  # 中心点
         y = corner[:, 1].mean()
-        # self._to_scrtach_coordinate_system(x, y)
-        return self._to_scrtach_coordinate_system(x, y)
+        return self._to_scrtach_coordinate_system(img, x, y)
 
-    def _to_scrtach_coordinate_system(self, x, y):
-        return (x - 240, -1 * y + 180)
+    def _to_scrtach_coordinate_system(self, img, x, y):
+        '''
+        img 480/360
+        todo 
+            检测图片信息
+            720/540
+            960/720
+            1080/810
+        '''
+        height, width, channels = img.shape
+        self.logger.info(f"width:{width}; height:{height}")
+        return ((x - width/2)*(480/width), (-1 * y + height/2)*(360/height))
 
     def get_markers_info(self, img, content):
         corners, ids, _ = self._get_marker_corners_ids(img)  # 所有信息
@@ -159,7 +168,7 @@ class PhysicalBlocksExtension(AdapterNode):
             # x1 = target_corner[:, 0].mean()
             # y1 = target_corner[:, 1].mean()
             x1, y1 = target_corner[:, 0][0]  # 左上角的点，第1个
-            x1_scratch, y1_scratch = self._to_scrtach_coordinate_system(x1, y1)
+            x1_scratch, y1_scratch = self._to_scrtach_coordinate_system(img, x1, y1)
             # todo 四个点都应该放进来
             # target_corner[:, 1][0] # 右上角的点，第2个
             marker_id = str(marker_id) # 当有多个的时候
@@ -172,7 +181,7 @@ class PhysicalBlocksExtension(AdapterNode):
             markers_info[marker_id]["y"] = float(y1_scratch)
 
             # 中心点, todo 转化为scratch坐标系
-            center_x, center_y = self._get_center_xy(target_corner)
+            center_x, center_y = self._get_center_xy(img, target_corner)
             markers_info[marker_id]["center_x"] = float(center_x)
             markers_info[marker_id]["center_y"] = float(center_y)
 
