@@ -48,9 +48,6 @@ class CozmoNode(AdapterNode):
     def extension_message_handle(self, topic, payload):
         self.q.put(payload)
 
-    def exit_message_handle(self, topic, payload):
-        self.terminate()
-
     def pub_event(self, event_name, event_param=""):
         message = self.message_template()
         message["payload"]["message_type"] = "device_event"

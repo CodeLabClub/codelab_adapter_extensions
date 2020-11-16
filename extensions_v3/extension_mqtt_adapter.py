@@ -45,11 +45,6 @@ class MqttAdapterExtension(Extension):
         self.client.connect(self.mqtt_addr, self.mqtt_port, 60)
         self.client.loop_start()  # as thread
 
-    def exit_message_handle(self, topic, payload):
-        # stop mqtt client
-        self.client.loop_stop()
-        self.terminate()
-
     def extension_message_handle(self, topic, payload):
         '''
         scratch eim -> mqtt
@@ -91,5 +86,8 @@ class MqttAdapterExtension(Extension):
             # to publish mqtt message
             time.sleep(0.1)
 
+    def terminate(self, **kwargs):
+        self.client.loop_stop()
+        super().terminate(**kwargs)
 
 export = MqttAdapterExtension

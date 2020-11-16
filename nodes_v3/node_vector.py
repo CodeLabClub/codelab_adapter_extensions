@@ -53,10 +53,6 @@ class VectorNode(AdapterNode):
         }
         self.publish(message)
 
-    # exit_message_handle 只是node需要 self.ternimate()
-    def exit_message_handle(self, topic, payload):
-        self.terminate()
-
     def handle_object_appeared(self, robot, event_type, event):
         # This will be called whenever an EvtObjectAppeared is dispatched -
         # whenever an Object comes into view.

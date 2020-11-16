@@ -7,6 +7,8 @@ import threading
 # import numpy as np
 # import libh264decoder
 
+# todo:  只考虑简单控制
+# 基于 https://github.com/hanyazou/TelloPy
 
 class Tello:
     """Wrapper class to interact with the Tello drone."""

@@ -64,9 +64,6 @@ class HCINode(AdapterNode):
         message = {"payload": payload}
         self.publish(message)
 
-    def exit_message_handle(self, topic, payload):
-        self.terminate()
-
     def run(self):
         self._import_requirement_or_import()
         while self._running:

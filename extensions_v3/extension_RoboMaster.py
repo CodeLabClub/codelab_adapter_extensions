@@ -5,6 +5,8 @@ import queue
 
 from codelab_adapter.core_extension import Extension
 
+# https://robomasterpy.nanmu.me/en/latest/
+# https://github.com/nanmu42/robo-playground
 
 class RoboMasterExtension(Extension):
     NODE_ID = "eim/extension_RoboMaster"

@@ -103,6 +103,7 @@ class PhysicalBlocksExtension(AdapterNode):
     DESCRIPTION = "在一张桌子上对实物进行编程"
     # REQUIREMENTS = ["opencv-contrib-python"]
     WEIGHT = 99.9
+    VERSION = "2.1.0"
 
     def __init__(self):
         super().__init__(logger=logger)  # logger=logger

@@ -33,9 +33,6 @@ class BlenderNode(AdapterNode):
         message = {"payload": payload}
         self.publish(message)
 
-    def exit_message_handle(self, topic, payload):
-        self.terminate()
-
     @threaded
     def run(self):
         while self._running:
