@@ -1,9 +1,5 @@
-'''
-pip install https://github.com/wwj718/DJITelloPy/archive/master.zip
-'''
-import sys
+# pip install https://github.com/wwj718/DJITelloPy/archive/master.zip
 import time
-import os
 from loguru import logger
 from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.utils import get_or_create_node_logger_dir
