@@ -15,6 +15,7 @@ from loguru import logger
 from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.utils import get_or_create_node_logger_dir
 from robomaster import robot
+from robomaster import blaster
 
 node_logger_dir = get_or_create_node_logger_dir()
 debug_log = str(node_logger_dir / "debug.log")
@@ -44,7 +45,7 @@ class EP3Node(AdapterNode):
     def run_python_code(self, code):
         try:
             # 允许用户传入连接参数 init_device
-            output = eval(code, {"__builtins__": None}, {"ep_robot": self.ep_robot, "init_device": self.init_device})
+            output = eval(code, {"__builtins__": None}, {"ep_robot": self.ep_robot, "blaster": blaster, "init_device": self.init_device})
         except Exception as e:
             output = e
         return output
