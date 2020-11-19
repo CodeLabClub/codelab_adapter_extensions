@@ -57,6 +57,9 @@ if __name__ == "__main__":
         node = Tello2Node()
         node.receive_loop_as_thread()
         node.run()
-    except:
+    except Exception as e:
+        # node.logger.debug("KeyboardInterrupt") # work mac
         if node._running:
-            node.terminate()
+            node.pub_notification(str(e), type="ERROR")
+            time.sleep(0.1)
+            node.terminate()  # Clean up before exiting.
