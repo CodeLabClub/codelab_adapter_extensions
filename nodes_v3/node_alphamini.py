@@ -26,6 +26,8 @@ from mini.apis.api_action import GetActionList, GetActionListResponse, RobotActi
 from mini.apis.api_setup import StartRunProgram
 from mini.apis.api_action import MoveRobot, MoveRobotDirection, MoveRobotResponse
 from mini.apis.api_expression import PlayExpression, PlayExpressionResponse
+from mini.apis.api_behavior import StartBehavior
+
 
 # 使用异步节点
 
@@ -100,6 +102,16 @@ class Robot:
         # https://web.ubtrobot.com/mini-python-sdk/additional.html#id4
         block: PlayExpression = PlayExpression(express_name=express_name)
         # response: PlayExpressionResponse
+        (resultType, response) = await block.execute()
+        return response
+
+    async def play_behavior(self, name="custom_0035"):
+        '''
+        custom_0035 生日快乐
+        dance_0008 虫儿飞
+        '''
+        # https://web.ubtrobot.com/mini-python-sdk/additional.html#id4
+        block = StartBehavior(name=name)
         (resultType, response) = await block.execute()
         return response
 
