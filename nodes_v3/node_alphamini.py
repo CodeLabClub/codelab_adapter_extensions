@@ -4,13 +4,15 @@ https://web.ubtrobot.com/mini-python-sdk/guide.html
 https://github.com/marklogg/mini_demo.git
 
 内置行为: https://web.ubtrobot.com/mini-python-sdk/additional.html
+
+todo
+    内置？
 '''
 
 import sys
 import time
 import os  # env
 
-import requests
 from codelab_adapter_client import AdapterNodeAio
 
 import asyncio
