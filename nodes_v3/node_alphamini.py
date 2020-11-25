@@ -7,16 +7,14 @@ https://github.com/marklogg/mini_demo.git
 
 todo
     内置？
+        插件启动确认
 '''
 
-import sys
 import time
-import os  # env
-
-from codelab_adapter_client import AdapterNodeAio
-
 import asyncio
-import logging
+from loguru import logger
+
+from codelab_adapter_client import AdapterNodeAio # todo 异步插件启动确认
 
 import mini.mini_sdk as MiniSdk
 from mini.dns.dns_browser import WiFiDevice
@@ -28,28 +26,35 @@ from mini.apis.api_action import MoveRobot, MoveRobotDirection, MoveRobotRespons
 from mini.apis.api_expression import PlayExpression, PlayExpressionResponse
 from mini.apis.api_behavior import StartBehavior, StopBehavior
 
-
 # 使用异步节点
 
 
-class Robot:
+class RobotProxy:
     def __init__(self, node=None):
         self.node = node
-        self.is_connected = False
+        self.is_connected = False  # todo 装饰器， 确认某件事才往下，否则返回错误信息， require connect，每次确保某件事发生
         self.robot_name = None
         self.robot = None
 
+    def _ensure_connect(self):
+        if not self.is_connected:
+            raise Exception("Device not connected!")
+
     async def list(self):
+        self._ensure_connect()
         results = await MiniSdk.get_device_list(10)
         print(results)
         return [str(i) for i in results]
 
     async def connect(self, robot_name="0447"):
+        if self.is_connected:
+            return "Device already connected"
         self.robot: WiFiDevice = await MiniSdk.get_device_by_name(
             robot_name, 10)
         if self.robot:
             is_success = await MiniSdk.connect(self.robot)
             if is_success:
+                self.is_connected = True
                 # (resultType, response) = await StartRunProgram().execute() #
                 await MiniSdk.enter_program()
                 # await self.say()
@@ -57,13 +62,14 @@ class Robot:
                 return is_success
 
     async def GetActionList(self):
+        self._ensure_connect()
         # robot.play(name="bow",speed="slow",operation="start")
         block: GetActionList = GetActionList(action_type=RobotActionType.INNER)
         # response:GetActionListResponse
         (resultType, response) = await block.execute()
         return response
 
-    async def play_action(self, action_name="010"):
+    async def play_action(self, **kwargs):
         '''
         https://web.ubtrobot.com/mini-python-sdk/additional.html#id2
         https://web.ubtrobot.com/mini-python-sdk/additional.html#id3
@@ -85,12 +91,13 @@ class Robot:
         action_014 邀请
         action_005 点赞
         '''
-        block: PlayAction = PlayAction(action_name=action_name)
+        self._ensure_connect()
+        block: PlayAction = PlayAction(**kwargs)
         # response: PlayActionResponse
         (resultType, response) = await block.execute()
         return response
 
-    async def play_expression(self, express_name="codemao13"):
+    async def play_expression(self, **kwargs):
         '''
         codemao9 打喷嚏
         codemao13	疑问
@@ -99,62 +106,69 @@ class Robot:
         emo_020	发呆
         codemao19 爱心
         '''
+        self._ensure_connect()
         # https://web.ubtrobot.com/mini-python-sdk/additional.html#id4
-        block: PlayExpression = PlayExpression(express_name=express_name)
+        block: PlayExpression = PlayExpression(**kwargs)
         # response: PlayExpressionResponse
         (resultType, response) = await block.execute()
         return response
 
-    async def play_behavior(self, name="custom_0035"):
+    async def play_behavior(self, **kwargs):
         '''
         custom_0035 生日快乐
         dance_0008 虫儿飞
         '''
+        self._ensure_connect()
         # https://web.ubtrobot.com/mini-python-sdk/additional.html#id4
-        block = StartBehavior(name=name)
-        (resultType, response) = await block.execute()
-        return response
-    
-    async def stop_behavior(self):
+        block = StartBehavior(**kwargs)
+        if kwargs.get("is_serial"):
+            (resultType, response) = await block.execute()
+            return response
+        else:
+            return await block.execute()
+
+    async def stop_behavior(self, **kwargs):
         '''
         custom_0035 生日快乐
         dance_0008 虫儿飞
         '''
+        self._ensure_connect()
         # https://web.ubtrobot.com/mini-python-sdk/additional.html#id4
-        block = StopBehavior()
+        block = StopBehavior(**kwargs)
         (resultType, response) = await block.execute()
         return response
 
     async def move(self, step=1, direction="FORWARD"):
         '''
+        
         FORWARD : 向前
         BACKWARD : 向后
         LEFTWARD : 向左
         RIGHTWARD : 向右
         '''
+        self._ensure_connect()
         block: MoveRobot = MoveRobot(step=step,
                                      direction=MoveRobotDirection[direction])
         (resultType, response) = await block.execute()
         return response
 
     async def bow(self):
+        self._ensure_connect()
         # robot.play(name="bow",speed="slow",operation="start")
         pass
 
-    async def say(self, content="你好"):
-        block: StartPlayTTS = StartPlayTTS(text=content)
+    async def say(self, **kwargs):
+        self._ensure_connect()
+        block: StartPlayTTS = StartPlayTTS(**kwargs)
         # 返回元组, response是个ControlTTSResponse
         (resultType, response) = await block.execute()
 
     # 判断函数决定同步异步
     async def quit(self):
+        self._ensure_connect()
         await MiniSdk.quit_program()
         await MiniSdk.release()
-
-    async def loop(self):
-        while True:
-            await asyncio.sleep(1)
-
+        self.is_connected = False
 
 class MiniExtension(AdapterNodeAio):
     NODE_ID = "eim/node_alphamini"
@@ -162,8 +176,8 @@ class MiniExtension(AdapterNodeAio):
     DESCRIPTION = "悟空机器人"
 
     def __init__(self):
-        super().__init__()
-        self.robot = Robot(self)
+        super().__init__(logger=logger)
+        self.robot = RobotProxy(self)  # create robot proxy object
 
     async def run_python_code(self, code):
         try:
@@ -175,6 +189,8 @@ class MiniExtension(AdapterNodeAio):
                     "robot": self.robot
                 })
         except Exception as e:
+            # todo 完整错误
+            # logger.exception('what?')
             output = e
         return output
 
@@ -189,12 +205,23 @@ class MiniExtension(AdapterNodeAio):
         message = {"payload": payload}
         await self.publish(message)
 
+    # release robot proxy object
+    async def terminate(self, **kwargs):
+        if self.robot.is_connected:
+            await self.robot.quit()
+        await super().terminate(**kwargs)
+
 
 if __name__ == "__main__":
     try:
         node = MiniExtension()
         asyncio.run(node.receive_loop())
     except KeyboardInterrupt:
+        if node.robot.is_connected:
+            # asyncio.run?
+            asyncio.run(node.robot.quit())
+            print("robot quit!")
+            # node.robot.quit() # todo run async
         if node._running:
             asyncio.run(node.terminate())
             # Clean up before exiting.
