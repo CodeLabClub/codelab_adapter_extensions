@@ -17,6 +17,7 @@ from loguru import logger
 from codelab_adapter_client import AdapterNodeAio # todo 异步插件启动确认
 
 import mini.mini_sdk as MiniSdk
+from mini.apis.base_api import MiniApiResultType
 from mini.dns.dns_browser import WiFiDevice
 from mini.apis.api_sound import StartPlayTTS, StopPlayTTS, ControlTTSResponse
 from mini.apis.api_action import PlayAction, PlayActionResponse
@@ -26,7 +27,15 @@ from mini.apis.api_action import MoveRobot, MoveRobotDirection, MoveRobotRespons
 from mini.apis.api_expression import PlayExpression, PlayExpressionResponse
 from mini.apis.api_behavior import StartBehavior, StopBehavior
 
+from mini.apis.api_sence import FaceAnalysis, FaceAnalyzeResponse
+from mini.apis.api_sence import FaceDetect, FaceDetectResponse
+from mini.apis.api_sence import FaceRecognise, FaceRecogniseResponse
 # 使用异步节点
+
+# 红外测距
+from mini.apis.api_sence import GetInfraredDistance, GetInfraredDistanceResponse
+# 物体识别 水果 鲜花 手势
+from mini.apis.api_sence import ObjectRecognise, RecogniseObjectResponse, ObjectRecogniseType
 
 
 class RobotProxy:
@@ -46,7 +55,7 @@ class RobotProxy:
         print(results)
         return [str(i) for i in results]
 
-    async def connect(self, robot_name="0447"):
+    async def connect(self, robot_name="00447"):
         if self.is_connected:
             return "Device already connected"
         self.robot: WiFiDevice = await MiniSdk.get_device_by_name(
@@ -140,7 +149,6 @@ class RobotProxy:
 
     async def move(self, step=1, direction="FORWARD"):
         '''
-        
         FORWARD : 向前
         BACKWARD : 向后
         LEFTWARD : 向左
@@ -163,6 +171,94 @@ class RobotProxy:
         # 返回元组, response是个ControlTTSResponse
         (resultType, response) = await block.execute()
 
+    ### 人脸api: https://github.com/marklogg/mini_demo/blob/42cacfa5c8e8a47ed343ab61c691c1973b17e742/test/test_sence.py#L18
+    async def face_detect(self, timeout=10):
+        block: FaceDetect = FaceDetect(timeout=timeout)
+        # response: FaceDetectResponse
+        (resultType, response) = await block.execute()
+        logger.debug(f'test_face_detect result: {response}')
+    
+        assert resultType == MiniApiResultType.Success, 'face_detect timetout'
+        assert response is not None and isinstance(response, FaceDetectResponse), 'face_detect result unavailable'
+        assert response.isSuccess, 'face_detect failed'
+
+        return response.count # 人脸个数
+
+    async def face_analysis(self, timeout=10):
+        # https://github.com/marklogg/mini_demo/blob/42cacfa5c8e8a47ed343ab61c691c1973b17e742/test/test_sence.py#L43
+        block: FaceAnalysis = FaceAnalysis(timeout=timeout)
+        # response: FaceAnalyzeResponse
+        (resultType, response) = await block.execute()
+
+        logger.debug(f'test_face_analysis result: {response}')
+        # print('code = {0}, error={1}'.format(response.resultCode, errors.get_vision_error_str(response.resultCode)))
+
+        assert resultType == MiniApiResultType.Success, 'face_analysis timetout'
+        assert response is not None and isinstance(response, FaceAnalyzeResponse), 'face_analysis result unavailable'
+        assert response.isSuccess, 'face_analysis failed'
+        return response # {"age": 24, "gender": 99, "height": 238, "width": 238}
+
+    async def face_recognise(self, timeout=10):
+        # https://github.com/marklogg/mini_demo/blob/42cacfa5c8e8a47ed343ab61c691c1973b17e742/test/test_sence.py#L182
+        # response : FaceRecogniseResponse
+        (resultType, response) = await FaceRecognise(timeout=timeout).execute()
+
+        logger.debug(f'face_recognise result: {response}')
+
+        assert resultType == MiniApiResultType.Success, 'face_recognise timetout'
+        assert response is not None and isinstance(response,
+                                                FaceRecogniseResponse), 'face_recognise result unavailable'
+        assert response.isSuccess, 'face_recognise failed'
+        return response.faceInfos # id name 
+
+    # 测试获取红外探测距离
+    async def get_infrared_distance(self):
+        (resultType, response) = await GetInfraredDistance().execute()
+
+        # print(f'test_get_infrared_distance result: {response}')
+
+        assert resultType == MiniApiResultType.Success, 'get_infrared_distance timetout'
+        assert response is not None and isinstance(response,
+                                                GetInfraredDistanceResponse), 'get_infrared_distance result unavailable'
+        assert response.distance > 0, 'get_infrared_distance failed'
+        return response.distance
+
+    # 物体识别
+    async def recognise_gesture(self, timeout=10):
+        """测试物体(手势)识别
+        """
+        # object_type: 支持FLOWER, FRUIT, GESTURE 三类物体
+        block: ObjectRecognise = ObjectRecognise(object_type=ObjectRecogniseType.GESTURE, timeout=timeout)
+        # response : RecogniseObjectResponse
+        (resultType, response) = await block.execute()
+
+        logger.debug(f'recognise_gesture result: {response}')
+
+        assert resultType == MiniApiResultType.Success, 'recognise_gesture timetout'
+        assert response is not None and isinstance(response,
+                                                RecogniseObjectResponse), 'recognise_gesture result unavailable'
+        assert response.isSuccess, 'recognise_gesture failed'
+        return response.objects
+
+    async def recognise_fruit(self, timeout=10):
+        """测试物体(水果)识别
+        """
+        # object_type: 支持FLOWER, FRUIT, GESTURE 三类物体
+        block: ObjectRecognise = ObjectRecognise(object_type=ObjectRecogniseType.FRUIT, timeout=timeout)
+        # response : RecogniseObjectResponse
+        (resultType, response) = await block.execute()
+
+        logger.debug(f'test_object_recognise_fruit result: {response}')
+
+        assert resultType == MiniApiResultType.Success, 'recognise_fruit timetout'
+        assert response is not None and isinstance(response,
+                                                RecogniseObjectResponse), 'recognise_fruit result unavailable'
+        assert response.isSuccess, 'recognise_fruit failed'
+        return response.objects
+
+    # 语音识别
+    # https://github.com/marklogg/mini_demo/blob/42cacfa5c8e8a47ed343ab61c691c1973b17e742/test/test_event.py#L16 
+
     # 判断函数决定同步异步
     async def quit(self):
         self._ensure_connect()
@@ -173,7 +269,8 @@ class RobotProxy:
 class MiniExtension(AdapterNodeAio):
     NODE_ID = "eim/node_alphamini"
     HELP_URL = "https://adapter.codelab.club/extension_guide/node_alphamini/"
-    DESCRIPTION = "悟空机器人"
+    DESCRIPTION = "悟空是一只伪装成机器人的猴子"
+    VERSION = "1.1.0"
 
     def __init__(self):
         super().__init__(logger=logger)
@@ -197,7 +294,7 @@ class MiniExtension(AdapterNodeAio):
     async def extension_message_handle(self, topic, payload):
         # todo 判断是否连接成功，否则报告连接问题
 
-        self.logger.info(f'code: {payload["content"]}')
+        logger.info(f'code: {payload["content"]}')
         message_id = payload.get("message_id")
         python_code = payload["content"]
         output = await self.run_python_code(python_code)
