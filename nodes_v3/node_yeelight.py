@@ -4,8 +4,13 @@ import time
 
 from loguru import logger
 from codelab_adapter_client import AdapterNode
-from yeelight import discover_bulbs
-from yeelight import Bulb
+from codelab_adapter_client.utils import , install_requirement
+
+try:
+    from yeelight import discover_bulbs, Bulb
+except ModuleNotFoundError:
+    install_requirement(requirement)
+    from yeelight import discover_bulbs, Bulb
 
 
 class LightProxy:

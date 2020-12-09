@@ -24,7 +24,7 @@ class CozmoNode(AdapterNode):
     NODE_ID = "eim/node_cozmo"
     WEIGHT = 100
     HELP_URL = "https://adapter.codelab.club/extension_guide/cozmo/"
-    VERSION = "1.2.1"
+    VERSION = "1.3.0"
     DESCRIPTION = "最好的 AI 教育机器人之一"
     REQUIREMENTS = ["cozmo"]
 
@@ -162,7 +162,13 @@ class CozmoNode(AdapterNode):
         robot.add_event_handler(cozmo.objects.EvtObjectMovingStarted,
                                 self.onObjectMovingStarted)
 
-        # face
+        # face todo 启动人脸识别 enable
+        '''
+        表情 启动 
+            http://cozmosdk.anki.com/docs/generated/cozmo.robot.html#cozmo.robot.Robot.enable_facial_expression_estimation
+            robot.enable_facial_expression_estimation(enable=True)
+            http://cozmosdk.anki.com/docs/generated/cozmo.faces.html#cozmo.faces.FACIAL_EXPRESSION_UNKNOWN
+        '''
         robot.add_event_handler(cozmo.faces.EvtFaceAppeared,
                                 self.onFaceAppeared)
         robot.add_event_handler(cozmo.faces.EvtFaceObserved,

@@ -50,7 +50,7 @@ class RobotProxy:
             raise Exception("Device not connected!")
 
     async def list(self):
-        self._ensure_connect()
+        # self._ensure_connect()
         results = await MiniSdk.get_device_list(10)
         print(results)
         return [str(i) for i in results]
@@ -196,6 +196,7 @@ class RobotProxy:
         assert resultType == MiniApiResultType.Success, 'face_analysis timetout'
         assert response is not None and isinstance(response, FaceAnalyzeResponse), 'face_analysis result unavailable'
         assert response.isSuccess, 'face_analysis failed'
+        # gender: 小于50为女性，大于50为男性
         return response # {"age": 24, "gender": 99, "height": 238, "width": 238}
 
     async def face_recognise(self, timeout=10):
