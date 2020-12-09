@@ -4,7 +4,7 @@ import time
 
 from loguru import logger
 from codelab_adapter_client import AdapterNode
-from codelab_adapter_client.utils import , install_requirement
+from codelab_adapter_client.utils import install_requirement
 
 try:
     from yeelight import discover_bulbs, Bulb
