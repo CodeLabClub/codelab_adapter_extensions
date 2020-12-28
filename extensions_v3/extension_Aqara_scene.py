@@ -80,7 +80,6 @@ class PythonKernelExtension(Extension):
             output = e
         return output
 
-    @verify_token
     def extension_message_handle(self, topic, payload):
         '''
         所有可能运行代码的地方，都加上验证，确认payload中代码风险和token

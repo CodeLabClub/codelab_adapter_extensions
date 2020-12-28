@@ -9,6 +9,7 @@ from codelab_adapter.core_extension import Extension
 from codelab_adapter_client.utils import get_adapter_home_path
 
 '''
+
 todo:
     使用makecode构建固件
         command
