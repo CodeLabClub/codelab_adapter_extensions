@@ -17,6 +17,7 @@ logger.add(debug_log, rotation="1 MB", level="DEBUG")
 class TelloProxy(AdapterThing):
     '''
     对象内部可能出现意外错误，重置积木（重启整个插件）
+    self.thing = Tello() 由于是udp 所以与wifi的通断 不影响， self.thing总是可用
     '''
     def __init__(self, node_instance):
         super().__init__(thing_name="Tello",
@@ -25,12 +26,16 @@ class TelloProxy(AdapterThing):
     def list(self, timeout=5) -> list:
         if not self.thing:
             self.thing = Tello()
+        self.thing.RESPONSE_TIMEOUT = timeout
+        logger.debug(f"self.thing: {self.thing}")
         try:
-            if self.thing.connect():  # RESPONSE_TIMEOUT 7 ，判断是否可连接
-                return ["192.168.10.1"]
-            else:
-                return []
+            # if True:  # self.thing.connect():  # RESPONSE_TIMEOUT 7 ，判断是否可连接
+            # logger.debug(f"self.thing.connect(): {self.thing.connect()}")
+            self.thing.connect() #  返回True有问题，如果没有飞机，就会except
+            return ["192.168.10.1"]
         except Exception as e:  # timeout
+            # self.thing.connect() except
+            logger.debug(f'error: {str(e)}')
             self.node_instance.pub_notification(str(e),
                                                 type="ERROR")
             return []
@@ -41,6 +46,7 @@ class TelloProxy(AdapterThing):
             self.thing = Tello()
         is_connected = self.thing.connect()  # 幂等操作 ，udp
         self.is_connected = is_connected
+        return True
 
     def status(self, **kwargs) -> bool:
         # check status
@@ -51,7 +57,7 @@ class TelloProxy(AdapterThing):
         self.is_connected = False
         try:
             if self.thing:
-                self.thing.clientSocket.close()
+                self.thing.clientSocket.close()  # 断开，允许本地其他client（如python client）
         except Exception:
             pass
         self.thing = None
