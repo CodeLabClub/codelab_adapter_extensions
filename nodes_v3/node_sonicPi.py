@@ -4,7 +4,6 @@ pip install python-sonic --user
 import sys
 import time
 import os  # env
-import subprocess
 from loguru import logger
 from codelab_adapter_client import AdapterNode  # codelab_adapter_client 确保已经安装，由adapter维护，首次启动时，检查version
 from codelab_adapter_client.utils import get_or_create_node_logger_dir, install_requirement

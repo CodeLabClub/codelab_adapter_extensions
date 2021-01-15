@@ -1,5 +1,4 @@
 import hashlib
-import subprocess
 import sys
 import time
 import webbrowser
@@ -7,7 +6,6 @@ import webbrowser
 import requests
 
 from codelab_adapter.core_extension import Extension
-from codelab_adapter.settings import TOKEN
 from codelab_adapter.utils import (open_path_in_system_file_manager,
                                    verify_token)
 

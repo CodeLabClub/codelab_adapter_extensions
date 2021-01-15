@@ -1,86 +1,119 @@
-'''
-pip install robomaster codelab_adapter_client --upgrade
-doc:  https://robomaster-dev.readthedocs.io/zh_CN/latest/python_sdk/beginner_drone.html
-仅支持
-    macOS >= 10.15
-    Window amd64
-
-策略作为外部 Node，能够和Adapter通信
-
-使用 EIM 测试: eim/node_tello3
-''' 
-
+# pip install https://github.com/wwj718/DJITelloPy/archive/master.zip
 import time
+import json
+import socket
 from loguru import logger
 from codelab_adapter_client import AdapterNode
+from codelab_adapter_client.thing import AdapterThing
 from codelab_adapter_client.utils import get_or_create_node_logger_dir
-# from djitellopy import Tello
-from robomaster import robot
+
+from djitellopy import Tello
 
 node_logger_dir = get_or_create_node_logger_dir()
 debug_log = str(node_logger_dir / "debug.log")
 logger.add(debug_log, rotation="1 MB", level="DEBUG")
 
 
+class TelloProxy(AdapterThing):
+    '''
+    对象内部可能出现意外错误，重置积木（重启整个插件）
+    '''
+    def __init__(self, node_instance):
+        super().__init__(thing_name="Tello",
+                         node_instance=node_instance)
+
+    def list(self, timeout=5) -> list:
+        if not self.thing:
+            self.thing = Tello()
+        try:
+            if self.thing.connect():  # RESPONSE_TIMEOUT 7 ，判断是否可连接
+                return ["192.168.10.1"]
+            else:
+                return []
+        except Exception as e:  # timeout
+            self.node_instance.pub_notification(str(e),
+                                                type="ERROR")
+            return []
+
+    def connect(self, ip, timeout=5):
+        # 修改 self.thing
+        if not self.thing:
+            self.thing = Tello()
+        is_connected = self.thing.connect()  # 幂等操作 ，udp
+        self.is_connected = is_connected
+
+    def status(self, **kwargs) -> bool:
+        # check status
+        # query thing status, 与设备通信，检查 is_connected 状态，修改它
+        return self.thing.connect()  # 超时7秒
+
+    def disconnect(self):
+        self.is_connected = False
+        try:
+            if self.thing:
+                self.thing.clientSocket.close()
+        except Exception:
+            pass
+        self.thing = None
+
+
 class Tello3Node(AdapterNode):
     NODE_ID = "eim/node_tello3"
     HELP_URL = "https://adapter.codelab.club/extension_guide/tello3/"
-    DESCRIPTION = "tello 3.0"
+    DESCRIPTION = "tello 3.0"  # list connect
 
     def __init__(self):
         super().__init__(logger=logger)
-        self.tello = None
-
-    def init_device(self, timeout=5):
-        # todo timeout
-        self.tello = robot.Drone() # todo timeout，挪到 REPL 里，作为连接的前置行为
-        self.tello.initialize()
-        self.pub_notification("Device(Tello) Connected!", type="SUCCESS")
+        self.tello = TelloProxy(self)
 
     def run_python_code(self, code):
         try:
-            # 允许用户传入连接参数 init_device
-            output = eval(code, {"__builtins__": None}, {"tello": self.tello, "init_device": self.init_device})
+            output = eval(
+                code,
+                {"__builtins__": None},
+                {
+                    "tello": self.tello.thing,  # 直接调用方法
+                    "connect": self.tello.connect,
+                    "disconnect": self.tello.disconnect,
+                    "list": self.tello.list,
+                })
         except Exception as e:
             output = e
         return output
 
     def extension_message_handle(self, topic, payload):
         self.logger.info(f'code: {payload["content"]}')
-        message_id = payload.get("message_id")
         python_code = payload["content"]
-        if self.tello:
-            output = self.run_python_code(python_code)
-            payload["content"] = str(output)
-            message = {"payload": payload}
-            self.publish(message)
+        output = self.run_python_code(python_code)
+        try:
+            output = json.dumps(output)
+        except Exception:
+            output = str(output)
+        payload["content"] = output
+        message = {"payload": payload}
+        self.publish(message)
+
+    # self.pub_notification(str(e), type="ERROR")
 
     def run(self):
-        "避免插件结束退出"
-        try:
-            self.init_device()
-        except Exception as e:
-            self.logger.error(e)
-            self.pub_notification(str(e), type="ERROR")
-            return
         while self._running:
             time.sleep(0.5)
 
     def terminate(self, **kwargs):
         try:
-            if self.tello:
-                self.tello.close()
-                self.tello = None
-        except Exception as e:
-            self.pub_notification(str(e), type="ERROR")
-            time.sleep(0.1)
+            self.tello.disconnect()
+        except Exception:
+            pass
         super().terminate(**kwargs)
+
 
 if __name__ == "__main__":
     try:
         node = Tello3Node()
         node.receive_loop_as_thread()
         node.run()
-    except:
+    except Exception as e:
         if node._running:
+            node.pub_notification(str(e), type="ERROR")
+            time.sleep(0.1)
             node.terminate()

@@ -4,7 +4,7 @@ import json
 import uuid
 
 import serial
-from codelab_adapter.utils import list_microbit, flash_usb_microbit, flash_makecode_file
+from codelab_adapter.utils import list_microbit, flash_py_hex_file, flash_makecode_file
 from codelab_adapter.core_extension import Extension
 from codelab_adapter_client.utils import get_adapter_home_path
 
@@ -45,7 +45,7 @@ class MicrobitHelper:
         _ser = serial.Serial(port, **kwargs)
         if firmware_type == "usb_microbit":
             self.send_command(ser = _ser, msgid="query version", payload="__version__") # 子类的方法
-            firmware_path = str(get_adapter_home_path() / "src" /"usb_Microbit_firmware.py")
+            firmware_path = str(get_adapter_home_path() / "src" /"usb_Microbit_firmware_4v1v2.hex")
             try:
                 data = self.get_response_from_microbit(_ser)
                 self.extensionInstance.logger.debug(f"query version(reply) -> {data}")
@@ -55,16 +55,18 @@ class MicrobitHelper:
                 else:
                     self.extensionInstance.pub_notification("flashing new firmware...",type="INFO") 
                     _ser.close()
-                    flash_usb_microbit(firmware_path)
+                    flash_py_hex_file(firmware_path)
+                    # flash_usb_microbit(firmware_path)
                     # flash_usb_microbit是非阻塞的
                     # https://github.com/ntoll/uflash/blob/master/tests/test_uflash.py
                     # self.extensionInstance.pub_notification(self.flash_finished_notification, type="SUCCESS")
                     return
             except Exception as e:
-                self.extensionInstance.logger.exception("!!!")
+                self.extensionInstance.logger.error(e)
+                # self.extensionInstance.logger.exception("!!!")
                 _ser.close()
-                self.extensionInstance.pub_notification("flashing firmware...",type="INFO")
-                flash_usb_microbit(firmware_path)
+                self.extensionInstance.pub_notification("flashing firmware...", type="INFO")
+                flash_py_hex_file(firmware_path)
                 # self.extensionInstance.pub_notification(self.flash_finished_notification, type="SUCCESS")
                 raise e
 
@@ -89,7 +91,7 @@ class MicrobitHelper:
                 self.extensionInstance.pub_notification("flashing firmware...",type="ERROR") 
                 flash_makecode_file(firmware_path)
                 # self.extensionInstance.pub_notification(self.flash_finished_notification, type="SUCCESS")
-                raise e
+                raise e # 使UI断开
         
         self.ser = _ser
         # query version
@@ -263,7 +265,7 @@ class UsbMicrobitProxy(Extension):
                     time.sleep(1 / rate)
                     self.logger.debug("0.1")
                 except Exception as e:
-                    self.logger.exception("!!!")
+                    # self.logger.exception("!!!")
                     self.pub_notification(str(e), type="ERROR")
                     time.sleep(0.1)
                     self.terminate()

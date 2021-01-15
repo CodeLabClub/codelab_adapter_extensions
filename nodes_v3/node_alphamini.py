@@ -1,20 +1,16 @@
 '''
-pip install alphamini
+pip install alphamini==1.1.0
 https://web.ubtrobot.com/mini-python-sdk/guide.html
 https://github.com/marklogg/mini_demo.git
 
 内置行为: https://web.ubtrobot.com/mini-python-sdk/additional.html
-
-todo
-    内置？
-        插件启动确认
 '''
 
-import time
 import asyncio
 from loguru import logger
 
-from codelab_adapter_client import AdapterNodeAio # todo 异步插件启动确认
+from codelab_adapter_client import AdapterNodeAio  # todo 异步插件启动确认
+from codelab_adapter_client.thing import AdapterThing
 
 import mini.mini_sdk as MiniSdk
 from mini.apis.base_api import MiniApiResultType
@@ -38,37 +34,66 @@ from mini.apis.api_sence import GetInfraredDistance, GetInfraredDistanceResponse
 from mini.apis.api_sence import ObjectRecognise, RecogniseObjectResponse, ObjectRecogniseType
 
 
-class RobotProxy:
-    def __init__(self, node=None):
-        self.node = node
-        self.is_connected = False  # todo 装饰器， 确认某件事才往下，否则返回错误信息， require connect，每次确保某件事发生
-        self.robot_name = None
-        self.robot = None
-
-    def _ensure_connect(self):
-        if not self.is_connected:
-            raise Exception("Device not connected!")
+class RobotProxy(AdapterThing):
+    '''
+    AdapterThing
+        init
+            self.thing_name
+            self.node_instance
+            self.is_connected = False  
+            self.thing = None
+    '''
+    def __init__(self, node_instance):
+        # todo pydanic
+        super().__init__(thing_name="悟空机器人(alphamini)", node_instance=node_instance)
 
     async def list(self):
+        # 需要在UI中填入序列号连接
+        # 课堂 在UI输入序列号连接
         # self._ensure_connect()
-        results = await MiniSdk.get_device_list(10)
-        print(results)
-        return [str(i) for i in results]
+        return
 
-    async def connect(self, robot_name="00447"):
+        '''
+        results = await MiniSdk.get_device_list(10)  # 无法搜到
+        # print(results)
+        return [str(i) for i in results]
+        '''
+
+    async def connect(self, robot_name):
+        # 修改 self.thing
         if self.is_connected:
-            return "Device already connected"
-        self.robot: WiFiDevice = await MiniSdk.get_device_by_name(
-            robot_name, 10)
-        if self.robot:
-            is_success = await MiniSdk.connect(self.robot)
-            if is_success:
-                self.is_connected = True
-                # (resultType, response) = await StartRunProgram().execute() #
-                await MiniSdk.enter_program()
-                # await self.say()
-                # await asyncio.sleep(100)
-                return is_success
+            return f"{self.thing_name} already connected"
+        else:
+            # robot_name = kwargs.get("robot_name")  # todo
+            self.thing: WiFiDevice = await MiniSdk.get_device_by_name(
+                robot_name, 10)
+            if self.thing:
+                is_success = await MiniSdk.connect(self.thing)
+                if is_success:
+                    self.is_connected = True
+                    # (resultType, response) = await StartRunProgram().execute() #
+                    await MiniSdk.enter_program()
+                    # await self.say()
+                    # await asyncio.sleep(100)
+                    return is_success
+
+    def status(self, **kwargs) -> bool:
+        # check status
+        # query thing status, 与设备通信，检查 is_connected 状态，修改它
+        pass
+    
+    # disconnect, 兼容
+    async def quit(self):
+        self._ensure_connect()
+        await MiniSdk.quit_program()
+        await MiniSdk.release()
+        self.is_connected = False
+        self.thing = None
+
+    async def disconnect(self):
+        return await self.quit()
+
+    ################## 以下是业务逻辑
 
     async def GetActionList(self):
         self._ensure_connect()
@@ -197,7 +222,7 @@ class RobotProxy:
         assert response is not None and isinstance(response, FaceAnalyzeResponse), 'face_analysis result unavailable'
         assert response.isSuccess, 'face_analysis failed'
         # gender: 小于50为女性，大于50为男性
-        return response # {"age": 24, "gender": 99, "height": 238, "width": 238}
+        return response  # {"age": 24, "gender": 99, "height": 238, "width": 238}
 
     async def face_recognise(self, timeout=10):
         # https://github.com/marklogg/mini_demo/blob/42cacfa5c8e8a47ed343ab61c691c1973b17e742/test/test_sence.py#L182
@@ -260,22 +285,15 @@ class RobotProxy:
     # 语音识别
     # https://github.com/marklogg/mini_demo/blob/42cacfa5c8e8a47ed343ab61c691c1973b17e742/test/test_event.py#L16 
 
-    # 判断函数决定同步异步
-    async def quit(self):
-        self._ensure_connect()
-        await MiniSdk.quit_program()
-        await MiniSdk.release()
-        self.is_connected = False
-
 class MiniExtension(AdapterNodeAio):
     NODE_ID = "eim/node_alphamini"
     HELP_URL = "https://adapter.codelab.club/extension_guide/node_alphamini/"
     DESCRIPTION = "悟空是一只伪装成机器人的猴子"
-    VERSION = "1.1.0"
+    VERSION = "1.2.0"
 
     def __init__(self):
         super().__init__(logger=logger)
-        self.robot = RobotProxy(self)  # create robot proxy object
+        self.thing = RobotProxy(self)  # create robot proxy object
 
     async def run_python_code(self, code):
         try:
@@ -283,8 +301,8 @@ class MiniExtension(AdapterNodeAio):
                 code,
                 {"__builtins__": None},
                 {
-                    # "api_instance": self.robot.api_instance,
-                    "robot": self.robot
+                    # "api_instance": self.thing.api_instance,
+                    "robot": self.thing
                 })
         except Exception as e:
             # todo 完整错误
@@ -296,7 +314,7 @@ class MiniExtension(AdapterNodeAio):
         # todo 判断是否连接成功，否则报告连接问题
 
         logger.info(f'code: {payload["content"]}')
-        message_id = payload.get("message_id")
+        # message_id = payload.get("message_id")
         python_code = payload["content"]
         output = await self.run_python_code(python_code)
         payload["content"] = str(output)
@@ -305,8 +323,8 @@ class MiniExtension(AdapterNodeAio):
 
     # release robot proxy object
     async def terminate(self, **kwargs):
-        if self.robot.is_connected:
-            await self.robot.quit()
+        if self.thing.is_connected:
+            await self.thing.disconnect()
         await super().terminate(**kwargs)
 
 
@@ -315,11 +333,5 @@ if __name__ == "__main__":
         node = MiniExtension()
         asyncio.run(node.receive_loop())
     except KeyboardInterrupt:
-        if node.robot.is_connected:
-            # asyncio.run?
-            asyncio.run(node.robot.quit())
-            print("robot quit!")
-            # node.robot.quit() # todo run async
         if node._running:
             asyncio.run(node.terminate())
-            # Clean up before exiting.

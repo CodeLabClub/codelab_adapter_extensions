@@ -1,10 +1,10 @@
 import sys
+import json
 import time
 import subprocess
 import webbrowser
 from codelab_adapter.core_extension import Extension
 from codelab_adapter.utils import verify_token, open_path_in_system_file_manager
-from codelab_adapter.settings import TOKEN
 '''
 当前插件只允许运行表达式
 如果你希望执行任意python代码，请使用: https://github.com/CodeLabClub/codelab_adapter_extensions/blob/master/extensions_v2/extension_python_kernel_exec.py，注意风险
@@ -29,7 +29,7 @@ class PythonKernelExtension(Extension):
     NODE_ID = "eim/extension_python"
     HELP_URL = "http://adapter.codelab.club/extension_guide/extension_python_kernel/"
     WEIGHT = 95
-    VERSION = "1.0"  # extension version
+    VERSION = "1.1"  # extension version
     DESCRIPTION = "Python eval"
 
     def __init__(self, **kwargs):
@@ -51,7 +51,7 @@ class PythonKernelExtension(Extension):
                 "PyHelper": self.PyHelper,
             })
         except Exception as e:
-            output = e
+            output = str(e)
         return output
 
     # @verify_token
@@ -63,7 +63,12 @@ class PythonKernelExtension(Extension):
         message_id = payload.get("message_id")
         python_code = payload["content"]
         output = self.run_python_code(python_code)
-        payload["content"] = str(output)
+        # payload["content"] = str(output)
+        try:
+            output = json.dumps(output)
+        except Exception as e:
+            output = str(e)
+        payload["content"] = output # 有可能是数据结构？
         message = {"payload": payload}  # 无论是否有message_id都返回
         self.publish(message)
 
