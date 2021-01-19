@@ -6,6 +6,7 @@ from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.thing import AdapterThing
 from codelab_adapter_client.utils import get_or_create_node_logger_dir
 
+# todo 放到node里
 node_logger_dir = get_or_create_node_logger_dir()
 debug_log = str(node_logger_dir / "debug.log")
 logger.add(debug_log, rotation="1 MB", level="DEBUG")
@@ -46,13 +47,11 @@ class Robot:
 
 class ThingProxy(AdapterThing):
     def __init__(self, node_instance):
-        # todo pydanic
         super().__init__(thing_name="Robot-BB8",
                          node_instance=node_instance)
         self.n = 0
 
     def list(self, timeout=5) -> list:
-        # check is onlien 192.168.10.1 CONTROL_UDP_PORT = 8889
         self.n += 1
         try:
             if self.n % 2 == 1:
@@ -60,30 +59,23 @@ class ThingProxy(AdapterThing):
             else:
                 self.node_instance.pub_notification(f'{self.thing_name} not found', type="ERROR")
                 return []
-        except Exception as e:  # timeout
+        except Exception as e:
             self.node_instance.pub_notification(str(e), type="ERROR")
             return []
 
     def connect(self, ip, timeout=5):
         if not self.thing:
-            # 多次连接
             self.thing = Robot()
         self.thing.connect()
         is_connected = True  # 幂等操作 ，udp
         self.is_connected = is_connected
 
     def status(self, **kwargs) -> bool:
-        # check status
-        # query thing status, 与设备通信，检查 is_connected 状态，修改它
         pass
 
     def disconnect(self):
+        # 不要try，暴露问题
         self.is_connected = False
-        try:
-            if self.thing:
-                pass
-        except Exception:
-            pass
         self.thing = None
 
 

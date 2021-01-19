@@ -2,17 +2,25 @@
 usage:
     python cozmo_server.py
 
+多台机器人
+    https://github.com/anki/cozmo-python-sdk/blob/dd29edef18748fcd816550469195323842a7872e/examples/multi_robot/multi_robot_unified.py
+    默认采用优先发现原则 https://github.com/anki/cozmo-python-sdk/blob/dd29edef18748fcd816550469195323842a7872e/src/cozmo/run.py#L400
 ref:
     https://github.com/anki/cozmo-python-sdk/blob/master/examples/apps/remote_control_cozmo.py#L335
 '''
 import queue
+import json
 import time
-import importlib
 from loguru import logger
 
 from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.utils import get_or_create_node_logger_dir, install_requirement
-# import os
+from codelab_adapter_client.thing import AdapterThing
+from codelab_adapter_client.utils import threaded
+
+import cozmo
+from cozmo.util import degrees, distance_mm, speed_mmps
+
 # logger.warning(dict(os.environ))
 # log for debug
 node_logger_dir = get_or_create_node_logger_dir()
@@ -20,47 +28,63 @@ debug_log = str(node_logger_dir / "debug.log")
 logger.add(debug_log, rotation="1 MB", level="DEBUG")
 
 
-class CozmoNode(AdapterNode):
-    NODE_ID = "eim/node_cozmo"
-    WEIGHT = 100
-    HELP_URL = "https://adapter.codelab.club/extension_guide/cozmo/"
-    VERSION = "1.3.0"
-    DESCRIPTION = "最好的 AI 教育机器人之一"
-    REQUIREMENTS = ["cozmo"]
+class CozmoProxy(AdapterThing):
+    def __init__(self, node_instance):
+        super().__init__(thing_name="Cozmo", node_instance=node_instance)
+        self.disconnect_flag = False
 
-    def __init__(self):
-        super().__init__(logger=logger)
-        self.q = queue.Queue()
+    def _say_hi(self, robot):
+        robot.say_text("hi").wait_for_completed()
 
-    def _import_requirement_or_import(self):
-        requirement = self.REQUIREMENTS
+    def list(self, timeout=5) -> list:
+        if self.thing:
+            # 检查是否连接正常
+            return ["Cozmo"]
         try:
-            importlib.import_module("cozmo")
-        except ModuleNotFoundError:
-            self.pub_notification(f'try to install {" ".join(requirement)}...')
-            install_requirement(requirement)
-            self.pub_notification(f'{" ".join(requirement)} installed!')
-        importlib.import_module("cozmo")
-        import cozmo
-        from cozmo.util import degrees, distance_mm, speed_mmps
-        global cozmo, degrees, distance_mm, speed_mmps # make it global
+            # message id返回
+            cozmo.run_program(self._say_hi)  # 联通性测试！
+            return ["Cozmo"]
+        except:
+            # cozmo 有问题？ 如果正常连接呢？
+            self.node_instance.pub_notification("Cozmo not found",
+                                                type="ERROR")
+            return []
 
-    def extension_message_handle(self, topic, payload):
-        self.q.put(payload)
+    @threaded
+    def _connect(self):
+        cozmo.run_program(self.cozmo_program)  # 阻塞
 
+    def connect(self, ip, timeout=5):
+        if self.thing:
+            return
+        self.is_connected = True
+        self._connect()
+        time.sleep(0.5)
+
+    def status(self, **kwargs) -> bool:
+        pass
+
+    def disconnect(self):
+        self.thing = None
+        self.is_connected = False
+        self.disconnect_flag = True
+        time.sleep(0.1)  # 等待检测
+        self.disconnect_flag = False
+
+    #  业务
     def pub_event(self, event_name, event_param=""):
-        message = self.message_template()
+        message = self.node_instance.message_template()
         message["payload"]["message_type"] = "device_event"
         message["payload"]["content"] = {
             "event_name": event_name,
             "event_param": event_param
         }
-        self.publish(message)
+        self.node_instance.publish(message)
 
     def onObjectTapped(self, evt, obj, **kwargs):
         # 事件数量巨大
         object_id = obj.object_id
-        self.logger.debug(object_id)
+        self.node_instance.logger.debug(object_id)
         event_name = "ObjectTapped"
         event_param = object_id
         self.pub_event(event_name, event_param)
@@ -92,18 +116,18 @@ class CozmoNode(AdapterNode):
     # face
     def onFaceAppeared(self, evt, face, **kwargs):
         event_name = "FaceAppeared"
-        self.logger.debug(face.name)
-        self.logger.debug(face.known_expression)
+        self.node_instance.logger.debug(face.name)
+        self.node_instance.logger.debug(face.known_expression)
         event_param = face.known_expression
         self.pub_event(event_name, event_param)
 
     def onFaceObserved(self, evt, face, **kwargs):
         # expression -> FACIAL_EXPRESSION_HAPPY("happy")
         event_name = "FaceObserved"
-        self.logger.debug(face.name)
-        self.logger.debug(face.known_expression)
+        self.node_instance.logger.debug(face.name)
+        self.node_instance.logger.debug(face.known_expression)
         event_param = face.known_expression
-        self.logger.debug(
+        self.node_instance.logger.debug(
             f'face name -> {face.name}, face expression -> {face.known_expression}'
         )
         if event_param:
@@ -117,22 +141,22 @@ class CozmoNode(AdapterNode):
     # pets
     def onPetAppeared(self, evt, pet, **kwargs):
         # 与face机制不一致
-        self.logger.debug("PetAppeared")
-        self.logger.debug(pet.pet_type)
+        self.node_instance.logger.debug("PetAppeared")
+        self.node_instance.logger.debug(pet.pet_type)
         event_name = "PetAppeared"
         event_param = pet.pet_type
         self.pub_event(event_name, event_param)
 
     def onPetObserved(self, evt, pet, **kwargs):
-        self.logger.debug("PetObserved")
-        self.logger.debug(pet.pet_type)
+        self.node_instance.logger.debug("PetObserved")
+        self.node_instance.logger.debug(pet.pet_type)
         event_name = "PetObserved"
         event_param = pet.pet_type
         self.pub_event(event_name, event_param)
 
     def onPetDisappeared(self, evt, pet, **kwargs):
-        self.logger.debug("PetDisappeared")
-        self.logger.debug(pet.pet_type)
+        self.node_instance.logger.debug("PetDisappeared")
+        self.node_instance.logger.debug(pet.pet_type)
         event_name = "PetDisappeared"
         event_param = pet.pet_type
         self.pub_event(event_name, event_param)
@@ -150,6 +174,7 @@ class CozmoNode(AdapterNode):
             cozmo.world.EvtNewCameraImage
         '''
         # Object
+        self.thing = robot
         robot.add_event_handler(cozmo.objects.EvtObjectTapped,
                                 self.onObjectTapped)
         # ObjectObserved 发送频率非常高 会导致冲刷缓存变量(todo 优化 js extension 消息接收机制)
@@ -185,30 +210,76 @@ class CozmoNode(AdapterNode):
         # world Camera
         # robot.add_event_handler(cozmo.camera.EvtRobotObservedMotion, self.onRobotObservedMotion)
 
-        self.pub_notification("Cozmo Connected!", type="SUCCESS")
-        while self._running:
+        self.node_instance.pub_notification("Cozmo Connected!", type="SUCCESS")
+        while self.node_instance._running:
             time.sleep(0.05)
-            if not self.q.empty():
-                payload = self.q.get()
-                self.logger.info(f'python: {payload}')
-                message_id = payload.get("message_id")
+            if self.disconnect_flag:
+                robot.say_text("see you later").wait_for_completed()
+                break
+            #  消息取来在内部运行
+            '''
+            if not self.node_instance.q.empty():
+                payload = self.node_instance.q.get()
+                # self.node_instance.logger.info(f'python: {payload}')
                 python_code = payload["content"]
-
                 try:
                     output = eval(python_code, {"__builtins__": None}, {
+                        "robot": robot,
                         "cozmo": cozmo,
-                        "robot": robot
                     })
                 except Exception as e:
                     output = e
-                    self.pub_notification(str(e), type="ERROR")
+                    self.node_instance.pub_notification(str(e), type="ERROR")
                 payload["content"] = str(output)
                 message = {"payload": payload}
                 self.publish(message)
+                # 把 message id 丢出去
+            '''
+
+class CozmoNode(AdapterNode):
+    NODE_ID = "eim/node_cozmo"
+    WEIGHT = 100
+    HELP_URL = "https://adapter.codelab.club/extension_guide/cozmo/"
+    VERSION = "2.0.0"
+    DESCRIPTION = "最好的 AI 教育机器人之一"
+
+    def __init__(self):
+        super().__init__(logger=logger)
+        # self.q = queue.Queue()
+        self.thing = CozmoProxy(self)
+
+    def extension_message_handle(self, topic, payload):
+        python_code = payload["content"]
+        # if python_code.startswith("robot."):
+        #     self.q.put(payload)
+        try:
+            output = eval(
+                python_code,
+                {"__builtins__": None},
+                {
+                    # "robot": robot,
+                    "list": self.thing.list,
+                    "connect": self.thing.connect,
+                    "disconnect": self.thing.disconnect,
+                    "robot": self.thing.thing,
+                    "cozmo": cozmo,
+                })
+        except Exception as e:
+            output = e
+            self.pub_notification(str(e), type="ERROR")
+        try:
+            output = json.dumps(output) # 单引号 json
+        except Exception:
+            output = str(output)
+        payload["content"] = str(output)
+        message = {"payload": payload}
+        self.publish(message)
 
     def run(self):
-        self._import_requirement_or_import()
-        cozmo.run_program(self.cozmo_program)
+        while self._running:
+            time.sleep(0.1)
+        # 发现，已经连接了，如果无法发现则说明有问题
+        # 利用 except 知道不存在 list
 
 
 if __name__ == "__main__":

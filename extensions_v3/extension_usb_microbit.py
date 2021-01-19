@@ -31,6 +31,7 @@ class MicrobitHelper:
         firmware_type
             usb_microbit
             makecode_radio
+        副作用
         '''
         self.port = port
         self.logger.debug(f"args: {kwargs}")
@@ -53,22 +54,21 @@ class MicrobitHelper:
                 if data.get("version") and data.get("version") >= "0.4":
                     self.extensionInstance.logger.debug(f"microbit firmware -> {data['version']}")   
                 else:
-                    self.extensionInstance.pub_notification("flashing new firmware...",type="INFO") 
+                    self.extensionInstance.pub_notification("flashing new firmware...", type="INFO") 
                     _ser.close()
-                    flash_py_hex_file(firmware_path)
+                    return flash_py_hex_file(firmware_path)
                     # flash_usb_microbit(firmware_path)
                     # flash_usb_microbit是非阻塞的
                     # https://github.com/ntoll/uflash/blob/master/tests/test_uflash.py
                     # self.extensionInstance.pub_notification(self.flash_finished_notification, type="SUCCESS")
-                    return
             except Exception as e:
                 self.extensionInstance.logger.error(e)
                 # self.extensionInstance.logger.exception("!!!")
                 _ser.close()
-                self.extensionInstance.pub_notification("flashing firmware...", type="INFO")
-                flash_py_hex_file(firmware_path)
+                self.extensionInstance.pub_notification("flashing new firmware...", type="INFO")
+                return flash_py_hex_file(firmware_path)
                 # self.extensionInstance.pub_notification(self.flash_finished_notification, type="SUCCESS")
-                raise e
+                # raise e
 
         if firmware_type == "makecode_radio":
             self.write("version\n",ser=_ser)
@@ -81,17 +81,15 @@ class MicrobitHelper:
                 else:
                     # flash
                     _ser.close()
-                    self.extensionInstance.pub_notification("flashing firmware...",type="ERROR") 
-                    flash_makecode_file(firmware_path)
+                    self.extensionInstance.pub_notification("flashing new firmware...", type="ERROR") 
+                    return flash_makecode_file(firmware_path)
                     # self.extensionInstance.pub_notification(self.flash_finished_notification, type="SUCCESS")
-                    return
             except Exception as e:
                 self.extensionInstance.logger.error(e)
                 _ser.close()
-                self.extensionInstance.pub_notification("flashing firmware...",type="ERROR") 
-                flash_makecode_file(firmware_path)
-                # self.extensionInstance.pub_notification(self.flash_finished_notification, type="SUCCESS")
-                raise e # 使UI断开
+                self.extensionInstance.pub_notification("flashing new firmware...", type="ERROR") 
+                return flash_makecode_file(firmware_path)  #  "flash..."
+                # raise e # 使UI断开
         
         self.ser = _ser
         # query version
@@ -151,7 +149,7 @@ class UsbMicrobitHelper(MicrobitHelper):
     def __init__(self, extensionInstance):
         super().__init__(extensionInstance)
 
-    def send_command(self, ser = None, msgid=-1, payload="0"):
+    def send_command(self, ser=None, msgid=-1, payload="0"):
         '''
         总是写入
         '''
@@ -214,6 +212,9 @@ class UsbMicrobitProxy(Extension):
         try:
             output = eval(code, {"__builtins__": None}, {
                 "microbitHelper": self.microbitHelper,
+                # "connect": self.microbitHelper.connect,
+                # "disconnect": self.microbitHelper.disconnect,
+                # "list": self.microbitHelper.list,
             })
         except Exception as e:
             output = str(e)
@@ -281,5 +282,4 @@ class UsbMicrobitProxy(Extension):
         super().terminate()
             
             
-
 export = UsbMicrobitProxy
