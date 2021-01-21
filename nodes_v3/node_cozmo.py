@@ -11,20 +11,18 @@ ref:
 import queue
 import json
 import time
-from loguru import logger
 
 from codelab_adapter_client import AdapterNode
-from codelab_adapter_client.utils import get_or_create_node_logger_dir, install_requirement
+from codelab_adapter_client.utils import install_requirement
 from codelab_adapter_client.thing import AdapterThing
 from codelab_adapter_client.utils import threaded
 
 import cozmo
 from cozmo.util import degrees, distance_mm, speed_mmps
 
-# logger.warning(dict(os.environ))
-# log for debug
-node_logger_dir = get_or_create_node_logger_dir()
-debug_log = str(node_logger_dir / "debug.log")
+from codelab_adapter_client.config import settings
+from loguru import logger
+debug_log = str(settings.NODE_LOG_PATH / "adapterMario.log")
 logger.add(debug_log, rotation="1 MB", level="DEBUG")
 
 
@@ -163,7 +161,7 @@ class CozmoProxy(AdapterThing):
 
     def onRobotObservedMotion(self, evt, **kwargs):
         event_name = "RobotObservedMotion"  # EvtRobotObservedMotion
-        logger.debug(event_name)
+        self.node_instance.logger.debug(event_name)
         self.pub_event(event_name)
 
     def cozmo_program(self, robot):

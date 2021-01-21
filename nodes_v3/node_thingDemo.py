@@ -1,14 +1,12 @@
 import time
 import json
 import random
-from loguru import logger
 from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.thing import AdapterThing
-from codelab_adapter_client.utils import get_or_create_node_logger_dir
 
-# todo 放到node里
-node_logger_dir = get_or_create_node_logger_dir()
-debug_log = str(node_logger_dir / "debug.log")
+from codelab_adapter_client.config import settings
+from loguru import logger
+debug_log = str(settings.NODE_LOG_PATH / "thingDemo.log")
 logger.add(debug_log, rotation="1 MB", level="DEBUG")
 
 
@@ -83,6 +81,7 @@ class MyNode(AdapterNode):
     NODE_ID = "eim/node_thingDemo"
     HELP_URL = "https://adapter.codelab.club/extension_guide/node_thingDemo/"
     DESCRIPTION = "thing Demo"  # list connect
+    VERSION = "1.0.0"
 
     def __init__(self):
         super().__init__(logger=logger)

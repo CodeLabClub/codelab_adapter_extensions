@@ -67,6 +67,7 @@ class Tello3Node(AdapterNode):
     NODE_ID = "eim/node_tello3"
     HELP_URL = "https://adapter.codelab.club/extension_guide/tello3/"
     DESCRIPTION = "tello 3.0"  # list connect
+    VERSION = "3.0.0"
 
     def __init__(self):
         super().__init__(logger=logger)
