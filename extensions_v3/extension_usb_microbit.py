@@ -56,7 +56,7 @@ class MicrobitHelper:
                 else:
                     self.extensionInstance.pub_notification("flashing new firmware...", type="INFO") 
                     _ser.close()
-                    return flash_py_hex_file(firmware_path)
+                    return flash_py_hex_file(firmware_path)  # 阻塞式，反馈时间比较长 20s
                     # flash_usb_microbit(firmware_path)
                     # flash_usb_microbit是非阻塞的
                     # https://github.com/ntoll/uflash/blob/master/tests/test_uflash.py
@@ -88,7 +88,7 @@ class MicrobitHelper:
                 self.extensionInstance.logger.error(e)
                 _ser.close()
                 self.extensionInstance.pub_notification("flashing new firmware...", type="ERROR") 
-                return flash_makecode_file(firmware_path)  #  "flash..."
+                return flash_makecode_file(firmware_path)   #  "flash..."
                 # raise e # 使UI断开
         
         self.ser = _ser
@@ -273,13 +273,13 @@ class UsbMicrobitProxy(Extension):
             else:
                 time.sleep(0.5)
 
-    def terminate(self):
+    def terminate(self, **kwargs):
         try:
             if self.microbitHelper.ser:
                 self.microbitHelper.ser.close()
         except Exception as e:
             self.logger.error(e)
-        super().terminate()
+        super().terminate(**kwargs)
             
             
 export = UsbMicrobitProxy

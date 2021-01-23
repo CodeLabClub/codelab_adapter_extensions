@@ -88,12 +88,12 @@ class MicrobitRadioProxy(Extension):
             else:
                 time.sleep(0.5)
                 # 广播不在线
-    def terminate(self):
+    def terminate(self, **kwargs):
         try:
             if self.microbitHelper.ser:
                 self.microbitHelper.ser.close()
         except Exception as e:
             self.logger.error(e)
-        super().terminate()
+        super().terminate(**kwargs)
 
 export = MicrobitRadioProxy

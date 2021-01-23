@@ -54,6 +54,10 @@ class MarioController(AdapterThing):
         message = {"payload": payload}
         await self.node_instance.publish(message)
 
+    async def _send_disconnect_message(self):
+        await self.node_instance.pub_notification(
+            f'{self.node_instance.NODE_ID} disconnect', type="WARNING")
+
     async def _connect(self, address):
         async with BleakClient(address) as client:
             await client.is_connected()
@@ -70,8 +74,11 @@ class MarioController(AdapterThing):
                                          self.SUBSCRIBE_RGB_COMMAND)
             while await client.is_connected():
                 await asyncio.sleep(0.1)
+            # 发送断开消息
+            # disconnect
+            await self._send_disconnect_message()
 
-    async def connect(self, address, timeout):
+    async def connect(self, address, timeout=5):
         if not self.thing:
             # self.thing = BleakClient(address)
             # as task
@@ -194,7 +201,7 @@ class MyNode(AdapterNodeAio):
     NODE_ID = "eim/node_adapterMario"
     HELP_URL = "https://adapter.codelab.club/extension_guide/adapterMario/"
     DESCRIPTION = "登登登等登蹬"
-    VERSION = "1.1.0"
+    VERSION = "2.0.0"  # 设备掉线通知
 
     def __init__(self):
         super().__init__(logger=logger, bucket_token=300, bucket_fill_rate=300)
