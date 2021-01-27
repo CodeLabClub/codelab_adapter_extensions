@@ -31,10 +31,10 @@ class JupyterlabExtension(Extension):
         self.jupyter_proc = None
 
     def _install_requirement(self):  # to install jupyterlab
-        self.pub_notification(f"jupyterlab is being installed...")
+        self.pub_notification("正在安装 JupyterLab...")
         output = install_requirement(self.REQUIREMENTS)
         if output == 0:
-            self.pub_notification("jupyterlab installed!")
+            self.pub_notification("JupyterLab 安装完成")
             self.env_manage.set_env(None)  # update env
 
     def run_jupyterlab(self):
@@ -89,7 +89,7 @@ class JupyterlabExtension(Extension):
 
         if not env["treasure box"].get("jupyterlab"):
             self._install_requirement()
-        self.pub_notification("ready to open jupyterlab...")
+        self.pub_notification("正在启动 jupyterlab...")
         self.run_jupyterlab()
         while self._running:
             time.sleep(1)
@@ -99,14 +99,14 @@ class JupyterlabExtension(Extension):
         stop thread
         '''
         if self._running:
-            self.pub_notification("try to stop jupyterlab")
+            self.pub_notification("正在停止 JupyterLab")
             if self.jupyter_proc:
                 # fuck Windows! 🖕️
                 self.jupyter_proc.kill()
                 # os.killpg(os.getpgid(self.jupyter_proc.pid), signal.SIGTERM)
                 self.jupyter_proc.wait()
                 # 启动 node 的东西 ，使用 psutil？ delegator.py？
-                self.pub_notification("jupyterlab stopped")
+                self.pub_notification("JupyterLab 已停止")
                 time.sleep(0.1)
             super().terminate()
 

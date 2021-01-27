@@ -38,10 +38,10 @@ class serialHelper:
     def disconnect(self, **kwargs):
         if self.ser:
             self.ser.close()
-            self.extensionInstance.pub_notification("device disconnected!")
+            self.extensionInstance.pub_notification("设备已断开")
             return "ok"
         else:
-            self.extensionInstance.pub_notification("Please connect the device!", type="ERROR")
+            self.extensionInstance.pub_notification("未发现可用设备", type="ERROR")
 
 
     def list_ports(self):
@@ -69,7 +69,7 @@ class serialHelper:
                 self.extensionInstance.terminate()
         else:
             self.extensionInstance.pub_notification(
-                "Please connect the device!", type="ERROR")
+                "未发现可用设备", type="ERROR")
             self.extensionInstance.terminate()
 
     def readline(self):
@@ -85,7 +85,7 @@ class serialHelper:
                 self.extensionInstance.terminate()
         else:
             self.extensionInstance.pub_notification(
-                "Please connect the device!", type="ERROR")
+                "未发现可用设备", type="ERROR")
             self.extensionInstance.terminate()
 
 

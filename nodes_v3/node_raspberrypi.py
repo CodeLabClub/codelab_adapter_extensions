@@ -35,7 +35,7 @@ class RaspberryPi:
         if self.factory:
             if self.node:
                 node.pub_notification(
-                    "Device(RaspberryPi) Connected!",
+                    "RaspberryPi 已连接",
                     type="SUCCESS")  # 由一个积木建立连接到时触发
             self.is_connected = True
             self.led = LED(17, pin_factory=self.factory)
@@ -57,9 +57,9 @@ class RPINode(AdapterNode):
         try:
             import gpiozero, pigpio
         except ModuleNotFoundError:
-            self.pub_notification(f'try to install {" ".join(requirement)}...')
+            self.pub_notification(f'正在安装 {" ".join(requirement)}...')
             install_requirement(requirement)
-            self.pub_notification(f'{" ".join(requirement)} installed!')
+            self.pub_notification(f'{" ".join(requirement)} 安装完成')
         from gpiozero import LED
         from gpiozero.pins.pigpio import PiGPIOFactory
         global LED, PiGPIOFactory
@@ -79,7 +79,7 @@ class RPINode(AdapterNode):
         self.logger.info(f'code: {payload["content"]}')
         python_code = payload["content"]
         if (not self.rpi.is_connected) and ("connect" not in python_code):
-            self.pub_notification("Please connect RaspberryPi", type="WARNING")
+            self.pub_notification("未发现 RaspberryPi", type="WARNING")
             return
         output = self.run_python_code(python_code)
         payload["content"] = str(output)

@@ -104,7 +104,7 @@ class VectorNode(AdapterNode):
         # enable_face_detection = True, show_viewer=True  https://github.com/anki/vector-python-sdk/blob/8ea77411dc56b16039b802e7c60c25a6475dcf8b/anki_vector/faces.py#L165
         with anki_vector.Robot() as robot:
             # with 以内 vector 错误无法被捕获，sdk做了特殊处理
-            self.pub_notification("Vector Connected!", type="SUCCESS")
+            self.pub_notification("Vector 已连接", type="SUCCESS")
 
             # event
             ## object event

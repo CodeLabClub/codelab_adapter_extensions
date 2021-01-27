@@ -36,7 +36,7 @@ class MyMinecraftClient:
         self.mcTurtle = MinecraftTurtle(self.mc, pos)
         if self.mc:
             if self.node:
-                node.pub_notification("Minecraf Connected!",
+                node.pub_notification("Minecraft 已连接",
                                       type="SUCCESS")  # 由一个积木建立连接到时触发
             self.is_connected = True
             return True
@@ -59,9 +59,9 @@ class McpiNode(AdapterNode):
             from mcpi import minecraft
             from minecraftstuff import MinecraftTurtle
         except ModuleNotFoundError:
-            self.pub_notification(f'try to install {" ".join(requirement)}...')
+            self.pub_notification(f'正在安装 {" ".join(requirement)}...')
             install_requirement(requirement)
-            self.pub_notification(f'{" ".join(requirement)} installed!')
+            self.pub_notification(f'{" ".join(requirement)} 安装完成')
 
         from mcpi import minecraft
         from minecraftstuff import MinecraftTurtle
@@ -85,7 +85,7 @@ class McpiNode(AdapterNode):
         python_code = payload["content"]
 
         if (not self.mc_client.is_connected) and ("connect" not in python_code):
-            self.pub_notification("Please connect Minecraf", type="WARNING")
+            self.pub_notification("未发现 Minecraft", type="WARNING")
             return
 
         output = self.run_python_code(python_code)

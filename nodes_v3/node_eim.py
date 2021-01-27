@@ -1,4 +1,5 @@
 import time
+import os
 from loguru import logger
 from codelab_adapter_client import AdapterNode
 from codelab_adapter_client.utils import get_or_create_node_logger_dir
@@ -15,18 +16,17 @@ class EIMNode(AdapterNode):
     def __init__(self):
         super().__init__(logger=logger)
 
-    def _response_message_to_scratch(self, content, payload):
+    def send_message_to_scratch(self, content):
         message = self.message_template()
         message["payload"]["content"] = content
-        message["payload"]["message_id"] = payload.get('message_id')
         self.publish(message)
 
     def extension_message_handle(self, topic, payload):
-        self.logger.info(f'receive message from scratch, topic: {topic} payload: {payload}')
+        self.logger.info(f'the message payload from scratch: {payload}')
         content = payload["content"]
         if type(content) == str:
             content_send_to_scratch = content[::-1]  # 反转字符串
-            self._response_message_to_scratch(content_send_to_scratch, payload)
+            self.send_message_to_scratch(content_send_to_scratch)
 
     def run(self):
         i = 0

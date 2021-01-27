@@ -54,7 +54,7 @@ class RoboMasterExtension(Extension):
         buf = command_socket.recv(1024)  # todo: timeout
         # todo 开启事件上报, 默认开启，使用一个新的socket线程，接收事件。使用bucket token
         self.logger.info(f"connect: {buf}")
-        self.pub_notification("Device(RoboMaster) Connected!", type="SUCCESS")
+        self.pub_notification("RoboMasterEP 已连接", type="SUCCESS")
         while self._running:
             # wait for the command for the client(scratch/web app)
             time.sleep(0.05)

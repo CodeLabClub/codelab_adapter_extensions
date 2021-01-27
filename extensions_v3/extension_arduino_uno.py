@@ -454,7 +454,7 @@ class ArduinoGateway(GatewayBaseAIO): # 直接回复
 
         try:
             self.event_loop.create_task(
-                self.pub_notification(f'Arduino UNO Connected!',
+                self.pub_notification('Arduino UNO 已连接',
                                       type="SUCCESS"))
             self.event_loop.run_until_complete(self.main())
             self.logger.debug("arduino thread end")

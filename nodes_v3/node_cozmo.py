@@ -44,7 +44,7 @@ class CozmoProxy(AdapterThing):
             return ["Cozmo"]
         except:
             # cozmo 有问题？ 如果正常连接呢？
-            self.node_instance.pub_notification("Cozmo not found",
+            self.node_instance.pub_notification("未发现 Cozmo",
                                                 type="ERROR")
             return []
 
@@ -208,7 +208,7 @@ class CozmoProxy(AdapterThing):
         # world Camera
         # robot.add_event_handler(cozmo.camera.EvtRobotObservedMotion, self.onRobotObservedMotion)
 
-        self.node_instance.pub_notification("Cozmo Connected!", type="SUCCESS")
+        self.node_instance.pub_notification("Cozmo 已连接", type="SUCCESS")
         while self.node_instance._running:
             time.sleep(0.05)
             if self.disconnect_flag:

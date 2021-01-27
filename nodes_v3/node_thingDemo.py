@@ -55,7 +55,7 @@ class ThingProxy(AdapterThing):
             if self.n % 2 == 1:
                 return ["192.168.10.1"]  # 随机
             else:
-                self.node_instance.pub_notification(f'{self.thing_name} not found', type="ERROR")
+                self.node_instance.pub_notification(f'未发现 {self.thing_name}', type="ERROR")
                 return []
         except Exception as e:
             self.node_instance.pub_notification(str(e), type="ERROR")

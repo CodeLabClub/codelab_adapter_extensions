@@ -56,7 +56,7 @@ class MarioController(AdapterThing):
 
     async def _send_disconnect_message(self):
         await self.node_instance.pub_notification(
-            f'{self.node_instance.NODE_ID} disconnect', type="WARNING")
+            f'{self.node_instance.NODE_ID} 已断开', type="WARNING")
 
     async def _connect(self, address):
         async with BleakClient(address) as client:

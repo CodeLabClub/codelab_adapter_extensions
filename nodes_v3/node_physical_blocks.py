@@ -93,9 +93,9 @@ class PhysicalBlocksExtension(AdapterNode):
         try:
             import cv2
         except ModuleNotFoundError:
-            self.pub_notification(f'try to install {" ".join(requirement)}...')
+            self.pub_notification(f'正在安装 {" ".join(requirement)}...')
             install_requirement(requirement)
-            self.pub_notification(f'{" ".join(requirement)} installed!')
+            self.pub_notification(f'{" ".join(requirement)} 安装成功')
         import cv2
         import numpy as np
         global cv2, np

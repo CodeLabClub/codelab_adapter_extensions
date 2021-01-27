@@ -31,10 +31,10 @@ class SonicPiNode(AdapterNode):
         try:
             import psonic
         except ModuleNotFoundError:
-            self.pub_notification(f'try to install {" ".join(requirement)}...')
+            self.pub_notification(f'正在安装 {" ".join(requirement)}...')
             # 只有 local python 下才可用，adapter内置的python无法使用pip（extension）
             install_requirement(requirement)
-            self.pub_notification(f'{" ".join(requirement)} installed!')
+            self.pub_notification(f'{" ".join(requirement)} 安装完成')
         import psonic  # 使用点语法 from x import * 不在顶层 无效
         global psonic
 

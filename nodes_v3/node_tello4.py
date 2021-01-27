@@ -35,7 +35,7 @@ class Tello4Node(AdapterNode):
         # todo timeout
         self.tello = robot.Drone() # todo timeout，挪到 REPL 里，作为连接的前置行为
         self.tello.initialize()
-        self.pub_notification("Device(Tello) Connected!", type="SUCCESS")
+        self.pub_notification("Tello 已连接", type="SUCCESS")
 
     def run_python_code(self, code):
         try:

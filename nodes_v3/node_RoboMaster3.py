@@ -40,7 +40,7 @@ class EP3Node(AdapterNode):
         # todo timeout
         self.ep_robot = robot.Robot()
         self.ep_robot.initialize(conn_type=conn_type)
-        self.pub_notification("Device(RoboMaster) Connected!", type="SUCCESS")
+        self.pub_notification("RoboMaster 已连接", type="SUCCESS")
 
     def run_python_code(self, code):
         try:

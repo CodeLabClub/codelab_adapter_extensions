@@ -39,8 +39,8 @@ class EPProxy(AdapterThing):
             broadcast_ip = rm.get_broadcast_ip(timeout=timeout)   # 多个怎么办？
             return [str(broadcast_ip)]
         except socket.timeout:
-            self.node_instance.pub_notification(
-                f"timeout({timeout}s) when get_broadcast_ip", type="ERROR")
+            # self.node_instance.pub_notification(f"获取设备IP超时({timeout}s)", type="ERROR")
+            self.node_instance.pub_notification("未发现 RoboMasterEP", type="ERROR")
             return []
         except Exception as e:
             self.node_instance.pub_notification(

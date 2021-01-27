@@ -22,10 +22,10 @@ class KanoMotionExtension(AdapterNode):
         try:
             from communitysdk import list_connected_devices, MotionSensorKit
         except ModuleNotFoundError:
-            self.pub_notification(f'try to install {" ".join(requirement)}...')
+            self.pub_notification(f'正在安装 {" ".join(requirement)}...')
             # 只有 local python 下才可用，adapter内置的python无法使用pip（extension）
             install_requirement(requirement)
-            self.pub_notification(f'{" ".join(requirement)} installed!')
+            self.pub_notification(f'{" ".join(requirement)} 安装完成')
         from communitysdk import list_connected_devices, MotionSensorKit
         global list_connected_devices, MotionSensorKit
 
@@ -50,13 +50,13 @@ class KanoMotionExtension(AdapterNode):
                 self._publish({"proximity":proximity, "delta":delta})
                 self.previous_value = proximity
 
-            info = 'Move your hand above the Motion Sensor:'
+            info = 'Motion Sensor 已连接'
             self.pub_notification(info)
             # print(info)
             msk.set_mode('proximity')
             msk.on_proximity = on_proximity
         else:
-            error = "No Motion Sensor was found :("
+            error = "未发现 Motion Sensor"
             self.pub_notification(error)
             # print(error)
 
