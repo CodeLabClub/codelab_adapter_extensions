@@ -7,6 +7,12 @@ usage:
     默认采用优先发现原则 https://github.com/anki/cozmo-python-sdk/blob/dd29edef18748fcd816550469195323842a7872e/src/cozmo/run.py#L400
 ref:
     https://github.com/anki/cozmo-python-sdk/blob/master/examples/apps/remote_control_cozmo.py#L335
+
+get status
+    https://github.com/wwj718/calypso/blob/master/server.py#L353
+
+调试
+    https://github.com/anki/cozmo-python-sdk/blob/master/examples/apps/cli.py
 '''
 import queue
 import json
@@ -18,11 +24,10 @@ from codelab_adapter_client.thing import AdapterThing
 from codelab_adapter_client.utils import threaded
 
 import cozmo
-from cozmo.util import degrees, distance_mm, speed_mmps
-
+from cozmo.util import degrees, distance_mm, speed_mmps, Pose
 from codelab_adapter_client.config import settings
 from loguru import logger
-debug_log = str(settings.NODE_LOG_PATH / "adapterMario.log")
+debug_log = str(settings.NODE_LOG_PATH / "cozmo.log")
 logger.add(debug_log, rotation="1 MB", level="DEBUG")
 
 
@@ -32,7 +37,9 @@ class CozmoProxy(AdapterThing):
         self.disconnect_flag = False
 
     def _say_hi(self, robot):
-        robot.say_text("hi").wait_for_completed()
+        # pass
+        # robot.say_text("hi").wait_for_completed()
+        pass
 
     def list(self, timeout=5) -> list:
         if self.thing:
@@ -42,18 +49,30 @@ class CozmoProxy(AdapterThing):
             # message id返回
             cozmo.run_program(self._say_hi)  # 联通性测试！
             return ["Cozmo"]
-        except:
+        except:  # 不能加Exception 协程
             # cozmo 有问题？ 如果正常连接呢？
+            # self.node_instance.logger.error()
             self.node_instance.pub_notification("未发现 Cozmo",
                                                 type="ERROR")
+            # self.node_instance.terminate()
             return []
 
     @threaded
     def _connect(self):
-        cozmo.run_program(self.cozmo_program)  # 阻塞
-
+        # RuntimeError: This event loop is already running
+        cozmo.run_program(self.cozmo_program)
+        # todo 需要在主线程打开
+        # cozmo.run_program(self.cozmo_program, use_3d_viewer=True, use_viewer=True)
+        '''
+        try:
+              # 阻塞
+        except:
+            self.thing = None # ??
+        '''
+            
     def connect(self, ip, timeout=5):
         if self.thing:
+            # 之前连过
             return
         self.is_connected = True
         self._connect()
@@ -63,12 +82,20 @@ class CozmoProxy(AdapterThing):
         pass
 
     def disconnect(self):
+        # self.node_instance
+        self.node_instance.pub_notification(f'{self.node_instance.NODE_ID} 已断开', type="WARNING")
+        if self.thing:
+            try:
+                self.thing.say_text("see you later").wait_for_completed()
+            except Exception as e:
+                self.node_instance.logger.error(str(e))
         self.thing = None
         self.is_connected = False
         self.disconnect_flag = True
         time.sleep(0.1)  # 等待检测
         self.disconnect_flag = False
-
+        # self.node_instance.terminate()  # 断开 重复连接cozmo可能有问题
+        
     #  业务
     def pub_event(self, event_name, event_param=""):
         message = self.node_instance.message_template()
@@ -173,6 +200,9 @@ class CozmoProxy(AdapterThing):
         '''
         # Object
         self.thing = robot
+        self.node_instance.pub_notification("Cozmo 已连接", type="SUCCESS")
+        robot.say_text("hi").wait_for_completed()
+        # robot.enable_facial_expression_estimation(enable=True)
         robot.add_event_handler(cozmo.objects.EvtObjectTapped,
                                 self.onObjectTapped)
         # ObjectObserved 发送频率非常高 会导致冲刷缓存变量(todo 优化 js extension 消息接收机制)
@@ -208,12 +238,12 @@ class CozmoProxy(AdapterThing):
         # world Camera
         # robot.add_event_handler(cozmo.camera.EvtRobotObservedMotion, self.onRobotObservedMotion)
 
-        self.node_instance.pub_notification("Cozmo 已连接", type="SUCCESS")
         while self.node_instance._running:
-            time.sleep(0.05)
             if self.disconnect_flag:
-                robot.say_text("see you later").wait_for_completed()
+                # self.thing = None
+                # self.is_connected = False
                 break
+            time.sleep(0.1)
             #  消息取来在内部运行
             '''
             if not self.node_instance.q.empty():
@@ -234,11 +264,12 @@ class CozmoProxy(AdapterThing):
                 # 把 message id 丢出去
             '''
 
+
 class CozmoNode(AdapterNode):
     NODE_ID = "eim/node_cozmo"
     WEIGHT = 100
     HELP_URL = "https://adapter.codelab.club/extension_guide/cozmo/"
-    VERSION = "2.0.0"
+    VERSION = "2.1.0"  # 支持表情
     DESCRIPTION = "最好的 AI 教育机器人之一"
 
     def __init__(self):
@@ -261,12 +292,18 @@ class CozmoNode(AdapterNode):
                     "disconnect": self.thing.disconnect,
                     "robot": self.thing.thing,
                     "cozmo": cozmo,
+                    "degrees": degrees,
+                    "distance_mm": distance_mm,
+                    "speed_mmps": speed_mmps,
+                    "Pose": Pose,
+                    "dir": dir,
+                    "help": help
                 })
         except Exception as e:
             output = e
             self.pub_notification(str(e), type="ERROR")
         try:
-            output = json.dumps(output) # 单引号 json
+            output = json.dumps(output)  # 单引号 json
         except Exception:
             output = str(output)
         payload["content"] = str(output)
@@ -275,9 +312,18 @@ class CozmoNode(AdapterNode):
 
     def run(self):
         while self._running:
-            time.sleep(0.1)
+            # "robot": self.thing.thing,
+            if self.thing.thing and not self.thing.thing.world.conn.is_connected:
+                self.logger.debug(f"conn: {self.thing.thing.world.conn.is_connected}")
+                # self.thing.disconnect()
+                self.terminate()
+                self.logger.debug("go on...")
+            time.sleep(0.5)
         # 发现，已经连接了，如果无法发现则说明有问题
         # 利用 except 知道不存在 list
+
+    def terminate(self, **kwargs):
+        super().terminate(**kwargs)
 
 
 if __name__ == "__main__":

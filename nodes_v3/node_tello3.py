@@ -31,9 +31,10 @@ class TelloProxy(AdapterThing):
         try:
             # if True:  # self.thing.connect():  # RESPONSE_TIMEOUT 7 ，判断是否可连接
             # logger.debug(f"self.thing.connect(): {self.thing.connect()}")
-            self.thing.connect() #  返回True有问题，如果没有飞机，就会except
+            self.thing.connect()  # 返回True有问题，如果没有飞机，就会except
             return ["192.168.10.1"]
         except Exception as e:  # timeout
+        # except:
             # self.thing.connect() except
             logger.debug(f'error: {str(e)}')
             self.node_instance.pub_notification(str(e),
