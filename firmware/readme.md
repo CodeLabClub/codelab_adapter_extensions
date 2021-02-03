@@ -5,4 +5,4 @@ usbMicrobit_for_adapter是microbit的固件。与[extension_usb_microbit.py](htt
 
 使用文档参考: [使用说明(usage)](https://codelab-adapter-docs.codelab.club/user_guide/usage/)
 
-提醒: 推荐使用`python.microbit.org`编译为hex(需要删除中文注释)。
+提醒: 推荐使用`https://python.microbit.org/v/2`编译为hex(需要删除中文注释)。
