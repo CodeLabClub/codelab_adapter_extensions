@@ -1,7 +1,7 @@
 # firmware
 
 ### usbMicrobit_for_adapter
-usbMicrobit_for_adapter是microbit的固件。与[extension_usb_microbit.py](https://github.com/Scratch3Lab/codelab_adapter_extensions/blob/master/extension_usb_microbit.py)搭配使用
+usbMicrobit_for_adapter是microbit的固件。与[extension_usb_microbit.py](https://github.com/CodeLabClub/codelab_adapter_extensions/blob/master/extensions_v3/extension_usb_microbit.py)搭配使用
 
 使用文档参考: [使用说明(usage)](https://codelab-adapter-docs.codelab.club/user_guide/usage/)
 
