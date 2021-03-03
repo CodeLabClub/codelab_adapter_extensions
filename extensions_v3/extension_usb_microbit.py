@@ -8,6 +8,7 @@ from codelab_adapter_client.utils import get_adapter_home_path, threaded
 # from extension_usb_microbit import MicrobitHelper  # extensions/extension_usb_microbit.py
 from codelab_adapter.core_extension import Extension
 from codelab_adapter_client.thing import AdapterThing
+import threading
 
 # from codelab_adapter.microbit_helper import MicrobitRadioHelper
 '''
@@ -35,6 +36,7 @@ class ThingProxy(AdapterThing):
         # The append() and popleft() methods are both atomic.
         # self.write_fifo_queue = deque()  # to microbit
         # self.read_fifo_queue = deque()  # from microbit
+        self.lock = threading.Lock()
 
     def list(self, timeout=5) -> list:
         microbit_ports = list_microbit()  # return
@@ -170,8 +172,8 @@ class ThingProxy(AdapterThing):
         while self.node_instance._running:
             if self.is_connected:
                 # microbit node -> microbit adapter
-                rate = 20
-                time.sleep(1 / rate)
+                # rate = 20
+                # time.sleep(1 / rate)
                 self.send_command()
                 response_from_microbit = self.uart_helper()
                 self.node_instance.logger.debug(f'read from microbit: {response_from_microbit}')
@@ -194,12 +196,16 @@ class ThingProxy(AdapterThing):
         payload content
         todo message id 对应
         '''
+        self.lock.acquire()
+        rate = 10
+        time.sleep(1 / rate)
         scratch3_message = {"msgid": msgid, "payload": payload}
 
         scratch3_message = json.dumps(scratch3_message) + "\r\n"
         scratch3_message_bytes = scratch3_message.encode('utf-8')
         self.node_instance.logger.debug(f'send to microbit: {scratch3_message_bytes}')
         self.thing.write(scratch3_message_bytes)
+        self.lock.release()
 
 
 class MicrobitExtension(Extension):
