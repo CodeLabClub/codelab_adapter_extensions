@@ -51,11 +51,11 @@ class JupyterlabExtension(Extension):
                 sys.executable
             ).parents[Adapter_APP_index] / "app_packages/share/jupyter/lab"
 
-        if Adapter_APP_index: # cli mode
+        if Adapter_APP_index:  # cli mode
             cmd = [
                 self.python_path, "-m", "jupyterlab", "--notebook-dir",
-                str(self.adapter_home_path), "--app-dir",
-                str(app_dir)
+                str(self.adapter_home_path), 
+                "--LabApp.app_dir", str(app_dir)
             ]
             if ("--debug" in sys.argv):
                 # 调试模式 cli
