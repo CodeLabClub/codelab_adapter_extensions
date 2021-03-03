@@ -48,8 +48,12 @@ class EPProxy(AdapterThing):
             return []
 
     def connect(self, ip, timeout=5):
-        # 修改 self.thing
-        self.thing = rm.Commander(ip, timeout)
+        # 修改 self.thing， connect失败呢？
+        try:
+            self.thing = rm.Commander(ip, timeout)
+            self.node_instance.pub_notification("RoboMasterEP 已连接", type="SUCCESS")
+        except Exception as e:
+            self.node_instance.pub_notification(str(e), type="ERROR")
 
     def status(self, **kwargs) -> bool:
         # check status
@@ -73,7 +77,7 @@ class EPExtension(AdapterNode):
     NODE_ID = "eim/node_RoboMasterEP2"
     HELP_URL = "http://adapter.codelab.club/extension_guide/RoboMasterEP2/"
     DESCRIPTION = "开火！RoboMaster EP"
-    VERSION = "2.0.0"
+    VERSION = "2.0.1"  # 处理connect问题
 
     def __init__(self):
         super().__init__(logger=logger)

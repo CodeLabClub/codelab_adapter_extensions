@@ -1,7 +1,7 @@
-import sys
-import json
+# import sys
+# import json
 import time
-import subprocess
+# import subprocess
 import webbrowser
 from codelab_adapter.core_extension import Extension
 from codelab_adapter.utils import verify_token, open_path_in_system_file_manager
@@ -60,15 +60,16 @@ class PythonKernelExtension(Extension):
         所有可能运行代码的地方，都加上验证，确认payload中代码风险和token
         '''
         self.logger.info(f'python code: {payload["content"]}')
-        message_id = payload.get("message_id")
+        # message_id = payload.get("message_id")
         python_code = payload["content"]
         output = self.run_python_code(python_code)
         # payload["content"] = str(output)
         try:
-            output = json.dumps(output)
+            # output = json.dumps(output)
+            output = str(output)  # 不要传递复杂结构
         except Exception as e:
             output = str(e)
-        payload["content"] = output # 有可能是数据结构？
+        payload["content"] = output  # 有可能是数据结构？
         message = {"payload": payload}  # 无论是否有message_id都返回
         self.publish(message)
 

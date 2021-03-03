@@ -1,7 +1,10 @@
 import asyncio
 import json
 import time
-from bleak import BleakScanner, BleakClient, BleakError
+try:
+    from bleak import BleakScanner, BleakClient, BleakError  # 有些windows无法使用
+except Exception:
+    pass
 from codelab_adapter_client import AdapterNodeAio
 from codelab_adapter_client.thing import AdapterThing
 from codelab_adapter_client.utils import is_win
