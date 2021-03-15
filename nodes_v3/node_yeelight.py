@@ -9,7 +9,7 @@ from codelab_adapter_client.utils import install_requirement
 try:
     from yeelight import discover_bulbs, Bulb
 except ModuleNotFoundError:
-    install_requirement(requirement)
+    # install_requirement(requirement)
     from yeelight import discover_bulbs, Bulb
 
 
@@ -53,8 +53,8 @@ class Yeelight2Node(AdapterNode):
     HELP_URL = "https://adapter.codelab.club/extension_guide/yeelight/"
     DESCRIPTION = "yeelight"
 
-    def __init__(self):
-        super().__init__(logger=logger)
+    def __init__(self, **kwargs):
+        super().__init__(logger=logger, **kwargs)
         self.manager = LightProxy(self)  # create robot proxy object
 
     def run_python_code(self, code):
@@ -79,9 +79,9 @@ class Yeelight2Node(AdapterNode):
             time.sleep(0.5)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = Yeelight2Node()
+        node = Yeelight2Node(**kwargs)
         node.receive_loop_as_thread()
         node.run()
     except Exception as e:
@@ -90,3 +90,7 @@ if __name__ == "__main__":
             node.pub_notification(str(e), type="ERROR")
             time.sleep(0.1)
             node.terminate()  # Clean up before exiting.
+
+
+if __name__ == "__main__":
+    main()

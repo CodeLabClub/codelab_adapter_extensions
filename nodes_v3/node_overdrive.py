@@ -3,10 +3,6 @@ import asyncio
 import json
 import time
 # from bleak import BleakScanner, BleakClient, BleakError
-try:
-    from bleak import BleakScanner, BleakClient, BleakError  # 有些windows无法使用
-except Exception:
-    pass
 from codelab_adapter_client import AdapterNodeAio
 from codelab_adapter_client.thing import AdapterThing
 from codelab_adapter_client.utils import is_win
@@ -17,7 +13,12 @@ from loguru import logger
 debug_log = str(settings.NODE_LOG_PATH / "overdrive.log")
 logger.add(debug_log, rotation="1 MB", level="DEBUG")
 
+try:
+    from bleak import BleakScanner, BleakClient, BleakError  # 有些windows无法使用
+except Exception:
+    logger.error("import bleak error")
 # todo 尚未支持Linux， ExtensionAio
+
 
 # Class for the controller
 class Drive(AdapterThing):
@@ -30,8 +31,10 @@ class Drive(AdapterThing):
         logger.debug("list devices...")
         try:
             devices = await BleakScanner.discover()  # todo except
+            # 一直阻塞
         except BleakError as e:
             # 提醒开启蓝牙
+            logger.error(e)
             await self.node_instance.pub_notification(str(e), type="ERROR")
             return []
         logger.debug(f'devices: {devices}')
@@ -99,8 +102,8 @@ class MyNode(AdapterNodeAio):
     DESCRIPTION = "overdrive"
     VERSION = "0.1.0"  # 设备掉线通知
 
-    def __init__(self):
-        super().__init__(logger=logger, bucket_token=300, bucket_fill_rate=300)
+    def __init__(self, **kwargs):
+        super().__init__(logger=logger, bucket_token=300, bucket_fill_rate=300, **kwargs)
         self.thing = Drive(self)
         self.connect_payload = None
 
@@ -148,12 +151,15 @@ class MyNode(AdapterNodeAio):
         await super().terminate(**kwargs)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = MyNode()
+        # 使用 **kwargs 还是sys.argv?
+        node = MyNode(**kwargs)  # message id
         asyncio.run(node.receive_loop())  # CPU?
     except Exception:
         if node._running:
             asyncio.run(node.terminate())
 
-# export = ArduinoGateway
+
+if __name__ == "__main__":
+    main()

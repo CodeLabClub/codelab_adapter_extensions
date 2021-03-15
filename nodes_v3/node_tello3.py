@@ -70,8 +70,8 @@ class Tello3Node(AdapterNode):
     DESCRIPTION = "tello 3.0"  # list connect
     VERSION = "3.0.0"
 
-    def __init__(self):
-        super().__init__(logger=logger)
+    def __init__(self, **kwargs):
+        super().__init__(logger=logger, **kwargs)
         self.tello = TelloProxy(self)
 
     def run_python_code(self, code):
@@ -115,9 +115,9 @@ class Tello3Node(AdapterNode):
         super().terminate(**kwargs)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = Tello3Node()
+        node = Tello3Node(**kwargs)
         node.receive_loop_as_thread()
         node.run()
     except Exception as e:
@@ -125,3 +125,7 @@ if __name__ == "__main__":
             node.pub_notification(str(e), type="ERROR")
             time.sleep(0.1)
             node.terminate()
+
+
+if __name__ == "__main__":
+    main()

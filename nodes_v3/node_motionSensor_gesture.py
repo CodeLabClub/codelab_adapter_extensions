@@ -12,8 +12,8 @@ class KanoMotionExtension(AdapterNode):
     REQUIRES_ADAPTER = ""  # ">= 3.2.0"
     REQUIREMENTS = ["kano-community-sdk"]
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def _import_requirement_or_import(self):
         requirement = self.REQUIREMENTS
@@ -71,11 +71,15 @@ class KanoMotionExtension(AdapterNode):
         os._exit(0)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = KanoMotionExtension()
+        node = KanoMotionExtension(**kwargs)
         node.receive_loop_as_thread()
         node.run()
     finally:
         if node._running:
             node.terminate()  # Clean up before exiting.
+
+
+if __name__ == "__main__":
+    main()

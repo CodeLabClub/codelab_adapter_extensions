@@ -48,8 +48,8 @@ class RPINode(AdapterNode):
     DESCRIPTION = "使用 gpiozero 对树莓派进行编程"
     REQUIREMENTS = ["gpiozero", "pigpio"]
 
-    def __init__(self):
-        super().__init__(logger=logger)
+    def __init__(self, **kwargs):
+        super().__init__(logger=logger, **kwargs)
         self.rpi = RaspberryPi(self)
 
     def _install_requirement_or_import(self):
@@ -93,12 +93,16 @@ class RPINode(AdapterNode):
             time.sleep(0.5)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = RPINode()
+        node = RPINode(**kwargs)
         node.receive_loop_as_thread()
         node.run()
     except KeyboardInterrupt:
         # node.logger.debug("KeyboardInterrupt") # work mac
         if node._running:
             node.terminate()  # Clean up before exiting.
+
+
+if __name__ == "__main__":
+    main()

@@ -272,8 +272,8 @@ class CozmoNode(AdapterNode):
     VERSION = "2.1.0"  # 支持表情
     DESCRIPTION = "最好的 AI 教育机器人之一"
 
-    def __init__(self):
-        super().__init__(logger=logger)
+    def __init__(self, **kwargs):
+        super().__init__(logger=logger, **kwargs)
         # self.q = queue.Queue()
         self.thing = CozmoProxy(self)
 
@@ -326,9 +326,9 @@ class CozmoNode(AdapterNode):
         super().terminate(**kwargs)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = CozmoNode()
+        node = CozmoNode(**kwargs)
         node.receive_loop_as_thread()
         node.run()
     except KeyboardInterrupt:
@@ -338,3 +338,7 @@ if __name__ == "__main__":
         node.pub_notification(str(e), type="ERROR")
         time.sleep(0.05)
         node.terminate()  # Clean up before exiting.
+
+
+if __name__ == "__main__":
+    main()

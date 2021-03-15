@@ -33,8 +33,8 @@ class HCINode(AdapterNode):
     VERSION = "1.1.0"
     REQUIREMENTS = ["pyautogui"]
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self.q = queue.Queue()
 
     def _import_requirement_or_import(self):
@@ -70,9 +70,9 @@ class HCINode(AdapterNode):
             time.sleep(0.5)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = HCINode()
+        node = HCINode(**kwargs)
         node.receive_loop_as_thread()
         node.run()
     except KeyboardInterrupt:
@@ -82,3 +82,7 @@ if __name__ == "__main__":
         node.pub_notification(str(e), type="ERROR")
         time.sleep(0.05)
         node.terminate()  # Clean up before exiting.
+
+
+if __name__ == "__main__":
+    main()

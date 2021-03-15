@@ -74,9 +74,9 @@ def digimon():
 class DigimonNode(AdapterNode):
     NODE_ID = "eim/node_digimon"
 
-    def __init__(self):
+    def __init__(self, **kwargs):
         self.port = 18081
-        super().__init__(logger=logger)
+        super().__init__(logger=logger, **kwargs)
 
     @threaded
     def _run_webserver_as_thread(self):
@@ -103,9 +103,9 @@ class DigimonNode(AdapterNode):
         os._exit(0)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = DigimonNode()
+        node = DigimonNode(**kwargs)
         node.receive_loop_as_thread()
         node.run()
     except KeyboardInterrupt:
@@ -114,3 +114,7 @@ if __name__ == "__main__":
             node.terminate()  # Clean up before exiting.
     finally:
         node.terminate()
+
+
+if __name__ == "__main__":
+    main()

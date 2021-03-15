@@ -85,8 +85,8 @@ class PhysicalBlocksExtension(AdapterNode):
     REQUIREMENTS = ["opencv-contrib-python"]
     WEIGHT = 100
 
-    def __init__(self):
-        super().__init__() # logger=logger
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs) # logger=logger
 
     def _install_requirement_or_import(self):
         requirement = self.REQUIREMENTS
@@ -227,11 +227,15 @@ class PhysicalBlocksExtension(AdapterNode):
             time.sleep(0.5)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = PhysicalBlocksExtension()
+        node = PhysicalBlocksExtension(**kwargs)
         node.receive_loop_as_thread()
         node.run()
     except KeyboardInterrupt:
         if node._running:
             node.terminate()  # Clean up before exiting.
+        
+
+if __name__ == "__main__":
+    main()

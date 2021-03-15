@@ -35,8 +35,8 @@ class VectorNode(AdapterNode):
     VERSION = "1.0.0"
     DESCRIPTION = "最好的 AI 教育机器人之一， Cozmo的下一代"
 
-    def __init__(self):
-        super().__init__(logger=logger)  # todo log
+    def __init__(self, **kwargs):
+        super().__init__(logger=logger, **kwargs)  # todo log
         # self.NODE_ID = self.generate_node_id(__file__) # 检查时发现
         self.q = queue.Queue()
         # from_jupyter/extensions
@@ -150,9 +150,9 @@ class VectorNode(AdapterNode):
                     self.publish(message)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = VectorNode()
+        node = VectorNode(**kwargs)
         node.receive_loop_as_thread(
         )  # run extension_message_handle, noblock(threaded)
         node.run()
@@ -165,3 +165,7 @@ if __name__ == "__main__":
         # node.pub_notification(str(e), type="ERROR")
         if node._running:
             node.terminate()  # Clean up before exiting.
+
+
+if __name__ == "__main__":
+    main()

@@ -1,7 +1,6 @@
 # import sys
 # import json
 import time
-# import subprocess
 import webbrowser
 from codelab_adapter.core_extension import Extension
 from codelab_adapter.utils import verify_token, open_path_in_system_file_manager

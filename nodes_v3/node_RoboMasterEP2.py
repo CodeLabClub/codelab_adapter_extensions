@@ -79,8 +79,8 @@ class EPExtension(AdapterNode):
     DESCRIPTION = "开火！RoboMaster EP"
     VERSION = "2.0.1"  # 处理connect问题
 
-    def __init__(self):
-        super().__init__(logger=logger)
+    def __init__(self, **kwargs):
+        super().__init__(logger=logger, **kwargs)
         self.ep = EPProxy(self)  # create proxy object
 
     def run_python_code(self, code):
@@ -127,9 +127,9 @@ class EPExtension(AdapterNode):
         super().terminate(**kwargs)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = EPExtension()
+        node = EPExtension(**kwargs)
         node.receive_loop_as_thread()
         node.run()
     except Exception as e:
@@ -137,3 +137,7 @@ if __name__ == "__main__":
             node.pub_notification(str(e), type="ERROR")
             time.sleep(0.1)
             node.terminate()
+
+
+if __name__ == "__main__":
+    main()

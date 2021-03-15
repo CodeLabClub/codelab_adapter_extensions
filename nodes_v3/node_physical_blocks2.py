@@ -105,8 +105,8 @@ class PhysicalBlocksExtension(AdapterNode):
     WEIGHT = 99.9
     VERSION = "2.1.0"
 
-    def __init__(self):
-        super().__init__(logger=logger)  # logger=logger
+    def __init__(self, **kwargs):
+        super().__init__(logger=logger, **kwargs)  # logger=logger
 
     def _get_marker_corners_ids(self, img):
         frame = img
@@ -236,11 +236,15 @@ class PhysicalBlocksExtension(AdapterNode):
             time.sleep(0.5)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = PhysicalBlocksExtension()
+        node = PhysicalBlocksExtension(**kwargs)
         node.receive_loop_as_thread()
         node.run()
     except KeyboardInterrupt:
         if node._running:
             node.terminate()  # Clean up before exiting.
+
+
+if __name__ == "__main__":
+    main()

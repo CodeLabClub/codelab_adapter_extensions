@@ -291,8 +291,8 @@ class MiniExtension(AdapterNodeAio):
     DESCRIPTION = "悟空是一只伪装成机器人的猴子"
     VERSION = "1.2.0"
 
-    def __init__(self):
-        super().__init__(logger=logger)
+    def __init__(self, **kwargs):
+        super().__init__(logger=logger, **kwargs)
         self.thing = RobotProxy(self)  # create robot proxy object
 
     async def run_python_code(self, code):
@@ -328,10 +328,13 @@ class MiniExtension(AdapterNodeAio):
         await super().terminate(**kwargs)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = MiniExtension()
+        node = MiniExtension(**kwargs)
         asyncio.run(node.receive_loop())
     except KeyboardInterrupt:
         if node._running:
             asyncio.run(node.terminate())
+
+if __name__ == "__main__":
+    main()

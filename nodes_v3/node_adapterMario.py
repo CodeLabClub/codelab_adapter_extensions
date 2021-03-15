@@ -206,8 +206,8 @@ class MyNode(AdapterNodeAio):
     DESCRIPTION = "登登登等登蹬"
     VERSION = "2.0.0"  # 设备掉线通知
 
-    def __init__(self):
-        super().__init__(logger=logger, bucket_token=300, bucket_fill_rate=300)
+    def __init__(self, **kwargs):
+        super().__init__(logger=logger, bucket_token=300, bucket_fill_rate=300, **kwargs)
         self.thing = MarioController(self)
         self.connect_payload = None
 
@@ -255,10 +255,14 @@ class MyNode(AdapterNodeAio):
         await super().terminate(**kwargs)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = MyNode()
+        node = MyNode(**kwargs)
         asyncio.run(node.receive_loop())  # CPU?
     except Exception:
         if node._running:
             asyncio.run(node.terminate())
+
+
+if __name__ == "__main__":
+    main()

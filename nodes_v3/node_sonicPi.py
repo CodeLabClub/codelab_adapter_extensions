@@ -23,8 +23,8 @@ class SonicPiNode(AdapterNode):
     HELP_URL = "https://adapter.codelab.club/extension_guide/sonicPi/"
     DESCRIPTION = "Sonic Pi 是可编程的音乐创作和演奏工具"
 
-    def __init__(self):
-        super().__init__(logger=logger)
+    def __init__(self, **kwargs):
+        super().__init__(logger=logger, **kwargs)
 
     def _import_requirement_or_import(self):
         requirement = self.REQUIREMENTS
@@ -61,12 +61,16 @@ class SonicPiNode(AdapterNode):
             time.sleep(0.5)
 
 
-if __name__ == "__main__":
+def main(**kwargs):
     try:
-        node = SonicPiNode()
+        node = SonicPiNode(**kwargs)
         node.receive_loop_as_thread()
         node.run()
     except KeyboardInterrupt:
         # node.logger.debug("KeyboardInterrupt") # work mac
         if node._running:
             node.terminate()  # Clean up before exiting.
+
+
+if __name__ == "__main__":
+    main()
