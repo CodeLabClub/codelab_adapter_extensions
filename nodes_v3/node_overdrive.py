@@ -24,6 +24,7 @@ class Drive(AdapterThing):
             self.device_flag = "link manager protocol"  # lmp
         else:
             self.device_flag = "drive"
+        self.scanner = None
 
     def _detection_ble_callback(self, device, advertisement_data):
         # devices_list 实时更新
@@ -45,11 +46,12 @@ class Drive(AdapterThing):
         self.devices_list = {}  # 清空
         try:
             scanner = BleakScanner()
+            self.scanner = scanner
             scanner.register_detection_callback(self._detection_ble_callback)
             await scanner.start()
             await asyncio.sleep(5.0)
-            await scanner.stop()
-            devices = await scanner.get_discovered_devices()
+            # await scanner.stop()
+            # devices = await scanner.get_discovered_devices()
             # devices = await BleakScanner.discover()  # todo except
             # 一直阻塞
             '''
@@ -63,7 +65,7 @@ class Drive(AdapterThing):
             logger.error(e)
             await self.node_instance.pub_notification(str(e), type="ERROR")
             return []
-        logger.debug(f'devices: {devices}')
+        # logger.debug(f'devices: {devices}')
         # 单独处理windows，bleak系统兼容不好
 
         
@@ -102,6 +104,9 @@ class Drive(AdapterThing):
         # self.thing = BleakClient(address)
         # as task
         # 等待future， 外部停掉
+        # 停止 scan
+        if self.scanner:
+            await self.scanner.stop()
         self.task = asyncio.create_task(self._connect(address))  # todo 真正连上后发出
         # await asyncio.sleep(3)
         # await asyncio.sleep(timeout)  # 不要答复
