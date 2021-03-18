@@ -15,7 +15,7 @@ from bleak import BleakScanner, BleakClient, BleakError
 # Class for the controller
 class Drive(AdapterThing):
     def __init__(self, node_instance):
-        super().__init__(thing_name="overdrive", node_instance=node_instance)
+        super().__init__(thing_name="overdrive2", node_instance=node_instance)
         self.is_connected = False
         self.task = None
 
@@ -121,9 +121,9 @@ class Drive(AdapterThing):
 
 
 class MyNode(AdapterNodeAio):
-    NODE_ID = "eim/node_overdrive"
+    NODE_ID = "eim/node_overdrive2"
     HELP_URL = "https://adapter.codelab.club/extension_guide/overdrive/"
-    DESCRIPTION = "overdrive"
+    DESCRIPTION = "overdrive2"
     VERSION = "1.0.0"  # 设备掉线通知
 
     def __init__(self, **kwargs):
