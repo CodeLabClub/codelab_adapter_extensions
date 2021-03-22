@@ -34,12 +34,12 @@ class Drive(AdapterThing):
                 "peripheralId": str(device.address),
                 "rssi": device.rssi,
             }
-        message = self.node_instance.message_template()
-        message["payload"]["message_type"] = "devices_list"
-        message["payload"]["content"] = list(self.devices_list.values())
-        
-        asyncio.create_task(self.node_instance.publish(message))
-        # print(device.address, "RSSI:", device.rssi, advertisement_data)
+            message = self.node_instance.message_template()
+            message["payload"]["message_type"] = "devices_list"
+            message["payload"]["content"] = list(self.devices_list.values())
+            
+            asyncio.create_task(self.node_instance.publish(message))
+            # print(device.address, "RSSI:", device.rssi, advertisement_data)
 
     async def list(self, timeout=5) -> list:
         # logger.debug("list devices...")
@@ -49,7 +49,7 @@ class Drive(AdapterThing):
             self.scanner = scanner
             scanner.register_detection_callback(self._detection_ble_callback)
             await scanner.start()
-            await asyncio.sleep(5.0)
+            await asyncio.sleep(3.0)
             # await scanner.stop()
             # devices = await scanner.get_discovered_devices()
             # devices = await BleakScanner.discover()  # todo except

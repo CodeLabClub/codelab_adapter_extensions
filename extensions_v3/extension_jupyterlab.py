@@ -45,8 +45,9 @@ class JupyterlabExtension(Extension):
                 return
             '''
 
-            if not env["treasure box"].get("jupyterlab"):
-                self._install_requirement()
+            # if not env["treasure box"].get("jupyterlab"):
+            pass
+            # self._install_requirement()
         # self.run_jupyterlab()
         self.pub_notification("正在启动 jupyterlab...")
         self.jupyter_proc = jupyterlabProxy().run_jupyterlab()

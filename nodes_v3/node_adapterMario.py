@@ -30,26 +30,40 @@ class MarioController(AdapterThing):
         self.current_z = 0
         self.is_connected = False
         self.task = None
+
+        self.devices_list = {}
+        self.device_flag = "lego"
+        self.scanner = None
         # self.q = queue.Queue()
 
+    def _detection_ble_callback(self, device, advertisement_data):
+        # devices_list 实时更新
+        if self.device_flag in str(device).lower():
+            self.devices_list[str(device.address)] = {
+                "name": str(device.address),
+                "peripheralId": str(device.address),
+                "rssi": device.rssi,
+            }
+            message = self.node_instance.message_template()
+            message["payload"]["message_type"] = "devices_list"
+            message["payload"]["content"] = list(self.devices_list.values())
+            
+            asyncio.create_task(self.node_instance.publish(message))
+
     async def list(self, timeout=5) -> list:
-        logger.debug("list devices...")
+        # logger.debug("list devices...")
+        self.devices_list = {}  # 清空
         try:
-            devices = await BleakScanner.discover()  # todo except
+            scanner = BleakScanner()
+            self.scanner = scanner
+            scanner.register_detection_callback(self._detection_ble_callback)
+            await scanner.start()
+            await asyncio.sleep(3.0)
         except BleakError as e:
             # 提醒开启蓝牙
+            logger.error(e)
             await self.node_instance.pub_notification(str(e), type="ERROR")
             return []
-        logger.debug(f'devices: {devices}')
-        # 单独处理windows，bleak系统兼容不好
-        if is_win():
-            # 条件很弱，可能会误判
-            return [str(d.address) for d in devices if "lego" in str(d).lower()]
-        else:
-            return [
-                str(d.address) for d in devices
-                if d.name.lower().startswith("lego mario")
-            ]
 
     async def _send_connect_reply(self):
         #  from RVR
