@@ -49,8 +49,8 @@ class Drive(AdapterThing):
             self.scanner = scanner
             scanner.register_detection_callback(self._detection_ble_callback)
             await scanner.start()
-            await asyncio.sleep(3.0)
-            # await scanner.stop()
+            await asyncio.sleep(5.0)
+            await scanner.stop()
             # devices = await scanner.get_discovered_devices()
             # devices = await BleakScanner.discover()  # todo except
             # 一直阻塞
@@ -106,7 +106,10 @@ class Drive(AdapterThing):
         # 等待future， 外部停掉
         # 停止 scan
         if self.scanner:
-            await self.scanner.stop()
+            try:
+                await self.scanner.stop()
+            except Exception:
+                pass
         self.task = asyncio.create_task(self._connect(address))  # todo 真正连上后发出
         # await asyncio.sleep(3)
         # await asyncio.sleep(timeout)  # 不要答复
@@ -129,7 +132,7 @@ class MyNode(AdapterNodeAio):
     NODE_ID = "eim/node_overdrive"
     HELP_URL = "https://adapter.codelab.club/extension_guide/overdrive/"
     DESCRIPTION = "overdrive"
-    VERSION = "1.0.0"  # 设备掉线通知
+    VERSION = "1.1.0"  # 设备掉线通知
 
     def __init__(self, **kwargs):
         super().__init__(logger=logger,

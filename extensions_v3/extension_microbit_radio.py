@@ -2,6 +2,7 @@ import time
 import serial
 import json
 from collections import deque
+import threading
 
 from codelab_adapter.utils import list_microbit, flash_makecode_file
 from codelab_adapter_client.utils import get_adapter_home_path, threaded
@@ -36,6 +37,7 @@ class ThingProxy(AdapterThing):
         # The append() and popleft() methods are both atomic.
         # self.write_fifo_queue = deque()  # to microbit
         # self.read_fifo_queue = deque()  # from microbit
+        self.lock = threading.Lock()
 
     def list(self, timeout=5) -> list:
         microbit_ports = list_microbit()  # return
@@ -111,9 +113,14 @@ class ThingProxy(AdapterThing):
     # 业务
     def write(self, content):
         if self.is_connected:
+            self.lock.acquire()  # todo queue？ 好像某些 windows 会导致 microbit死掉 好像是发的东西不对，在 microbit 观察下
             self.thing.write(content.encode('utf-8'))  # todo 线程安全
             # time.sleep(0.1) # 避免遗漏消息
+            self.thing.flush()
+            # 前端使用等待的
+            self.lock.release()
             return "ok"
+            
 
     def uart_helper(self):
         '''

@@ -7,6 +7,7 @@
 
 import time
 import webbrowser
+import requests
 from codelab_adapter.core_extension import Extension
 from codelab_adapter.utils import verify_token, open_path_in_system_file_manager
 
@@ -39,6 +40,7 @@ class PythonKernelExtension(Extension):
             # eval(expression, globals=None, locals=None)
             output = eval(code, {"__builtins__": None}, {
                 "PyHelper": self.PyHelper,
+                "requests": requests,
             })
         except Exception as e:
             output = str(e)

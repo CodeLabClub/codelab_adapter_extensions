@@ -58,7 +58,8 @@ class MarioController(AdapterThing):
             self.scanner = scanner
             scanner.register_detection_callback(self._detection_ble_callback)
             await scanner.start()
-            await asyncio.sleep(3.0)
+            await asyncio.sleep(5.0)
+            await self.scanner.stop()
         except BleakError as e:
             # 提醒开启蓝牙
             logger.error(e)
@@ -218,7 +219,7 @@ class MyNode(AdapterNodeAio):
     NODE_ID = "eim/node_adapterMario"
     HELP_URL = "https://adapter.codelab.club/extension_guide/adapterMario/"
     DESCRIPTION = "登登登等登蹬"
-    VERSION = "2.0.0"  # 设备掉线通知
+    VERSION = "2.1.0"  # 设备掉线通知
 
     def __init__(self, **kwargs):
         super().__init__(logger=logger, bucket_token=300, bucket_fill_rate=300, **kwargs)
