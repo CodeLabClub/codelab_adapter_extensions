@@ -67,7 +67,8 @@ class KanoMotionExtension(AdapterNode):
         while self._running:
             time.sleep(1)
 
-    def terminate(self):
+    def terminate(self, **kwargs):
+        super().terminate(**kwargs)
         os._exit(0)
 
 
