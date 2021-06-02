@@ -5,13 +5,14 @@ https://github.com/marklogg/mini_demo.git
 
 内置行为: https://web.ubtrobot.com/mini-python-sdk/additional.html
 '''
-
+import re
 import asyncio
 from loguru import logger
 
 from codelab_adapter_client import AdapterNodeAio  # todo 异步插件启动确认
 from codelab_adapter_client.thing import AdapterThing
 
+# from mini import WiFiDevice
 import mini.mini_sdk as MiniSdk
 from mini.apis.base_api import MiniApiResultType
 from mini.dns.dns_browser import WiFiDevice
@@ -59,15 +60,24 @@ class RobotProxy(AdapterThing):
         return [str(i) for i in results]
         '''
 
-    async def connect(self, robot_name):
+    async def connect(self, robot_name_or_ip):
         # 修改 self.thing
         if self.is_connected:
             return f"{self.thing_name} already connected"
         else:
             # robot_name = kwargs.get("robot_name")  # todo
-            self.thing: WiFiDevice = await MiniSdk.get_device_by_name(
-                robot_name, 10)
+            # WiFiDevice(info.name, socket.inet_ntoa(info.addresses[0]), info.port, info.type, info.server)
+            # print 一次正常的
+            # if robot_name_or_ip
+            robot_name_or_ip = robot_name_or_ip.strip()
+            if re.match(r"^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$", robot_name_or_ip):
+                # self.thing = await WiFiDevice()
+                self.thing = WiFiDevice('Dedu_', robot_name_or_ip, 50503, '_Dedu_mini_channel_server._tcp.local.', 'Android-3.local.')
+            else:
+                self.thing: WiFiDevice = await MiniSdk.get_device_by_name(
+                    robot_name_or_ip, 10)
             if self.thing:
+                # todo 连接失败
                 is_success = await MiniSdk.connect(self.thing)
                 if is_success:
                     self.is_connected = True

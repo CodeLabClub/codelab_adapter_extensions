@@ -1,11 +1,12 @@
 import time
-
+import sys
 from codelab_adapter.jupyterlab_manage import jupyterlabProxy
 
 from codelab_adapter.core_extension import Extension
 from codelab_adapter.local_env import EnvManage
 from codelab_adapter.utils import get_python3_path, get_html_message_for_no_local_python, is_linux
 from codelab_adapter_client.utils import install_requirement, get_adapter_home_path
+from codelab_adapter.config import settings
 
 # https://github.com/jupyterlab/jupyterlab/blob/36037151f0ddddf84715d3e693f3f02dd483960d/jupyterlab/labapp.py#L409 Jupyter 的参数
 
@@ -50,6 +51,7 @@ class JupyterlabExtension(Extension):
             # self._install_requirement()
         # self.run_jupyterlab()
         self.pub_notification("正在启动 jupyterlab...")
+        sys.argv.extend(["--NotebookApp.token", str(settings.TOKEN)])
         self.jupyter_proc = jupyterlabProxy().run_jupyterlab()
         while self._running:
             time.sleep(1)
