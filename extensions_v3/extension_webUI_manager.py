@@ -6,9 +6,11 @@ from codelab_adapter_client.utils import open_path, is_win
 
 
 class WebUI_Manager(Extension):
+    NODE_ID = "adapter/WebUI_Manager"
+    DESCRIPTION = "通过响应自定义消息扩展 WebUI"
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.NODE_ID = "adapter/WebUI_Manager"
 
     def extension_message_handle(self, topic, payload):
         content = payload["content"]

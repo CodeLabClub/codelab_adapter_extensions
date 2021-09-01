@@ -7,7 +7,7 @@ class KanoMotionExtension(AdapterNode):
     NODE_ID = "eim/node_motionSensor"
     HELP_URL = "https://adapter.codelab.club/extension_guide/extension_kano_motion/"  # Documentation page for the project
     VERSION = "1.0"  # extension version
-    DESCRIPTION = "kano motion sensor"
+    DESCRIPTION = "kano motion sensor: gesture"
     ICON_URL = ""
     REQUIRES_ADAPTER = ""  # ">= 3.2.0"
     REQUIREMENTS = ["kano-community-sdk"]

@@ -36,7 +36,7 @@ class MyMinecraftClient:
         self.mcTurtle = MinecraftTurtle(self.mc, pos)
         if self.mc:
             if self.node:
-                node.pub_notification("Minecraft 已连接",
+                self.node.pub_notification("Minecraft 已连接",
                                       type="SUCCESS")  # 由一个积木建立连接到时触发
             self.is_connected = True
             return True

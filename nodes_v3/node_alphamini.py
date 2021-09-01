@@ -60,7 +60,11 @@ class RobotProxy(AdapterThing):
         return [str(i) for i in results]
         '''
 
-    async def connect(self, robot_name_or_ip):
+    async def connect(self, robot_name_or_ip, robot_type="DEDU"):
+        if robot_type in ["DEDU", "undefined"]:
+            MiniSdk.set_robot_type(MiniSdk.RobotType.DEDU)
+        if robot_type == "MINI":
+            MiniSdk.set_robot_type(MiniSdk.RobotType.MINI)
         # 修改 self.thing
         if self.is_connected:
             return f"{self.thing_name} already connected"

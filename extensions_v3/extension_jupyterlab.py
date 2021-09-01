@@ -16,7 +16,7 @@ class JupyterlabExtension(Extension):
     NODE_ID = "eim/extension_jupyterlab"
     HELP_URL = "https://adapter.codelab.club/extension_guide/jupyterlab/"
     WEIGHT = 97
-    VERSION = "1.0"  # extension version
+    VERSION = "3.1"  # extension version
     DESCRIPTION = "使用 JupyterLab 开始你的 Python 之旅"
     REQUIREMENTS = ["jupyterlab"]
 
@@ -27,6 +27,7 @@ class JupyterlabExtension(Extension):
         self.python_path = get_python3_path()
         self.env_manage = EnvManage(self.logger)
         self.jupyter_proc = None
+        self.allow_collaborative = False  # '--collaborative --ip="*"' 
 
     def _install_requirement(self):  # to install jupyterlab
         self.pub_notification("正在安装 JupyterLab...")
@@ -51,7 +52,16 @@ class JupyterlabExtension(Extension):
             # self._install_requirement()
         # self.run_jupyterlab()
         self.pub_notification("正在启动 jupyterlab...")
-        sys.argv.extend(["--NotebookApp.token", str(settings.TOKEN)])
+        # jupyter notebook password
+        # sys.argv.extend(["--NotebookApp.token", str(settings.TOKEN)])  # ServerApp.
+        if "--ServerApp.token" not in sys.argv:
+            # 重新启动
+            sys.argv.extend(["--ServerApp.token", str(settings.TOKEN)])
+        if self.allow_collaborative:
+            if "--ip" not in sys.argv:
+                sys.argv.extend(["--ip", "*"])
+            if "--collaborative" not in sys.argv:
+                sys.argv.extend(["--collaborative",])
         self.jupyter_proc = jupyterlabProxy().run_jupyterlab()
         while self._running:
             time.sleep(1)

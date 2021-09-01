@@ -73,6 +73,7 @@ def digimon():
 
 class DigimonNode(AdapterNode):
     NODE_ID = "eim/node_digimon"
+    DESCRIPTION = "Hello, 被选召的孩子!"
 
     def __init__(self, **kwargs):
         self.port = 18081
