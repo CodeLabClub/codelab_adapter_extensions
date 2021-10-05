@@ -12,6 +12,7 @@ from codelab_adapter_client.utils import get_or_create_node_logger_dir, open_pat
 import cv2 # opencv-contrib-python
 import numpy as np
 
+
 node_logger_dir = get_or_create_node_logger_dir()
 debug_log = str(node_logger_dir / "debug.log")
 logger.add(debug_log, rotation="1 MB", level="DEBUG")
@@ -34,7 +35,7 @@ linux无法使用了？
 liuqing linux 不能使用最新的。单独给源码
 '''
 
-def decode_image(src, name):
+def decode_image(src):
     result = re.search("data:image/(?P<ext>.*?);base64,(?P<data>.*)", src,
                        re.DOTALL)
     if result:
@@ -42,13 +43,6 @@ def decode_image(src, name):
         data = result.groupdict().get("data")
     else:
         raise Exception("Do not parse!")
-    '''
-    img = base64.urlsafe_b64decode(data) # todo 放在内存中 base64 to cv2
-    filename = "{}.{}".format(name, ext)
-    with open(filename, "wb") as f:
-        f.write(img)
-    return filename
-    '''
     # img = cv2.imread(io.BytesIO(base64.urlsafe_b64decode(data)))
     decoded_data = base64.urlsafe_b64decode(data)
     np_data = np.fromstring(decoded_data, np.uint8)
@@ -204,11 +198,7 @@ class PhysicalBlocksExtension(AdapterNode):
         return markers_info
 
     def _handle(self, imgdata, message_id, content):
-        codelab_adapter_dir = pathlib.Path.home() / "codelab_adapter"
-        name = codelab_adapter_dir / 'physical_blocks'
-        # 图片保存到本地 ~/codelab_adapter/physical_blocks.png
-        # filename = decode_image(imgdata, name) # todo 优化，不要保存
-        img = decode_image(imgdata, name)
+        img = decode_image(imgdata)
 
         markers_info = self.get_markers_info(img, content)  # 格式说明, 顺序 从左到右从上到下
         message = self.message_template()
