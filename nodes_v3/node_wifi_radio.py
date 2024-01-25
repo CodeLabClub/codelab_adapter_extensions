@@ -47,7 +47,6 @@ class WifiRadioNode(AdapterNode):
                 message["payload"]["content"] = {
                     "last_number": self.radio.last_number,
                     "last_string": self.radio.last_string,
-                    "timestamp": time.time()
                 }
                 self.publish(message)
 
